@@ -1,0 +1,5 @@
+export const APP_NAME = 'BirthdayCalendar';
+export const APP_VERSION = '1.0.0';
+export const THEME_STORAGE_KEY = '@theme_mode';
+export const ONBOARDING_COMPLETE_KEY = '@onboarding_complete';
+export const NOTIFICATION_DAYS_OPTIONS = [1, 3, 7] as const;
