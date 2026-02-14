@@ -18,7 +18,8 @@
     },
     "ios": {
       "supportsTablet": false,
-      "bundleIdentifier": "com.birthdaycalendar.app"
+      "bundleIdentifier": "com.birthdaycalendar.app",
+      "jsEngine": "hermes"
     },
     "plugins": [
       "expo-router",

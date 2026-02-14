@@ -13,6 +13,7 @@ import * as Notifications from 'expo-notifications';
 import { ThemeProvider } from '../contexts/ThemeContext';
 import { BirthdaysProvider } from '../contexts/BirthdaysContext';
 import { GroupsProvider } from '../contexts/GroupsContext';
+import { ErrorBoundary } from '../components/ErrorBoundary';
 import { useTheme } from '../hooks/useTheme';
 
 SplashScreen.preventAutoHideAsync().catch(() => { });
@@ -49,13 +50,15 @@ export default function RootLayout() {
   }
 
   return (
-    <ThemeProvider>
-      <BirthdaysProvider>
-        <GroupsProvider>
-          <RootNavigator />
-        </GroupsProvider>
-      </BirthdaysProvider>
-    </ThemeProvider>
+    <ErrorBoundary>
+      <ThemeProvider>
+        <BirthdaysProvider>
+          <GroupsProvider>
+            <RootNavigator />
+          </GroupsProvider>
+        </BirthdaysProvider>
+      </ThemeProvider>
+    </ErrorBoundary>
   );
 }
 
@@ -72,6 +75,7 @@ function RootNavigator() {
         <Stack.Screen name="person/[id]" />
         <Stack.Screen name="group/[id]" />
         <Stack.Screen name="shared/[code]" />
+        <Stack.Screen name="legal" />
       </Stack>
     </>
   );

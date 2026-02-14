@@ -4,6 +4,7 @@ import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../hooks/useTheme';
 import { useBirthdays } from '../hooks/useBirthdays';
+import { useGroups } from '../hooks/useGroups';
 import { supabase } from '../lib/supabase';
 import {
   BirthdayForm,
@@ -15,6 +16,7 @@ export default function AddEditBirthdayModal() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { addBirthday, updateBirthday } = useBirthdays();
+  const { refetch: refetchGroups } = useGroups();
   const params = useLocalSearchParams<{
     id?: string;
     name?: string;
@@ -67,6 +69,9 @@ export default function AddEditBirthdayModal() {
           group_ids: data.group_ids,
         });
       }
+
+      // Refresh groups so member counts update immediately
+      refetchGroups();
 
       // Close modal immediately - user gets instant feedback
       router.back();
