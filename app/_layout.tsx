@@ -11,9 +11,10 @@ import {
 import * as SplashScreen from 'expo-splash-screen';
 import * as Notifications from 'expo-notifications';
 import { ThemeProvider } from '../contexts/ThemeContext';
+import { BirthdaysProvider } from '../contexts/BirthdaysContext';
 import { useTheme } from '../hooks/useTheme';
 
-SplashScreen.preventAutoHideAsync().catch(() => {});
+SplashScreen.preventAutoHideAsync().catch(() => { });
 
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
@@ -34,7 +35,7 @@ export default function RootLayout() {
 
   useEffect(() => {
     if (fontsLoaded || fontsError) {
-      SplashScreen.hideAsync().catch(() => {});
+      SplashScreen.hideAsync().catch(() => { });
     }
   }, [fontsLoaded, fontsError]);
 
@@ -48,7 +49,9 @@ export default function RootLayout() {
 
   return (
     <ThemeProvider>
-      <RootNavigator />
+      <BirthdaysProvider>
+        <RootNavigator />
+      </BirthdaysProvider>
     </ThemeProvider>
   );
 }

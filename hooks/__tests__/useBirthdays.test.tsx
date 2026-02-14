@@ -1,5 +1,7 @@
+import React from 'react';
 import { renderHook, waitFor } from '@testing-library/react-native';
 import { useBirthdays } from '../useBirthdays';
+import { BirthdaysProvider } from '../../contexts/BirthdaysContext';
 
 // useBirthdays depends on useAuth, mock it
 jest.mock('../useAuth', () => ({
@@ -32,6 +34,11 @@ function createChainableMock(resolveData: any = { data: [], error: null }) {
   return chain;
 }
 
+// Wrapper to provide BirthdaysContext
+function wrapper({ children }: { children: React.ReactNode }) {
+  return <BirthdaysProvider>{ children } </BirthdaysProvider>;
+}
+
 describe('useBirthdays', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -39,7 +46,7 @@ describe('useBirthdays', () => {
   });
 
   it('returns birthdays array', async () => {
-    const { result } = renderHook(() => useBirthdays());
+    const { result } = renderHook(() => useBirthdays(), { wrapper });
     await waitFor(() => {
       expect(result.current.loading).toBe(false);
     });
@@ -47,7 +54,7 @@ describe('useBirthdays', () => {
   });
 
   it('returns expected hook API', async () => {
-    const { result } = renderHook(() => useBirthdays());
+    const { result } = renderHook(() => useBirthdays(), { wrapper });
     await waitFor(() => {
       expect(result.current.loading).toBe(false);
     });
@@ -62,7 +69,7 @@ describe('useBirthdays', () => {
   });
 
   it('addBirthday is a function', async () => {
-    const { result } = renderHook(() => useBirthdays());
+    const { result } = renderHook(() => useBirthdays(), { wrapper });
     await waitFor(() => {
       expect(result.current.loading).toBe(false);
     });
@@ -70,7 +77,7 @@ describe('useBirthdays', () => {
   });
 
   it('updateBirthday is a function', async () => {
-    const { result } = renderHook(() => useBirthdays());
+    const { result } = renderHook(() => useBirthdays(), { wrapper });
     await waitFor(() => {
       expect(result.current.loading).toBe(false);
     });
@@ -78,7 +85,7 @@ describe('useBirthdays', () => {
   });
 
   it('deleteBirthday is a function', async () => {
-    const { result } = renderHook(() => useBirthdays());
+    const { result } = renderHook(() => useBirthdays(), { wrapper });
     await waitFor(() => {
       expect(result.current.loading).toBe(false);
     });
