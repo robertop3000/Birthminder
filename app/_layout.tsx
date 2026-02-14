@@ -12,6 +12,7 @@ import * as SplashScreen from 'expo-splash-screen';
 import * as Notifications from 'expo-notifications';
 import { ThemeProvider } from '../contexts/ThemeContext';
 import { BirthdaysProvider } from '../contexts/BirthdaysContext';
+import { GroupsProvider } from '../contexts/GroupsContext';
 import { useTheme } from '../hooks/useTheme';
 
 SplashScreen.preventAutoHideAsync().catch(() => { });
@@ -50,7 +51,9 @@ export default function RootLayout() {
   return (
     <ThemeProvider>
       <BirthdaysProvider>
-        <RootNavigator />
+        <GroupsProvider>
+          <RootNavigator />
+        </GroupsProvider>
       </BirthdaysProvider>
     </ThemeProvider>
   );

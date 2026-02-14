@@ -14,7 +14,6 @@ import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../hooks/useTheme';
 import { useGroups } from '../../hooks/useGroups';
 import { TopBar } from '../../components/ui/TopBar';
-import { FAB } from '../../components/ui/FAB';
 import { GroupCard } from '../../components/group/GroupCard';
 import { Button } from '../../components/ui/Button';
 
@@ -97,8 +96,6 @@ export default function GroupsScreen() {
           showsVerticalScrollIndicator={false}
         />
       )}
-
-      <FAB />
 
       <Modal visible={showModal} animationType="slide" transparent>
         <View style={styles.modalOverlay}>

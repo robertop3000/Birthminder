@@ -1,5 +1,7 @@
+import React from 'react';
 import { renderHook, waitFor } from '@testing-library/react-native';
 import { useGroups } from '../useGroups';
+import { GroupsProvider } from '../../contexts/GroupsContext';
 
 // useGroups depends on useAuth — mock with NO user to avoid fetchGroups async path
 // This tests the "no user" branch where loading is set false synchronously
@@ -15,9 +17,14 @@ jest.mock('../useAuth', () => ({
   }),
 }));
 
+// Wrapper to provide GroupsContext
+function wrapper({ children }: { children: React.ReactNode }) {
+  return <GroupsProvider>{children}</GroupsProvider>;
+}
+
 describe('useGroups', () => {
   it('returns empty groups when no user', async () => {
-    const { result } = renderHook(() => useGroups());
+    const { result } = renderHook(() => useGroups(), { wrapper });
     await waitFor(() => {
       expect(result.current.loading).toBe(false);
     });
@@ -25,7 +32,7 @@ describe('useGroups', () => {
   });
 
   it('returns expected hook API', async () => {
-    const { result } = renderHook(() => useGroups());
+    const { result } = renderHook(() => useGroups(), { wrapper });
     await waitFor(() => {
       expect(result.current.loading).toBe(false);
     });
@@ -41,7 +48,7 @@ describe('useGroups', () => {
   });
 
   it('addGroup is a function', async () => {
-    const { result } = renderHook(() => useGroups());
+    const { result } = renderHook(() => useGroups(), { wrapper });
     await waitFor(() => {
       expect(result.current.loading).toBe(false);
     });
@@ -49,7 +56,7 @@ describe('useGroups', () => {
   });
 
   it('deleteGroup is a function', async () => {
-    const { result } = renderHook(() => useGroups());
+    const { result } = renderHook(() => useGroups(), { wrapper });
     await waitFor(() => {
       expect(result.current.loading).toBe(false);
     });
@@ -57,7 +64,7 @@ describe('useGroups', () => {
   });
 
   it('generateShareCode is a function', async () => {
-    const { result } = renderHook(() => useGroups());
+    const { result } = renderHook(() => useGroups(), { wrapper });
     await waitFor(() => {
       expect(result.current.loading).toBe(false);
     });
