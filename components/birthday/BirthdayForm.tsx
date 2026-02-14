@@ -9,7 +9,9 @@ import {
   Platform,
   KeyboardAvoidingView,
   Modal,
+  Alert,
 } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import { useTheme } from '../../hooks/useTheme';
 import { useGroups } from '../../hooks/useGroups';
@@ -44,7 +46,7 @@ export function BirthdayForm({
   loading = false,
 }: BirthdayFormProps) {
   const { colors } = useTheme();
-  const { groups } = useGroups();
+  const { groups, addGroup } = useGroups();
 
   const [name, setName] = useState(initialValues?.name ?? '');
   const [month, setMonth] = useState(initialValues?.birthday_month ?? 1);
@@ -60,6 +62,10 @@ export function BirthdayForm({
   const [selectedGroups, setSelectedGroups] = useState<string[]>(
     initialValues?.group_ids ?? []
   );
+  const [showNewGroup, setShowNewGroup] = useState(false);
+  const [newGroupName, setNewGroupName] = useState('');
+  const [newGroupColor, setNewGroupColor] = useState('#E07A5F');
+  const [creatingGroup, setCreatingGroup] = useState(false);
 
   const pickPhoto = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
@@ -77,6 +83,35 @@ export function BirthdayForm({
     setSelectedGroups((prev) =>
       prev.includes(id) ? prev.filter((g) => g !== id) : [...prev, id]
     );
+  };
+
+  const GROUP_COLORS = [
+    '#E07A5F', '#3D405B', '#81B29A', '#F2CC8F',
+    '#6A8EAE', '#D4A5A5', '#9B72CF', '#4ECDC4',
+  ];
+
+  const handleCreateGroup = async () => {
+    if (!newGroupName.trim()) {
+      Alert.alert('Error', 'Please enter a group name');
+      return;
+    }
+    setCreatingGroup(true);
+    try {
+      const newGroup = await addGroup({
+        name: newGroupName.trim(),
+        color: newGroupColor,
+      });
+      if (newGroup) {
+        setSelectedGroups((prev) => [...prev, newGroup.id]);
+      }
+      setNewGroupName('');
+      setNewGroupColor('#E07A5F');
+      setShowNewGroup(false);
+    } catch {
+      Alert.alert('Error', 'Failed to create group');
+    } finally {
+      setCreatingGroup(false);
+    }
   };
 
   const handleSubmit = () => {
@@ -286,45 +321,135 @@ export function BirthdayForm({
           </View>
         </View>
 
-        {groups.length > 0 && (
-          <View style={styles.inputGroup}>
-            <Text style={[styles.label, { color: colors.textSecondary }]}>
-              Groups
-            </Text>
-            <View style={styles.groupChips}>
-              {groups.map((g) => (
-                <Pressable
-                  key={g.id}
-                  onPress={() => toggleGroup(g.id)}
+        <View style={styles.inputGroup}>
+          <Text style={[styles.label, { color: colors.textSecondary }]}>
+            Groups
+          </Text>
+          <View style={styles.groupChips}>
+            {groups.map((g) => (
+              <Pressable
+                key={g.id}
+                onPress={() => toggleGroup(g.id)}
+                style={[
+                  styles.groupChip,
+                  {
+                    backgroundColor: selectedGroups.includes(g.id)
+                      ? (g.color || colors.primary) + '30'
+                      : colors.surface,
+                    borderColor: selectedGroups.includes(g.id)
+                      ? g.color || colors.primary
+                      : colors.bottomBarBorder,
+                  },
+                ]}
+              >
+                <Text
                   style={[
-                    styles.groupChip,
+                    styles.groupChipText,
                     {
-                      backgroundColor: selectedGroups.includes(g.id)
-                        ? (g.color || colors.primary) + '30'
-                        : colors.surface,
-                      borderColor: selectedGroups.includes(g.id)
+                      color: selectedGroups.includes(g.id)
                         ? g.color || colors.primary
-                        : colors.bottomBarBorder,
+                        : colors.textPrimary,
                     },
                   ]}
                 >
-                  <Text
+                  {g.name}
+                </Text>
+              </Pressable>
+            ))}
+            <Pressable
+              onPress={() => setShowNewGroup(true)}
+              style={[
+                styles.groupChip,
+                styles.newGroupChip,
+                { borderColor: colors.primary, borderStyle: 'dashed' },
+              ]}
+            >
+              <Ionicons name="add" size={16} color={colors.primary} />
+              <Text style={[styles.groupChipText, { color: colors.primary }]}>
+                New Group
+              </Text>
+            </Pressable>
+          </View>
+
+          {/* Inline Create Group Modal */}
+          <Modal
+            visible={showNewGroup}
+            transparent
+            animationType="fade"
+            onRequestClose={() => setShowNewGroup(false)}
+          >
+            <Pressable
+              style={styles.modalOverlay}
+              onPress={() => setShowNewGroup(false)}
+            >
+              <Pressable
+                style={[styles.newGroupModal, { backgroundColor: colors.surface }]}
+                onPress={(e) => e.stopPropagation()}
+              >
+                <Text style={[styles.modalTitle, { color: colors.textPrimary }]}>
+                  Create New Group
+                </Text>
+                <TextInput
+                  style={[
+                    styles.input,
+                    {
+                      backgroundColor: colors.background,
+                      color: colors.textPrimary,
+                      borderColor: colors.bottomBarBorder,
+                      marginBottom: 14,
+                    },
+                  ]}
+                  value={newGroupName}
+                  onChangeText={setNewGroupName}
+                  placeholder="Group name (e.g. Church, Work)"
+                  placeholderTextColor={colors.textSecondary}
+                  autoFocus
+                />
+                <Text style={[styles.dateLabel, { color: colors.textSecondary, marginBottom: 8 }]}>
+                  Color
+                </Text>
+                <View style={styles.colorRow}>
+                  {GROUP_COLORS.map((c) => (
+                    <Pressable
+                      key={c}
+                      onPress={() => setNewGroupColor(c)}
+                      style={[
+                        styles.colorDot,
+                        {
+                          backgroundColor: c,
+                          borderWidth: newGroupColor === c ? 3 : 0,
+                          borderColor: colors.textPrimary,
+                        },
+                      ]}
+                    />
+                  ))}
+                </View>
+                <View style={styles.newGroupActions}>
+                  <Pressable onPress={() => setShowNewGroup(false)}>
+                    <Text style={[styles.cancelText, { color: colors.textSecondary }]}>
+                      Cancel
+                    </Text>
+                  </Pressable>
+                  <Pressable
+                    onPress={handleCreateGroup}
+                    disabled={creatingGroup || !newGroupName.trim()}
                     style={[
-                      styles.groupChipText,
+                      styles.saveButton,
                       {
-                        color: selectedGroups.includes(g.id)
-                          ? g.color || colors.primary
-                          : colors.textPrimary,
+                        backgroundColor: colors.primary,
+                        opacity: creatingGroup || !newGroupName.trim() ? 0.5 : 1,
                       },
                     ]}
                   >
-                    {g.name}
-                  </Text>
-                </Pressable>
-              ))}
-            </View>
-          </View>
-        )}
+                    <Text style={styles.saveText}>
+                      {creatingGroup ? 'Creating...' : 'Create'}
+                    </Text>
+                  </Pressable>
+                </View>
+              </Pressable>
+            </Pressable>
+          </Modal>
+        </View>
 
         <View style={styles.inputGroup}>
           <Text style={[styles.label, { color: colors.textSecondary }]}>
@@ -494,6 +619,33 @@ const styles = StyleSheet.create({
   groupChipText: {
     fontSize: 14,
     fontFamily: 'DMSans_500Medium',
+  },
+  newGroupChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: 'transparent',
+  },
+  newGroupModal: {
+    width: '85%',
+    borderRadius: 16,
+    padding: 20,
+  },
+  colorRow: {
+    flexDirection: 'row',
+    gap: 10,
+    flexWrap: 'wrap',
+    marginBottom: 20,
+  },
+  colorDot: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+  },
+  newGroupActions: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
   },
   notesInput: {
     minHeight: 80,
