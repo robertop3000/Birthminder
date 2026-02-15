@@ -57,9 +57,25 @@ export default function ProfileScreen() {
       style={[styles.container, { backgroundColor: colors.background }]}
       contentContainerStyle={[
         styles.content,
-        { paddingTop: insets.top + 20, paddingBottom: insets.bottom + 40 },
+        { paddingTop: insets.top + 12, paddingBottom: insets.bottom + 40 },
       ]}
     >
+      {/* Gear icon */}
+      <View style={styles.topBar}>
+        <View style={{ width: 32 }} />
+        <Pressable
+          onPress={() => router.push('/settings')}
+          hitSlop={8}
+          style={styles.gearButton}
+        >
+          <Ionicons
+            name="settings-outline"
+            size={24}
+            color={colors.textSecondary}
+          />
+        </Pressable>
+      </View>
+
       <View style={styles.header}>
         <Avatar uri={avatarUrl} size={120} />
         <Text style={[styles.name, { color: colors.textPrimary }]}>
@@ -86,19 +102,6 @@ export default function ProfileScreen() {
         />
       </View>
 
-      <View style={styles.legalSection}>
-        <Pressable
-          onPress={() => router.push('/legal')}
-          style={[styles.legalLink, { backgroundColor: colors.surface }]}
-        >
-          <Ionicons name="document-text-outline" size={18} color={colors.textSecondary} />
-          <Text style={[styles.legalLinkText, { color: colors.textPrimary }]}>
-            Privacy Policy & Terms of Service
-          </Text>
-          <Ionicons name="chevron-forward" size={18} color={colors.textSecondary} />
-        </Pressable>
-      </View>
-
       <Text style={[styles.version, { color: colors.textSecondary }]}>
         v{APP_VERSION}
       </Text>
@@ -112,6 +115,15 @@ const styles = StyleSheet.create({
   },
   content: {
     paddingHorizontal: 24,
+  },
+  topBar: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  gearButton: {
+    padding: 4,
   },
   header: {
     alignItems: 'center',
@@ -144,21 +156,5 @@ const styles = StyleSheet.create({
     fontFamily: 'DMSans_400Regular',
     marginTop: 20,
   },
-  legalSection: {
-    marginBottom: 8,
-    marginTop: 12,
-  },
-  legalLink: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 14,
-    paddingHorizontal: 16,
-    borderRadius: 14,
-    gap: 10,
-  },
-  legalLinkText: {
-    flex: 1,
-    fontSize: 15,
-    fontFamily: 'DMSans_500Medium',
-  },
 });
+
