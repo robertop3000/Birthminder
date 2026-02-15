@@ -50,37 +50,49 @@ export default function AddEditBirthdayModal() {
       let photoUrl = data.photo_uri;
 
       // If we have a photo and it's a local URI (not http/s), upload it first
+      // If we have a photo and it's a local URI (not http/s), upload it first
       if (photoUrl && !photoUrl.startsWith('http')) {
+        console.log('[AddBirthday] Processing photo upload for:', photoUrl);
         try {
+          // 1. Read file
           const response = await fetch(photoUrl);
           const blob = await response.blob();
           const arrayBuffer = await blob.arrayBuffer();
 
-          const ext = photoUrl.split('.').pop() || 'jpg';
+          // 2. Prepare filename
+          const ext = photoUrl.split('.').pop()?.split('?')[0] || 'jpg';
           const fileName = `${Date.now()}_${Math.random().toString(36).substring(7)}.${ext}`;
           const filePath = `people/${fileName}`;
+          console.log('[AddBirthday] Uploading to path:', filePath);
 
-          const { error: uploadError } = await supabase.storage
+          // 3. Upload to Supabase
+          const { error: uploadError, data: uploadData } = await supabase.storage
             .from('avatars')
             .upload(filePath, arrayBuffer, {
               contentType: `image/${ext}`,
               upsert: false,
             });
 
-          if (uploadError) throw uploadError;
+          if (uploadError) {
+            console.error('[AddBirthday] Upload failed:', uploadError);
+            throw new Error(`Photo upload failed: ${uploadError.message}`);
+          }
+          console.log('[AddBirthday] Upload successful:', uploadData);
 
+          // 4. Get Public URL
           const { data: urlData } = supabase.storage
             .from('avatars')
             .getPublicUrl(filePath);
 
+          console.log('[AddBirthday] Generated public URL:', urlData.publicUrl);
           photoUrl = urlData.publicUrl;
+
         } catch (uploadErr) {
-          console.error('Photo upload failed:', uploadErr);
-          // Allow saving without photo if upload fails, or throw? 
-          // Better to throw so user knows photo wasn't saved, but maybe just warn?
-          // Let's throw to stop the save clearly.
-          throw new Error('Failed to upload photo. Please try again.');
+          console.error('[AddBirthday] Critical upload error:', uploadErr);
+          throw new Error('Failed to upload photo. Please check your internet connection.');
         }
+      } else {
+        console.log('[AddBirthday] Photo is already remote or empty:', photoUrl);
       }
 
       if (isEdit && params.id) {

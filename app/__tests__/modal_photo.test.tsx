@@ -77,6 +77,10 @@ describe('AddEditBirthdayModal Photo Upload', () => {
     });
 
     it('uploads photo to Supabase before saving birthday', async () => {
+        // Mock console methods to keep output clean
+        const consoleLogSpy = jest.spyOn(console, 'log').mockImplementation();
+        const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
+
         // Mock ImagePicker result
         (ImagePicker.launchImageLibraryAsync as jest.Mock).mockResolvedValue({
             canceled: false,
@@ -124,5 +128,9 @@ describe('AddEditBirthdayModal Photo Upload', () => {
         });
 
         expect(mockRouterBack).toHaveBeenCalled();
+
+        // Restore console mocks
+        consoleLogSpy.mockRestore();
+        consoleErrorSpy.mockRestore();
     });
 });

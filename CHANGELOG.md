@@ -7,8 +7,9 @@ All notable changes to Birthminder will be documented in this file.
 ## v0.7 — 2026-02-15
 
 ### Significant Changes
-- **Photo Upload Fix**: Changed `AddEditBirthdayModal` to upload photos to Supabase Storage *before* saving the birthday record. This ensures the database always contains a public URL instead of a local file path.
-- **New Test**: Added `app/__tests__/modal_photo.test.tsx` to verify the photo upload flow.
+- **Photo Upload Fix**: Implemented robust photo upload logic in `AddEditBirthdayModal`. It now explicitly handles file reading, unique filename generation, and error checking before saving the public URL. Added detailed logging for debugging.
+- **Database Schema**: Added SQL to auto-create the 'avatars' storage bucket and necessary RLS policies if they don't exist.
+- **New Test**: Added `app/__tests__/modal_photo.test.tsx` to verify the upload flow.
 
 ### Current Status
 - TSC: 0 errors | Jest: 15/15 suites, 95/95 tests passing
