@@ -2,6 +2,7 @@ import React from 'react';
 import { render, fireEvent, waitFor, act } from '@testing-library/react-native';
 import AddEditBirthdayModal from '../modal';
 import * as ImagePicker from 'expo-image-picker';
+import * as FileSystem from 'expo-file-system/legacy';
 import { supabase } from '../../lib/supabase';
 
 // Mock hooks
@@ -65,15 +66,22 @@ jest.mock('expo-image-picker', () => ({
     launchImageLibraryAsync: jest.fn(),
 }));
 
+// Mock expo-file-system
+jest.mock('expo-file-system/legacy', () => ({
+    readAsStringAsync: jest.fn(),
+    EncodingType: { Base64: 'base64' },
+}));
+
+// Mock base64-arraybuffer
+jest.mock('base64-arraybuffer', () => ({
+    decode: jest.fn().mockReturnValue(new ArrayBuffer(8)),
+}));
+
 describe('AddEditBirthdayModal Photo Upload', () => {
     beforeEach(() => {
         jest.clearAllMocks();
-        // Reset fetch
-        global.fetch = jest.fn().mockResolvedValue({
-            blob: jest.fn().mockResolvedValue({
-                arrayBuffer: jest.fn().mockResolvedValue(new ArrayBuffer(8)),
-            }),
-        } as any);
+        // Setup FileSystem mock
+        (FileSystem.readAsStringAsync as jest.Mock).mockResolvedValue('base64-string-content');
     });
 
     it('uploads photo to Supabase before saving birthday', async () => {
@@ -103,6 +111,12 @@ describe('AddEditBirthdayModal Photo Upload', () => {
             fireEvent.press(getByText('Save'));
         });
 
+        // Verify FileSystem was used
+        expect(FileSystem.readAsStringAsync).toHaveBeenCalledWith(
+            'file:///local/path/image.jpg',
+            { encoding: 'base64' }
+        );
+
         // Verify upload flow
         // Retrieve the mock functions from the imported module to check calls
         const storageFrom = supabase.storage.from as jest.Mock;
@@ -116,21 +130,69 @@ describe('AddEditBirthdayModal Photo Upload', () => {
         const uploadCall = bucket.upload.mock.calls[0];
         // Check if path starts with people/ and ends with .jpg
         expect(uploadCall[0]).toMatch(/^people\/.*\.jpg$/);
+        // Verify upload called with ArrayBuffer (mocked return from decode)
+        expect(uploadCall[1]).toBeInstanceOf(ArrayBuffer);
 
-        // Verify public URL was used in addBirthday
+
+        // Verify public URL was used in addBirthday WITH timestamp
         await waitFor(() => {
             expect(mockAddBirthday).toHaveBeenCalledWith(
                 expect.objectContaining({
                     name: 'Photo User',
-                    photo_url: 'https://supabase.co/storage/v1/object/public/avatars/path/to/image.jpg',
+                    photo_url: expect.stringMatching(/^https:\/\/supabase\.co\/.*\.jpg\?t=\d+$/),
                 })
             );
         });
 
         expect(mockRouterBack).toHaveBeenCalled();
 
-        // Restore console mocks
         consoleLogSpy.mockRestore();
         consoleErrorSpy.mockRestore();
+    });
+
+    it('removes photo when Remove is clicked', async () => {
+        (ImagePicker.launchImageLibraryAsync as jest.Mock).mockResolvedValue({
+            canceled: false,
+            assets: [{ uri: 'file:///local/path/image.jpg' }],
+        });
+
+        const { getByText, getByPlaceholderText } = render(<AddEditBirthdayModal />);
+
+        // 1. Pick photo
+        await act(async () => {
+            fireEvent.press(getByText('Add Photo'));
+        });
+
+        // 2. Verify Remove button appears
+        expect(getByText('Remove')).toBeTruthy();
+
+        // 3. Click Remove
+        await act(async () => {
+            fireEvent.press(getByText('Remove'));
+        });
+
+        // Fill required name
+        fireEvent.changeText(getByPlaceholderText("Person's name"), 'No Photo User');
+        fireEvent.changeText(getByPlaceholderText('DD'), '20');
+
+        // 4. Save
+        await act(async () => {
+            fireEvent.press(getByText('Save'));
+        });
+
+        // 5. Verify upload NOT called and photo_url is null
+        const storageFrom = supabase.storage.from as jest.Mock;
+        // It might be called for previous test, so checks counts or recent calls?
+        // Jest mocks are cleared in beforeEach.
+        expect(storageFrom).not.toHaveBeenCalled();
+
+        await waitFor(() => {
+            expect(mockAddBirthday).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    name: 'No Photo User',
+                    photo_url: null,
+                })
+            );
+        });
     });
 });

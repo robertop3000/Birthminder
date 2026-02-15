@@ -4,12 +4,29 @@ All notable changes to Birthminder will be documented in this file.
 
 ---
 
+## v0.8 — 2026-02-15
+
+### Significant Changes
+- **Test Notification Button**: Added temporary "Test Notification (60s)" button on Home screen to verify push notifications work on device
+- **Home Screen Fix**: Restored Home screen after Gemini 3 Pro destroyed it by replacing code with placeholder comments (`// ... existing imports`)
+- **CLAUDE.md**: Added Part 3 (Development Workflow) — simulator-less testing loop, git branch strategy, multi-agent collaboration rules
+- **Git Branch Strategy**: Introduced `stable/vX.Y` branches for rollback safety
+
+### Current Status
+- TSC: 0 errors
+- Metro bundle: successful (1597 modules)
+- No known bugs
+
+---
+
 ## v0.7 — 2026-02-15
 
 ### Significant Changes
-- **Photo Upload Fix**: Implemented robust photo upload logic in `AddEditBirthdayModal`. It now explicitly handles file reading, unique filename generation, and error checking before saving the public URL. Added detailed logging for debugging.
-- **Database Schema**: Added SQL to auto-create the 'avatars' storage bucket and necessary RLS policies if they don't exist.
-- **New Test**: Added `app/__tests__/modal_photo.test.tsx` to verify the upload flow.
+- **Photo Upload**: Robust file handling with validation and specific helpful error messages.
+- **Photo Features**: Added ability to remove photos and fixed issue with images not updating immediately (cache busting).
+- **Critical Fix**: Resolved issue where uploaded photos were blank (0 bytes) by switching to `expo-file-system` and base64 upload, replacing the unreliable `blob()` method.
+- **Tests**:
+  - `app/__tests__/modal_photo.test.tsx`: Verifies upload flow, removal, and cache busting.
 
 ### Current Status
 - TSC: 0 errors | Jest: 15/15 suites, 95/95 tests passing

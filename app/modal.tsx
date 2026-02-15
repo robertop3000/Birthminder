@@ -5,6 +5,8 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../hooks/useTheme';
 import { useBirthdays } from '../hooks/useBirthdays';
 import { useGroups } from '../hooks/useGroups';
+import { decode } from 'base64-arraybuffer';
+import * as FileSystem from 'expo-file-system/legacy';
 import { supabase } from '../lib/supabase';
 import {
   BirthdayForm,
@@ -54,10 +56,11 @@ export default function AddEditBirthdayModal() {
       if (photoUrl && !photoUrl.startsWith('http')) {
         console.log('[AddBirthday] Processing photo upload for:', photoUrl);
         try {
-          // 1. Read file
-          const response = await fetch(photoUrl);
-          const blob = await response.blob();
-          const arrayBuffer = await blob.arrayBuffer();
+          // 1. Read file as base64 using expo-file-system (more reliable than fetch blob)
+          console.log('[AddBirthday] Reading file from:', photoUrl);
+          const base64 = await FileSystem.readAsStringAsync(photoUrl, {
+            encoding: 'base64',
+          });
 
           // 2. Prepare filename
           const ext = photoUrl.split('.').pop()?.split('?')[0] || 'jpg';
@@ -65,7 +68,9 @@ export default function AddEditBirthdayModal() {
           const filePath = `people/${fileName}`;
           console.log('[AddBirthday] Uploading to path:', filePath);
 
-          // 3. Upload to Supabase
+          // 3. Upload to Supabase (needs ArrayBuffer)
+          const arrayBuffer = decode(base64);
+
           const { error: uploadError, data: uploadData } = await supabase.storage
             .from('avatars')
             .upload(filePath, arrayBuffer, {
@@ -85,14 +90,21 @@ export default function AddEditBirthdayModal() {
             .getPublicUrl(filePath);
 
           console.log('[AddBirthday] Generated public URL:', urlData.publicUrl);
-          photoUrl = urlData.publicUrl;
+          // Add timestamp to force image refresh
+          photoUrl = `${urlData.publicUrl}?t=${Date.now()}`;
 
-        } catch (uploadErr) {
+        } catch (uploadErr: any) {
           console.error('[AddBirthday] Critical upload error:', uploadErr);
-          throw new Error('Failed to upload photo. Please check your internet connection.');
+          // Show the specific error message to help debugging (e.g. "Bucket not found")
+          const msg = uploadErr.message || 'Unknown upload error';
+          throw new Error(`Failed to upload photo: ${msg}`);
         }
+      } else if (!photoUrl) {
+        // Photo was removed
+        console.log('[AddBirthday] Photo removed');
+        photoUrl = null;
       } else {
-        console.log('[AddBirthday] Photo is already remote or empty:', photoUrl);
+        console.log('[AddBirthday] Photo is already remote:', photoUrl);
       }
 
       if (isEdit && params.id) {

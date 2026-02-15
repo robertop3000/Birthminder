@@ -150,12 +150,25 @@ export function BirthdayForm({
         contentContainerStyle={styles.content}
         keyboardShouldPersistTaps="handled"
       >
-        <Pressable onPress={pickPhoto} style={styles.photoSection}>
-          <Avatar uri={photoUri} size={100} />
-          <Text style={[styles.photoLabel, { color: colors.primary }]}>
-            {photoUri ? 'Change Photo' : 'Add Photo'}
-          </Text>
-        </Pressable>
+        <View style={styles.photoSection}>
+          <Pressable onPress={pickPhoto}>
+            <Avatar uri={photoUri} size={100} />
+          </Pressable>
+          <View style={styles.photoActions}>
+            <Pressable onPress={pickPhoto}>
+              <Text style={[styles.photoLabel, { color: colors.primary }]}>
+                {photoUri ? 'Change Photo' : 'Add Photo'}
+              </Text>
+            </Pressable>
+            {photoUri && (
+              <Pressable onPress={() => setPhotoUri(null)} style={styles.removePhotoButton}>
+                <Text style={[styles.photoLabel, { color: '#E07A5F' }]}>
+                  Remove
+                </Text>
+              </Pressable>
+            )}
+          </View>
+        </View>
 
         <View style={styles.inputGroup}>
           <Text style={[styles.label, { color: colors.textSecondary }]}>
@@ -511,10 +524,17 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 24,
   },
+  photoActions: {
+    flexDirection: 'row',
+    gap: 16,
+    marginTop: 12,
+  },
   photoLabel: {
-    marginTop: 8,
     fontSize: 14,
     fontFamily: 'DMSans_500Medium',
+  },
+  removePhotoButton: {
+    // Optional: add border/background if needed, but text link is fine
   },
   inputGroup: {
     marginBottom: 18,
