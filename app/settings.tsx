@@ -47,7 +47,7 @@ export default function SettingsScreen() {
             await supabase.from('people').delete().eq('user_id', user.id);
 
             // 3. Delete all groups
-            await supabase.from('groups').delete().eq('created_by', user.id);
+            await supabase.from('groups').delete().eq('user_id', user.id);
 
             // 4. Delete profile
             await supabase.from('profiles').delete().eq('id', user.id);

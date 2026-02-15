@@ -148,3 +148,28 @@ CREATE TRIGGER update_people_updated_at
   BEFORE UPDATE ON people
   FOR EACH ROW
   EXECUTE FUNCTION update_updated_at_column();
+
+-- Policy: Users can delete their own profile
+CREATE POLICY "Users can delete their own profile"
+  ON profiles FOR DELETE
+  USING (auth.uid() = id);
+
+-- Function to automatically create a profile when a new user signs up
+CREATE OR REPLACE FUNCTION handle_new_user()
+RETURNS TRIGGER AS $$
+BEGIN
+  INSERT INTO public.profiles (id, display_name, avatar_url)
+  VALUES (
+    NEW.id,
+    COALESCE(NEW.raw_user_meta_data->>'display_name', split_part(NEW.email, '@', 1)),
+    NEW.raw_user_meta_data->>'avatar_url'
+  );
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Trigger: runs after a new user is created in auth.users
+CREATE TRIGGER on_auth_user_created
+  AFTER INSERT ON auth.users
+  FOR EACH ROW
+  EXECUTE FUNCTION handle_new_user();

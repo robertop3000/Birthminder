@@ -98,6 +98,12 @@ describe('useAuth', () => {
     expect(mockSupabase.auth.signUp).toHaveBeenCalledWith({
       email: 'new@test.com',
       password: 'pass123',
+      options: {
+        data: {
+          display_name: 'New User',
+          avatar_url: null,
+        },
+      },
     });
     expect(mockSupabase.from).toHaveBeenCalledWith('profiles');
   });

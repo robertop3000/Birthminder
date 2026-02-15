@@ -4,6 +4,18 @@ All notable changes to Birthminder will be documented in this file.
 
 ---
 
+## v0.6 — 2026-02-15
+
+### Significant Changes
+- **Robust Profile Creation**: Fixed an issue where new sign-ups resulted in empty profiles. Added a database trigger to auto-create profiles on user creation and a client-side fallback mechanism ensuring profile existence on sign-in.
+- **Settings Fix**: Corrected a column name mismatch in the delete account logic (`user_id` instead of `created_by` for groups deletion).
+
+### Current Status
+- TSC: 0 errors | Jest: 14/14 suites, 94/94 tests passing
+- No known bugs
+
+---
+
 ## v0.5 — 2025-02-14
 
 ### Significant Changes
