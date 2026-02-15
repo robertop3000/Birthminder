@@ -47,14 +47,49 @@ export default function AddEditBirthdayModal() {
   const handleSubmit = async (data: BirthdayFormData) => {
     setLoading(true);
     try {
-      // Save birthday data first (fast)
+      let photoUrl = data.photo_uri;
+
+      // If we have a photo and it's a local URI (not http/s), upload it first
+      if (photoUrl && !photoUrl.startsWith('http')) {
+        try {
+          const response = await fetch(photoUrl);
+          const blob = await response.blob();
+          const arrayBuffer = await blob.arrayBuffer();
+
+          const ext = photoUrl.split('.').pop() || 'jpg';
+          const fileName = `${Date.now()}_${Math.random().toString(36).substring(7)}.${ext}`;
+          const filePath = `people/${fileName}`;
+
+          const { error: uploadError } = await supabase.storage
+            .from('avatars')
+            .upload(filePath, arrayBuffer, {
+              contentType: `image/${ext}`,
+              upsert: false,
+            });
+
+          if (uploadError) throw uploadError;
+
+          const { data: urlData } = supabase.storage
+            .from('avatars')
+            .getPublicUrl(filePath);
+
+          photoUrl = urlData.publicUrl;
+        } catch (uploadErr) {
+          console.error('Photo upload failed:', uploadErr);
+          // Allow saving without photo if upload fails, or throw? 
+          // Better to throw so user knows photo wasn't saved, but maybe just warn?
+          // Let's throw to stop the save clearly.
+          throw new Error('Failed to upload photo. Please try again.');
+        }
+      }
+
       if (isEdit && params.id) {
         await updateBirthday(params.id, {
           name: data.name,
           birthday_month: data.birthday_month,
           birthday_day: data.birthday_day,
           birthday_year: data.birthday_year,
-          photo_url: data.photo_uri, // Use existing or new URI temporarily
+          photo_url: photoUrl,
           notes: data.notes || null,
           group_ids: data.group_ids,
         });
@@ -64,7 +99,7 @@ export default function AddEditBirthdayModal() {
           birthday_month: data.birthday_month,
           birthday_day: data.birthday_day,
           birthday_year: data.birthday_year,
-          photo_url: data.photo_uri,
+          photo_url: photoUrl,
           notes: data.notes || null,
           group_ids: data.group_ids,
         });
@@ -76,52 +111,14 @@ export default function AddEditBirthdayModal() {
       // Close modal immediately - user gets instant feedback
       router.back();
 
-      // Upload photo in background (non-blocking)
-      if (data.photo_uri && !data.photo_uri.startsWith('http')) {
-        const photoUriToUpload = data.photo_uri; // Capture in closure
-        setTimeout(async () => {
-          try {
-            const response = await fetch(photoUriToUpload);
-            const blob = await response.blob();
-            const arrayBuffer = await blob.arrayBuffer();
-            const ext = photoUriToUpload.split('.').pop() || 'jpg';
-            const filePath = `people/${Date.now()}.${ext}`;
-
-            const { error: uploadError } = await supabase.storage
-              .from('avatars')
-              .upload(filePath, arrayBuffer, {
-                contentType: `image/${ext}`,
-                upsert: true,
-              });
-
-            if (!uploadError) {
-              const { data: urlData } = supabase.storage
-                .from('avatars')
-                .getPublicUrl(filePath);
-              const photoUrl = urlData.publicUrl;
-
-              // Update the photo URL after upload completes
-              const personId = isEdit ? params.id : null;
-              if (personId) {
-                await updateBirthday(personId, { photo_url: photoUrl });
-              }
-            }
-          } catch (photoErr) {
-            console.warn('Background photo upload failed:', photoErr);
-          }
-        }, 100);
-      }
     } catch (err: unknown) {
       console.error('Save error details:', err);
-      console.error('Error type:', typeof err);
-      console.error('Error stringified:', JSON.stringify(err, null, 2));
 
       let errorMessage = 'Failed to save';
 
       if (err instanceof Error) {
         errorMessage = err.message;
       } else if (typeof err === 'object' && err !== null) {
-        // Supabase errors might not be Error instances
         const supabaseError = err as any;
         if (supabaseError.message) {
           errorMessage = supabaseError.message;
@@ -130,7 +127,6 @@ export default function AddEditBirthdayModal() {
         }
       }
 
-      // Show simpler error now that database is set up
       Alert.alert('Error', errorMessage);
     } finally {
       setLoading(false);

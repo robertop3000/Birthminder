@@ -4,6 +4,18 @@ All notable changes to Birthminder will be documented in this file.
 
 ---
 
+## v0.7 — 2026-02-15
+
+### Significant Changes
+- **Photo Upload Fix**: Changed `AddEditBirthdayModal` to upload photos to Supabase Storage *before* saving the birthday record. This ensures the database always contains a public URL instead of a local file path.
+- **New Test**: Added `app/__tests__/modal_photo.test.tsx` to verify the photo upload flow.
+
+### Current Status
+- TSC: 0 errors | Jest: 15/15 suites, 95/95 tests passing
+- No known bugs
+
+---
+
 ## v0.6 — 2026-02-15
 
 ### Significant Changes
