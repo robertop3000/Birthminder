@@ -2,7 +2,7 @@ import { APP_NAME, APP_VERSION, THEME_STORAGE_KEY, ONBOARDING_COMPLETE_KEY } fro
 
 describe('constants', () => {
   it('has APP_NAME defined', () => {
-    expect(APP_NAME).toBe('BirthdayCalendar');
+    expect(APP_NAME).toBe('Birthminder');
   });
 
   it('has APP_VERSION defined', () => {

@@ -1,4 +1,4 @@
--- Database Schema for Birthday Calendar App
+-- Database Schema for Birthminder App
 
 -- Enable UUID extension
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";

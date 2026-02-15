@@ -1,6 +1,6 @@
 # Changelog
 
-All notable changes to BirthdayCalendar will be documented in this file.
+All notable changes to Birthminder will be documented in this file.
 
 ---
 

@@ -238,7 +238,7 @@ export default function SharedGroupScreen() {
 
       <View style={styles.importSection}>
         <Button
-          title="Import to my BirthdayCalendar"
+          title="Import to my Birthminder"
           onPress={handleImport}
           loading={importing}
           style={styles.importButton}

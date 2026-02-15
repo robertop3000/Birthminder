@@ -1,5 +1,5 @@
 {
-  "name": "birthdaycalendar",
+  "name": "birthminder",
   "version": "1.0.0",
   "main": "expo-router/entry",
   "scripts": {
@@ -12,14 +12,30 @@
   "jest": {
     "preset": "ts-jest",
     "testEnvironment": "jsdom",
-    "setupFiles": ["./jest.setup.js"],
-    "moduleFileExtensions": ["ts", "tsx", "js", "jsx"],
-    "testPathIgnorePatterns": ["/node_modules/"],
+    "setupFiles": [
+      "./jest.setup.js"
+    ],
+    "moduleFileExtensions": [
+      "ts",
+      "tsx",
+      "js",
+      "jsx"
+    ],
+    "testPathIgnorePatterns": [
+      "/node_modules/"
+    ],
     "transformIgnorePatterns": [
       "node_modules/(?!(date-fns)/)"
     ],
     "transform": {
-      "^.+\\.tsx?$": ["ts-jest", { "tsconfig": { "jsx": "react-jsx" } }]
+      "^.+\\.tsx?$": [
+        "ts-jest",
+        {
+          "tsconfig": {
+            "jsx": "react-jsx"
+          }
+        }
+      ]
     }
   },
   "dependencies": {

@@ -1,10 +1,10 @@
 {
   "expo": {
-    "name": "BirthdayCalendar",
-    "slug": "birthday-calendar",
+    "name": "Birthminder",
+    "slug": "birthminder",
     "version": "1.0.0",
     "orientation": "portrait",
-    "scheme": "birthdaycalendar",
+    "scheme": "birthminder",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
@@ -18,7 +18,7 @@
     },
     "ios": {
       "supportsTablet": false,
-      "bundleIdentifier": "com.birthdaycalendar.app",
+      "bundleIdentifier": "com.birthminder.app",
       "jsEngine": "hermes"
     },
     "plugins": [
@@ -28,7 +28,7 @@
       [
         "expo-image-picker",
         {
-          "photosPermission": "BirthdayCalendar needs access to your photos to add birthday and profile pictures."
+          "photosPermission": "Birthminder needs access to your photos to add birthday and profile pictures."
         }
       ]
     ]

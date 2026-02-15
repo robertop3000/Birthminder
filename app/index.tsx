@@ -49,7 +49,7 @@ export default function Index() {
     // Show loading state while fonts load
     return (
         <View style={styles.container}>
-            <Text style={styles.title}>BirthdayCalendar</Text>
+            <Text style={styles.title}>Birthminder</Text>
             <ActivityIndicator size="small" color="#E07A5F" style={styles.loader} />
         </View>
     );

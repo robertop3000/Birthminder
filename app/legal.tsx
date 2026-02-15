@@ -15,7 +15,7 @@ type Tab = 'privacy' | 'terms';
 
 const PRIVACY_POLICY = `Last updated: February 2025
 
-BirthdayCalendar ("we", "our", or "us") respects your privacy. This Privacy Policy explains how we collect, use, and protect your information.
+Birthminder ("we", "our", or "us") respects your privacy. This Privacy Policy explains how we collect, use, and protect your information.
 
 **Information We Collect**
 • Account information: your display name, email address, and optional profile photo.
@@ -23,7 +23,7 @@ BirthdayCalendar ("we", "our", or "us") respects your privacy. This Privacy Poli
 • Group information: group names, colors, and membership.
 
 **How We Use Your Information**
-• To provide and improve the BirthdayCalendar service.
+• To provide and improve the Birthminder service.
 • To send you push notifications about upcoming birthdays (only when you enable them).
 • We do not sell, rent, or share your personal data with third parties for marketing purposes.
 
@@ -36,14 +36,14 @@ You may delete your account and all associated data at any time from the Profile
 📧 birthdaycalendarapp@gmail.com
 
 **Children's Privacy**
-BirthdayCalendar is not directed at children under 13. We do not knowingly collect information from children under 13.
+Birthminder is not directed at children under 13. We do not knowingly collect information from children under 13.
 
 **Changes to This Policy**
 We may update this Privacy Policy from time to time. We will notify you of any material changes through the app.`;
 
 const TERMS_OF_SERVICE = `Last updated: February 2025
 
-By using BirthdayCalendar ("the App"), you agree to these Terms of Service.
+By using Birthminder ("the App"), you agree to these Terms of Service.
 
 **Your Account**
 • You are responsible for maintaining the security of your account credentials.
