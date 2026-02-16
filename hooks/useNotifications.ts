@@ -10,7 +10,7 @@ import { Person } from './useBirthdays';
 export function useNotifications() {
   const { user } = useAuth();
   const [permissionStatus, setPermissionStatus] = useState<string | null>(null);
-  const [daysBefore, setDaysBefore] = useState(3);
+  const [daysBefore, setDaysBefore] = useState(0);
 
   useEffect(() => {
     checkPermission();
@@ -36,7 +36,7 @@ export function useNotifications() {
       .eq('id', user.id)
       .single();
 
-    if (data?.notification_days_before) {
+    if (data?.notification_days_before != null) {
       setDaysBefore(data.notification_days_before);
     }
   }, [user]);

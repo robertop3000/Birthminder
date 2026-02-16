@@ -5,10 +5,7 @@ import {
   FlatList,
   StyleSheet,
   ActivityIndicator,
-  Alert,
-  TouchableOpacity,
 } from 'react-native';
-import * as Notifications from 'expo-notifications';
 import { useTheme } from '../../hooks/useTheme';
 import { useAuth } from '../../hooks/useAuth';
 import { useBirthdays } from '../../hooks/useBirthdays';
@@ -28,7 +25,7 @@ export default function HomeScreen() {
   const { colors } = useTheme();
   const { user } = useAuth();
   const { birthdays, loading, refetch } = useBirthdays();
-  const { scheduleAllNotifications, requestPermission, permissionStatus } = useNotifications();
+  const { scheduleAllNotifications } = useNotifications();
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
 
   useEffect(() => {
@@ -76,36 +73,6 @@ export default function HomeScreen() {
     [birthdays]
   );
 
-  const handleTestNotification = async () => {
-    try {
-      if (permissionStatus !== 'granted') {
-        const granted = await requestPermission();
-        if (!granted) {
-          Alert.alert('Permission required', 'Please enable notifications in settings to test.');
-          return;
-        }
-      }
-
-      await Notifications.scheduleNotificationAsync({
-        content: {
-          title: 'Happy Birthday! 🎂',
-          body: 'This is a test from BirthdayCalendar',
-          sound: 'default',
-        },
-        trigger: {
-          type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL,
-          seconds: 60,
-          repeats: false,
-        },
-      });
-
-      Alert.alert('Scheduled', 'Notification will fire in 60 seconds. Please minimize the app!');
-    } catch (error: any) {
-      console.error('Test notification error:', error);
-      Alert.alert('Error', `Failed to schedule: ${error.message || error}`);
-    }
-  };
-
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       <TopBar title={APP_NAME} avatarUrl={avatarUrl} />
@@ -123,14 +90,6 @@ export default function HomeScreen() {
           <Text style={[styles.emptySubtitle, { color: colors.textSecondary }]}>
             Tap + to add your first birthday!
           </Text>
-          <TouchableOpacity
-            onPress={handleTestNotification}
-            style={[styles.testButton, { backgroundColor: colors.surface }]}
-          >
-            <Text style={[styles.testButtonText, { color: colors.primary }]}>
-              Test Notification (60s)
-            </Text>
-          </TouchableOpacity>
         </View>
       ) : (
         <FlatList
@@ -154,19 +113,6 @@ export default function HomeScreen() {
                 </Text>
               )}
             </>
-          }
-          ListFooterComponent={
-            <View style={styles.testButtonContainer}>
-              <TouchableOpacity
-                onPress={handleTestNotification}
-                style={[styles.testButton, { backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.bottomBarBorder }]}
-              >
-                <Text style={[styles.testButtonText, { color: colors.primary }]}>
-                  Test Notification (60s)
-                </Text>
-              </TouchableOpacity>
-              <View style={{ height: 80 }} />
-            </View>
           }
           ListEmptyComponent={
             todayBirthdays.length === 0 ? (
@@ -228,18 +174,5 @@ const styles = StyleSheet.create({
   },
   list: {
     paddingBottom: 120,
-  },
-  testButton: {
-    marginTop: 20,
-    padding: 10,
-    borderRadius: 8,
-  },
-  testButtonText: {
-    fontFamily: 'DMSans_500Medium',
-    fontSize: 14,
-  },
-  testButtonContainer: {
-    alignItems: 'center',
-    padding: 20,
   },
 });

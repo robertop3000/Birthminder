@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   View,
   Text,
@@ -19,6 +19,9 @@ import {
 } from '../../lib/dateHelpers';
 import { NOTIFICATION_DAYS_OPTIONS } from '../../lib/constants';
 
+const getDaysLabel = (d: number) =>
+  d === 0 ? 'Just the day of' : `${d} day${d > 1 ? 's' : ''} before`;
+
 export default function NotificationsScreen() {
   const { colors } = useTheme();
   const { birthdays } = useBirthdays();
@@ -29,6 +32,7 @@ export default function NotificationsScreen() {
     updatePreference,
     scheduleAllNotifications,
   } = useNotifications();
+  const [dropdownOpen, setDropdownOpen] = useState(false);
 
   const isEnabled = permissionStatus === 'granted';
 
@@ -101,41 +105,83 @@ export default function NotificationsScreen() {
               <Text
                 style={[styles.prefLabel, { color: colors.textSecondary }]}
               >
-                Remind me before
+                Remind me
               </Text>
-              <View style={styles.prefOptions}>
-                {NOTIFICATION_DAYS_OPTIONS.map((d) => (
-                  <Pressable
-                    key={d}
-                    onPress={() => handleDaysChange(d)}
-                    style={[
-                      styles.prefChip,
-                      {
-                        backgroundColor:
-                          daysBefore === d
-                            ? colors.primary
-                            : colors.background,
-                        borderColor:
-                          daysBefore === d
-                            ? colors.primary
-                            : colors.bottomBarBorder,
-                      },
-                    ]}
-                  >
-                    <Text
+              <Pressable
+                onPress={() => setDropdownOpen(!dropdownOpen)}
+                style={[
+                  styles.dropdownHeader,
+                  {
+                    backgroundColor: colors.background,
+                    borderColor: dropdownOpen
+                      ? colors.primary
+                      : colors.bottomBarBorder,
+                  },
+                ]}
+              >
+                <Text
+                  style={[
+                    styles.dropdownHeaderText,
+                    { color: colors.textPrimary },
+                  ]}
+                >
+                  {getDaysLabel(daysBefore)}
+                </Text>
+                <Text
+                  style={[
+                    styles.dropdownArrow,
+                    { color: colors.textSecondary },
+                  ]}
+                >
+                  {dropdownOpen ? '▲' : '▼'}
+                </Text>
+              </Pressable>
+              {dropdownOpen && (
+                <View
+                  style={[
+                    styles.dropdownList,
+                    {
+                      backgroundColor: colors.background,
+                      borderColor: colors.bottomBarBorder,
+                    },
+                  ]}
+                >
+                  {NOTIFICATION_DAYS_OPTIONS.map((d) => (
+                    <Pressable
+                      key={d}
+                      onPress={() => {
+                        handleDaysChange(d);
+                        setDropdownOpen(false);
+                      }}
                       style={[
-                        styles.prefChipText,
-                        {
-                          color:
-                            daysBefore === d ? '#FFFFFF' : colors.textPrimary,
+                        styles.dropdownOption,
+                        daysBefore === d && {
+                          backgroundColor: colors.primary + '15',
                         },
                       ]}
                     >
-                      {d} day{d > 1 ? 's' : ''}
-                    </Text>
-                  </Pressable>
-                ))}
-              </View>
+                      <Text
+                        style={[
+                          styles.dropdownOptionText,
+                          {
+                            color:
+                              daysBefore === d
+                                ? colors.primary
+                                : colors.textPrimary,
+                          },
+                        ]}
+                      >
+                        {getDaysLabel(d)}
+                      </Text>
+                      {daysBefore === d && (
+                        <Text style={{ color: colors.primary, fontSize: 16 }}>
+                          ✓
+                        </Text>
+                      )}
+                    </Pressable>
+                  ))}
+                </View>
+              )}
             </View>
 
             <Text
@@ -217,19 +263,38 @@ const styles = StyleSheet.create({
     fontFamily: 'DMSans_500Medium',
     marginBottom: 10,
   },
-  prefOptions: {
+  dropdownHeader: {
     flexDirection: 'row',
-    gap: 10,
-  },
-  prefChip: {
+    alignItems: 'center',
+    justifyContent: 'space-between',
     paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 20,
+    paddingVertical: 12,
+    borderRadius: 12,
     borderWidth: 1,
   },
-  prefChipText: {
-    fontSize: 14,
+  dropdownHeaderText: {
+    fontSize: 15,
     fontWeight: '600',
+    fontFamily: 'DMSans_500Medium',
+  },
+  dropdownArrow: {
+    fontSize: 12,
+  },
+  dropdownList: {
+    marginTop: 8,
+    borderRadius: 12,
+    borderWidth: 1,
+    overflow: 'hidden',
+  },
+  dropdownOption: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+  },
+  dropdownOptionText: {
+    fontSize: 15,
     fontFamily: 'DMSans_500Medium',
   },
   sectionTitle: {
