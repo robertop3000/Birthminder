@@ -12,13 +12,19 @@ interface AvatarProps {
 
 export function Avatar({ uri, size = 36, onPress }: AvatarProps) {
   const { colors } = useTheme();
-  const [failed, setFailed] = useState(false);
+  const [retryCount, setRetryCount] = useState(0);
 
   useEffect(() => {
-    setFailed(false);
+    setRetryCount(0);
   }, [uri]);
 
-  const hasImage = !!uri && !failed;
+  const hasImage = !!uri;
+
+  const handleError = () => {
+    if (retryCount < 2) {
+      setTimeout(() => setRetryCount((c) => c + 1), 2000);
+    }
+  };
 
   const content = (
     <View style={[styles.container, { width: size, height: size, borderRadius: size / 2, backgroundColor: colors.surface }]}>
@@ -27,12 +33,13 @@ export function Avatar({ uri, size = 36, onPress }: AvatarProps) {
       </View>
       {hasImage && (
         <Image
+          key={`${uri}-${retryCount}`}
           source={uri}
           style={[styles.image, { width: size, height: size, borderRadius: size / 2 }]}
           contentFit="cover"
           transition={200}
           cachePolicy="disk"
-          onError={() => setFailed(true)}
+          onError={handleError}
         />
       )}
     </View>

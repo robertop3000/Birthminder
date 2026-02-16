@@ -194,6 +194,28 @@ jest.mock('react-native-safe-area-context', () => ({
   SafeAreaView: ({ children }) => children,
 }));
 
+// Mock expo-file-system/legacy (TypeScript entry point that Jest can't transform)
+jest.mock('expo-file-system/legacy', () => ({
+  readAsStringAsync: jest.fn().mockResolvedValue('base64-string-content'),
+  EncodingType: { Base64: 'base64' },
+}));
+
+// Mock expo-image (used by Avatar component)
+jest.mock('expo-image', () => {
+  const React = require('react');
+  const Image = ({ source, style, onError, ...props }) => {
+    return React.createElement('Image', { ...props, source, style });
+  };
+  Image.displayName = 'ExpoImage';
+  return { Image };
+});
+
+// Mock expo-image-manipulator (used by modal for image optimization)
+jest.mock('expo-image-manipulator', () => ({
+  manipulateAsync: jest.fn().mockResolvedValue({ uri: 'file:///processed.jpg' }),
+  SaveFormat: { JPEG: 'jpeg', PNG: 'png' },
+}));
+
 // Mock expo-image-picker
 jest.mock('expo-image-picker', () => ({
   launchImageLibraryAsync: jest.fn().mockResolvedValue({ canceled: true, assets: [] }),

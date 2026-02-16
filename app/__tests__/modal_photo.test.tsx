@@ -111,9 +111,9 @@ describe('AddEditBirthdayModal Photo Upload', () => {
             fireEvent.press(getByText('Save'));
         });
 
-        // Verify FileSystem was used
+        // Verify FileSystem was used (with processed URI from ImageManipulator)
         expect(FileSystem.readAsStringAsync).toHaveBeenCalledWith(
-            'file:///local/path/image.jpg',
+            'file:///processed.jpg',
             { encoding: 'base64' }
         );
 

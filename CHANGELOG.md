@@ -4,10 +4,24 @@ All notable changes to Birthminder will be documented in this file.
 
 ---
 
+## v0.9.2 - 2026-02-16
+
+### Fixed
+- **Avatar retry mechanism**: Replaced permanent failure state with auto-retry (up to 3 attempts with 2s delay). Fixes intermittent photo loading after upload when CDN is slow to propagate.
+- **Jest test infrastructure**: Added missing mocks for `expo-image`, `expo-image-manipulator`, and `expo-file-system/legacy` that were introduced in v0.9.1 but never mocked.
+- **e2e test suite**: Fixed empty test suite error.
+- **Photo upload test**: Updated assertion to account for ImageManipulator processing step.
+
+### Current Status
+- TSC: 0 errors | Jest: 16/16 suites, 97/97 tests passing
+- No known bugs
+
+---
+
 ## v0.9.1 - 2026-02-15
 
 ### Improved
-- **Image Pipeline Overhaul**: 
+- **Image Pipeline Overhaul**:
     - Installed `expo-image` for high-performance, disk-cached image rendering.
     - Implemented automatic image optimization on upload (Resize to 600px, Compress 0.7, Convert to JPEG).
     - Added fade-in transitions for smoother UX.

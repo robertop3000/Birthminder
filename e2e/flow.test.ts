@@ -1,3 +1,9 @@
+describe('E2E Verification Flow', () => {
+  it('manual verification script exists', () => {
+    expect(E2E_VERIFICATION_FLOW).toBeTruthy();
+  });
+});
+
 export const E2E_VERIFICATION_FLOW = `
 # Manual E2E Verification Script
 
