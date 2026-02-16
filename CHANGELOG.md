@@ -4,6 +4,17 @@ All notable changes to Birthminder will be documented in this file.
 
 ---
 
+## v0.9.1 - 2026-02-15
+
+### Improved
+- **Image Pipeline Overhaul**: 
+    - Installed `expo-image` for high-performance, disk-cached image rendering.
+    - Implemented automatic image optimization on upload (Resize to 600px, Compress 0.7, Convert to JPEG).
+    - Added fade-in transitions for smoother UX.
+- **Deep Linking**: Clarified that `birthminder://` links require development/production builds.
+
+---
+
 ## v0.9.0 — 2026-02-15
 
 ### Added

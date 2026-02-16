@@ -7,6 +7,7 @@ import { useBirthdays } from '../hooks/useBirthdays';
 import { useGroups } from '../hooks/useGroups';
 import { decode } from 'base64-arraybuffer';
 import * as FileSystem from 'expo-file-system/legacy';
+import * as ImageManipulator from 'expo-image-manipulator';
 import { supabase } from '../lib/supabase';
 import {
   BirthdayForm,
@@ -52,29 +53,36 @@ export default function AddEditBirthdayModal() {
       let photoUrl = data.photo_uri;
 
       // If we have a photo and it's a local URI (not http/s), upload it first
-      // If we have a photo and it's a local URI (not http/s), upload it first
       if (photoUrl && !photoUrl.startsWith('http')) {
         console.log('[AddBirthday] Processing photo upload for:', photoUrl);
         try {
-          // 1. Read file as base64 using expo-file-system (more reliable than fetch blob)
-          console.log('[AddBirthday] Reading file from:', photoUrl);
-          const base64 = await FileSystem.readAsStringAsync(photoUrl, {
+          // 0. Manipulate image (resize & compress)
+          const manipulated = await ImageManipulator.manipulateAsync(
+            photoUrl,
+            [{ resize: { width: 600 } }], // Resize to max width 600
+            { compress: 0.7, format: ImageManipulator.SaveFormat.JPEG }
+          );
+
+          const processedUri = manipulated.uri;
+          console.log('[AddBirthday] Processed image:', processedUri);
+
+          // 1. Read file as base64 using expo-file-system
+          const base64 = await FileSystem.readAsStringAsync(processedUri, {
             encoding: 'base64',
           });
 
           // 2. Prepare filename
-          const ext = photoUrl.split('.').pop()?.split('?')[0] || 'jpg';
-          const fileName = `${Date.now()}_${Math.random().toString(36).substring(7)}.${ext}`;
+          const fileName = `${Date.now()}_${Math.random().toString(36).substring(7)}.jpg`;
           const filePath = `people/${fileName}`;
           console.log('[AddBirthday] Uploading to path:', filePath);
 
-          // 3. Upload to Supabase (needs ArrayBuffer)
+          // 3. Upload to Supabase
           const arrayBuffer = decode(base64);
 
           const { error: uploadError, data: uploadData } = await supabase.storage
             .from('avatars')
             .upload(filePath, arrayBuffer, {
-              contentType: `image/${ext}`,
+              contentType: 'image/jpeg',
               upsert: false,
             });
 
@@ -95,7 +103,6 @@ export default function AddEditBirthdayModal() {
 
         } catch (uploadErr: any) {
           console.error('[AddBirthday] Critical upload error:', uploadErr);
-          // Show the specific error message to help debugging (e.g. "Bucket not found")
           const msg = uploadErr.message || 'Unknown upload error';
           throw new Error(`Failed to upload photo: ${msg}`);
         }

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Image, Pressable, View, StyleSheet } from 'react-native';
+import { View, StyleSheet, Pressable } from 'react-native';
+import { Image } from 'expo-image';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../hooks/useTheme';
 
@@ -9,70 +10,59 @@ interface AvatarProps {
   onPress?: () => void;
 }
 
-// TODO: Optimize image loading performance. Currently using standard Image component which can be slow.
-// Consider expo-image or better caching strategy in future updates.
 export function Avatar({ uri, size = 36, onPress }: AvatarProps) {
   const { colors } = useTheme();
   const [failed, setFailed] = useState(false);
 
-  // Reset failed state when URI changes
   useEffect(() => {
     setFailed(false);
   }, [uri]);
 
-  const showImage = !!uri && !failed;
+  const hasImage = !!uri && !failed;
 
-  const content = showImage ? (
-    <Image
-      source={{ uri: uri! }}
-      style={{
-        width: size,
-        height: size,
-        borderRadius: size / 2,
-        backgroundColor: colors.surface,
-      }}
-      resizeMode="cover"
-      onError={() => setFailed(true)}
-    />
-  ) : (
-    <View
-      style={[
-        styles.fallback,
-        {
-          width: size,
-          height: size,
-          borderRadius: size / 2,
-          backgroundColor: colors.surface,
-        },
-      ]}
-    >
-      <Ionicons
-        name="person"
-        size={size * 0.55}
-        color={colors.textSecondary}
-      />
+  const content = (
+    <View style={[styles.container, { width: size, height: size, borderRadius: size / 2, backgroundColor: colors.surface }]}>
+      <View style={[styles.fallback, { width: size, height: size, borderRadius: size / 2 }]}>
+        <Ionicons name="person" size={size * 0.55} color={colors.textSecondary} />
+      </View>
+      {hasImage && (
+        <Image
+          source={uri}
+          style={[styles.image, { width: size, height: size, borderRadius: size / 2 }]}
+          contentFit="cover"
+          transition={200}
+          cachePolicy="disk"
+          onError={() => setFailed(true)}
+        />
+      )}
     </View>
   );
 
   if (onPress) {
     return (
-      <Pressable onPress={onPress} style={styles.container}>
+      <Pressable onPress={onPress}>
         {content}
       </Pressable>
     );
   }
 
-  return <View style={styles.container}>{content}</View>;
+  return content;
 }
 
 const styles = StyleSheet.create({
   container: {
-    alignItems: 'center',
     justifyContent: 'center',
+    alignItems: 'center',
+    overflow: 'hidden',
   },
   fallback: {
-    alignItems: 'center',
+    ...StyleSheet.absoluteFillObject,
     justifyContent: 'center',
-    overflow: 'hidden',
+    alignItems: 'center',
+    zIndex: 1,
+  },
+  image: {
+    ...StyleSheet.absoluteFillObject,
+    zIndex: 2,
   },
 });
