@@ -1,13 +1,22 @@
--- Database Schema for Birthminder App
+-- ============================================
+-- Birthminder — Complete Database Schema
+-- ============================================
+-- Run this in Supabase > SQL Editor
+-- Last updated: 2026-02-15
 
 -- Enable UUID extension
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+
+-- ============================================
+-- TABLES
+-- ============================================
 
 -- Profiles table (extends Supabase auth.users)
 CREATE TABLE profiles (
   id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
   display_name TEXT NOT NULL,
   avatar_url TEXT,
+  notification_days_before INTEGER DEFAULT 0,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
@@ -21,6 +30,7 @@ CREATE TABLE people (
   birthday_year INTEGER CHECK (birthday_year > 1900 AND birthday_year <= 2100),
   photo_url TEXT,
   notes TEXT,
+  share_code TEXT UNIQUE,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
@@ -31,6 +41,7 @@ CREATE TABLE groups (
   user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
   name TEXT NOT NULL,
   color TEXT,
+  share_code TEXT UNIQUE,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
@@ -41,16 +52,20 @@ CREATE TABLE person_groups (
   PRIMARY KEY (person_id, group_id)
 );
 
--- Indexes for better query performance
+-- ============================================
+-- INDEXES
+-- ============================================
+
 CREATE INDEX idx_people_user_id ON people(user_id);
 CREATE INDEX idx_people_birthday ON people(birthday_month, birthday_day);
 CREATE INDEX idx_groups_user_id ON groups(user_id);
 CREATE INDEX idx_person_groups_person ON person_groups(person_id);
 CREATE INDEX idx_person_groups_group ON person_groups(group_id);
 
--- Row Level Security (RLS) Policies
+-- ============================================
+-- ROW LEVEL SECURITY
+-- ============================================
 
--- Enable RLS on all tables
 ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE people ENABLE ROW LEVEL SECURITY;
 ALTER TABLE groups ENABLE ROW LEVEL SECURITY;
@@ -69,6 +84,10 @@ CREATE POLICY "Users can insert their own profile"
   ON profiles FOR INSERT
   WITH CHECK (auth.uid() = id);
 
+CREATE POLICY "Users can delete their own profile"
+  ON profiles FOR DELETE
+  USING (auth.uid() = id);
+
 -- People policies
 CREATE POLICY "Users can view their own people"
   ON people FOR SELECT
@@ -86,6 +105,10 @@ CREATE POLICY "Users can delete their own people"
   ON people FOR DELETE
   USING (auth.uid() = user_id);
 
+CREATE POLICY "Public can view shared people"
+  ON people FOR SELECT
+  USING (share_code IS NOT NULL);
+
 -- Groups policies
 CREATE POLICY "Users can view their own groups"
   ON groups FOR SELECT
@@ -102,6 +125,10 @@ CREATE POLICY "Users can update their own groups"
 CREATE POLICY "Users can delete their own groups"
   ON groups FOR DELETE
   USING (auth.uid() = user_id);
+
+CREATE POLICY "Public can view shared groups"
+  ON groups FOR SELECT
+  USING (share_code IS NOT NULL);
 
 -- Person-Groups junction table policies
 CREATE POLICY "Users can view person_groups for their people"
@@ -134,7 +161,11 @@ CREATE POLICY "Users can delete person_groups for their people"
     )
   );
 
--- Function to update updated_at timestamp
+-- ============================================
+-- TRIGGERS
+-- ============================================
+
+-- Auto-update updated_at on people
 CREATE OR REPLACE FUNCTION update_updated_at_column()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -143,19 +174,13 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- Trigger to automatically update updated_at
 CREATE TRIGGER update_people_updated_at
   BEFORE UPDATE ON people
   FOR EACH ROW
   EXECUTE FUNCTION update_updated_at_column();
 
--- Policy: Users can delete their own profile
-CREATE POLICY "Users can delete their own profile"
-  ON profiles FOR DELETE
-  USING (auth.uid() = id);
-
--- Function to automatically create a profile when a new user signs up
-CREATE OR REPLACE FUNCTION handle_new_user()
+-- Auto-create profile on new user signup
+CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER AS $$
 BEGIN
   INSERT INTO public.profiles (id, display_name, avatar_url)
@@ -163,40 +188,38 @@ BEGIN
     NEW.id,
     COALESCE(NEW.raw_user_meta_data->>'display_name', split_part(NEW.email, '@', 1)),
     NEW.raw_user_meta_data->>'avatar_url'
-  );
+  )
+  ON CONFLICT (id) DO NOTHING;
   RETURN NEW;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
--- Trigger: runs after a new user is created in auth.users
-CREATE TRIGGER on_auth_user_created
+CREATE OR REPLACE TRIGGER on_auth_user_created
   AFTER INSERT ON auth.users
   FOR EACH ROW
-  EXECUTE FUNCTION handle_new_user();
+  EXECUTE FUNCTION public.handle_new_user();
 
--- Storage Bucket Setup
+-- ============================================
+-- STORAGE
+-- ============================================
+
 INSERT INTO storage.buckets (id, name, public)
 VALUES ('avatars', 'avatars', true)
 ON CONFLICT (id) DO NOTHING;
 
--- Storage Policies
--- Allow public access to view avatars
 CREATE POLICY "Avatar images are publicly accessible"
-  ON storage.objects FOR SELECT
-  USING ( bucket_id = 'avatars' );
+ON storage.objects FOR SELECT
+USING ( bucket_id = 'avatars' );
 
--- Allow authenticated users to upload their own avatars
 CREATE POLICY "Everyone can upload avatars"
-  ON storage.objects FOR INSERT
-  WITH CHECK ( bucket_id = 'avatars' AND auth.role() = 'authenticated' );
+ON storage.objects FOR INSERT
+WITH CHECK ( bucket_id = 'avatars' AND auth.role() = 'authenticated' );
 
--- Allow users to update their own avatars
 CREATE POLICY "Users can update their own avatars"
-  ON storage.objects FOR UPDATE
-  USING ( bucket_id = 'avatars' AND auth.uid() = owner )
-  WITH CHECK ( bucket_id = 'avatars' AND auth.uid() = owner );
+ON storage.objects FOR UPDATE
+USING ( bucket_id = 'avatars' AND auth.uid() = owner )
+WITH CHECK ( bucket_id = 'avatars' AND auth.uid() = owner );
 
--- Allow users to delete their own avatars
 CREATE POLICY "Users can delete their own avatars"
-  ON storage.objects FOR DELETE
-  USING ( bucket_id = 'avatars' AND auth.uid() = owner );
+ON storage.objects FOR DELETE
+USING ( bucket_id = 'avatars' AND auth.uid() = owner );

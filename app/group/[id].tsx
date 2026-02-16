@@ -5,6 +5,7 @@ import {
   StyleSheet,
   ScrollView,
   Alert,
+  Share,
   ActivityIndicator,
   Pressable,
   Modal,
@@ -17,7 +18,6 @@ import { useTheme } from '../../hooks/useTheme';
 import { useGroups } from '../../hooks/useGroups';
 import { useBirthdays } from '../../hooks/useBirthdays';
 import { Avatar } from '../../components/ui/Avatar';
-import { Button } from '../../components/ui/Button';
 import {
   getDaysUntilBirthday,
   formatBirthdayDate,
@@ -65,9 +65,12 @@ export default function GroupDetailScreen() {
   const handleShare = async () => {
     try {
       const code = group.share_code || (await generateShareCode(group.id));
-      Alert.alert('Share Code', `Share this code with friends:\n\n${code}`);
+      const shareUrl = `birthminder://shared/${code}`;
+      await Share.share({
+        message: `Check out my "${group.name}" birthdays on Birthminder! ${shareUrl}`,
+      });
     } catch {
-      Alert.alert('Error', 'Failed to generate share code');
+      Alert.alert('Error', 'Failed to share group');
     }
   };
 

@@ -5,6 +5,7 @@ import {
   StyleSheet,
   ScrollView,
   Alert,
+  Share,
   ActivityIndicator,
   Pressable,
 } from 'react-native';
@@ -25,7 +26,7 @@ export default function PersonDetailScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { id } = useLocalSearchParams<{ id: string }>();
-  const { birthdays, deleteBirthday } = useBirthdays();
+  const { birthdays, deleteBirthday, generatePersonShareCode } = useBirthdays();
 
   const person = birthdays.find((p) => p.id === id);
 
@@ -57,6 +58,18 @@ export default function PersonDetailScreen() {
     person.birthday_day,
     person.birthday_year
   );
+
+  const handleShare = async () => {
+    try {
+      const code = person.share_code || (await generatePersonShareCode(person.id));
+      const shareUrl = `birthminder://shared/person/${code}`;
+      await Share.share({
+        message: `${person.name}'s birthday is on ${dateStr}! Save it on Birthminder: ${shareUrl}`,
+      });
+    } catch {
+      Alert.alert('Error', 'Failed to share birthday');
+    }
+  };
 
   const handleEdit = () => {
     const groupIds = person.person_groups
@@ -106,6 +119,13 @@ export default function PersonDetailScreen() {
           <Ionicons name="arrow-back" size={24} color={colors.textPrimary} />
         </Pressable>
         <View style={styles.headerActions}>
+          <Pressable onPress={handleShare}>
+            <Ionicons
+              name="share-outline"
+              size={22}
+              color={colors.primary}
+            />
+          </Pressable>
           <Pressable onPress={handleEdit}>
             <Ionicons
               name="pencil-outline"

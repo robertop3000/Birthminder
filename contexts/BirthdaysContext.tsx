@@ -20,6 +20,7 @@ export interface Person {
     birthday_year: number | null;
     photo_url: string | null;
     notes: string | null;
+    share_code: string | null;
     created_at: string;
     person_groups: PersonGroup[];
 }
@@ -42,6 +43,7 @@ interface BirthdaysContextValue {
     addBirthday: (input: BirthdayInput) => Promise<Person | null>;
     updateBirthday: (id: string, input: Partial<BirthdayInput>) => Promise<void>;
     deleteBirthday: (id: string) => Promise<void>;
+    generatePersonShareCode: (id: string) => Promise<string>;
 }
 
 const BirthdaysContext = createContext<BirthdaysContextValue | null>(null);
@@ -165,6 +167,23 @@ export function BirthdaysProvider({ children }: { children: React.ReactNode }) {
         [fetchBirthdays]
     );
 
+    const generatePersonShareCode = useCallback(async (id: string) => {
+        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+        let code = '';
+        for (let i = 0; i < 8; i++) {
+            code += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+
+        const { error: updateError } = await supabase
+            .from('people')
+            .update({ share_code: code })
+            .eq('id', id);
+
+        if (updateError) throw updateError;
+        await fetchBirthdays();
+        return code;
+    }, [fetchBirthdays]);
+
     return (
         <BirthdaysContext.Provider
             value={{
@@ -175,6 +194,7 @@ export function BirthdaysProvider({ children }: { children: React.ReactNode }) {
                 addBirthday,
                 updateBirthday,
                 deleteBirthday,
+                generatePersonShareCode,
             }}
         >
             {children}

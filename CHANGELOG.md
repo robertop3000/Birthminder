@@ -4,6 +4,24 @@ All notable changes to Birthminder will be documented in this file.
 
 ---
 
+## v0.9.0 — 2026-02-15
+
+### Added
+- Group Sharing via native Share sheet (deep links).
+- Birthday Sharing via native Share sheet (deep links).
+- "Just the day of" notification option (0 days).
+- Image upload optimization (quality reduced to 0.5).
+
+### Fixed
+- Reverted `Avatar` component to conditional rendering to fix list display issues.
+- Fixed Group List share button to use native sharing.
+- Unified database schema in `supabase-schema.sql`.
+
+### Known Issues
+- Avatar image loading is slow/unoptimized in some views. Needs performance investigation.
+
+---
+
 ## v0.8 — 2026-02-15
 
 ### Significant Changes

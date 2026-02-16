@@ -9,6 +9,7 @@ import {
   TextInput,
   Modal,
   Pressable,
+  Share,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../hooks/useTheme';
@@ -54,9 +55,12 @@ export default function GroupsScreen() {
   const handleShare = async (groupId: string) => {
     try {
       const code = await generateShareCode(groupId);
-      Alert.alert('Share Code', `Share this code: ${code}`);
-    } catch (err: unknown) {
-      Alert.alert('Error', 'Failed to generate share code');
+      const shareUrl = `birthminder://shared/${code}`;
+      await Share.share({
+        message: `Check out my group birthdays on Birthminder! ${shareUrl}`,
+      });
+    } catch {
+      Alert.alert('Error', 'Failed to share group');
     }
   };
 
