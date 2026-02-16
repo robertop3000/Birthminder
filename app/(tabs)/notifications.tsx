@@ -2,12 +2,13 @@ import React, { useMemo, useState } from 'react';
 import {
   View,
   Text,
-  FlatList,
+  SectionList,
   Switch,
   StyleSheet,
   Pressable,
   Alert,
 } from 'react-native';
+import { useRouter } from 'expo-router';
 import { useTheme } from '../../hooks/useTheme';
 import { useBirthdays } from '../../hooks/useBirthdays';
 import { useNotifications } from '../../hooks/useNotifications';
@@ -18,12 +19,28 @@ import {
   formatBirthdayDate,
 } from '../../lib/dateHelpers';
 import { NOTIFICATION_DAYS_OPTIONS } from '../../lib/constants';
+import { Person } from '../../hooks/useBirthdays';
+
+const MONTH_NAMES = [
+  'January', 'February', 'March', 'April', 'May', 'June',
+  'July', 'August', 'September', 'October', 'November', 'December',
+];
 
 const getDaysLabel = (d: number) =>
   d === 0 ? 'Just the day of' : `${d} day${d > 1 ? 's' : ''} before`;
 
+interface BirthdayWithDays extends Person {
+  daysUntil: number;
+}
+
+interface MonthSection {
+  title: string;
+  data: BirthdayWithDays[];
+}
+
 export default function NotificationsScreen() {
   const { colors } = useTheme();
+  const router = useRouter();
   const { birthdays } = useBirthdays();
   const {
     permissionStatus,
@@ -57,145 +74,183 @@ export default function NotificationsScreen() {
     }
   };
 
-  const upcomingNotifs = useMemo(() => {
-    return birthdays
-      .map((p) => ({
-        ...p,
-        daysUntil: getDaysUntilBirthday(p.birthday_month, p.birthday_day),
-      }))
-      .sort((a, b) => a.daysUntil - b.daysUntil)
-      .slice(0, 20);
+  const sections = useMemo((): MonthSection[] => {
+    const currentMonth = new Date().getMonth() + 1; // 1-12
+
+    // Add daysUntil to each birthday
+    const withDays = birthdays.map((p) => ({
+      ...p,
+      daysUntil: getDaysUntilBirthday(p.birthday_month, p.birthday_day),
+    }));
+
+    // Group by month
+    const byMonth = new Map<number, BirthdayWithDays[]>();
+    for (const p of withDays) {
+      const month = p.birthday_month;
+      if (!byMonth.has(month)) byMonth.set(month, []);
+      byMonth.get(month)!.push(p);
+    }
+
+    // Sort within each month by day ascending
+    for (const entries of byMonth.values()) {
+      entries.sort((a, b) => a.birthday_day - b.birthday_day);
+    }
+
+    // Build rolling month order: current month first, then next months, then earlier months
+    const monthOrder: number[] = [];
+    for (let i = 0; i < 12; i++) {
+      const month = ((currentMonth - 1 + i) % 12) + 1;
+      monthOrder.push(month);
+    }
+
+    // Build sections
+    const result: MonthSection[] = [];
+    for (const month of monthOrder) {
+      const entries = byMonth.get(month);
+      if (entries && entries.length > 0) {
+        result.push({
+          title: MONTH_NAMES[month - 1],
+          data: entries,
+        });
+      }
+    }
+
+    return result;
   }, [birthdays]);
 
-  return (
-    <View style={[styles.container, { backgroundColor: colors.background }]}>
-      <TopBar title="Notifications" />
+  const renderHeader = () => (
+    <View>
+      <View
+        style={[
+          styles.toggleRow,
+          { backgroundColor: colors.surface },
+        ]}
+      >
+        <Text style={[styles.toggleLabel, { color: colors.textPrimary }]}>
+          Enable Notifications
+        </Text>
+        <Switch
+          value={isEnabled}
+          onValueChange={handleToggle}
+          trackColor={{
+            false: colors.bottomBarBorder,
+            true: colors.primary,
+          }}
+          thumbColor="#FFFFFF"
+        />
+      </View>
 
-      <FlatList
-        data={upcomingNotifs}
-        keyExtractor={(item) => item.id}
-        ListHeaderComponent={
-          <View>
-            <View
-              style={[
-                styles.toggleRow,
-                { backgroundColor: colors.surface },
-              ]}
-            >
-              <Text style={[styles.toggleLabel, { color: colors.textPrimary }]}>
-                Enable Notifications
-              </Text>
-              <Switch
-                value={isEnabled}
-                onValueChange={handleToggle}
-                trackColor={{
-                  false: colors.bottomBarBorder,
-                  true: colors.primary,
-                }}
-                thumbColor="#FFFFFF"
-              />
-            </View>
-
-            <View
-              style={[
-                styles.prefSection,
-                { backgroundColor: colors.surface },
-              ]}
-            >
-              <Text
-                style={[styles.prefLabel, { color: colors.textSecondary }]}
-              >
-                Remind me
-              </Text>
+      <View
+        style={[
+          styles.prefSection,
+          { backgroundColor: colors.surface },
+        ]}
+      >
+        <Text
+          style={[styles.prefLabel, { color: colors.textSecondary }]}
+        >
+          Remind me
+        </Text>
+        <Pressable
+          onPress={() => setDropdownOpen(!dropdownOpen)}
+          style={[
+            styles.dropdownHeader,
+            {
+              backgroundColor: colors.background,
+              borderColor: dropdownOpen
+                ? colors.primary
+                : colors.bottomBarBorder,
+            },
+          ]}
+        >
+          <Text
+            style={[
+              styles.dropdownHeaderText,
+              { color: colors.textPrimary },
+            ]}
+          >
+            {getDaysLabel(daysBefore)}
+          </Text>
+          <Text
+            style={[
+              styles.dropdownArrow,
+              { color: colors.textSecondary },
+            ]}
+          >
+            {dropdownOpen ? '▲' : '▼'}
+          </Text>
+        </Pressable>
+        {dropdownOpen && (
+          <View
+            style={[
+              styles.dropdownList,
+              {
+                backgroundColor: colors.background,
+                borderColor: colors.bottomBarBorder,
+              },
+            ]}
+          >
+            {NOTIFICATION_DAYS_OPTIONS.map((d) => (
               <Pressable
-                onPress={() => setDropdownOpen(!dropdownOpen)}
+                key={d}
+                onPress={() => {
+                  handleDaysChange(d);
+                  setDropdownOpen(false);
+                }}
                 style={[
-                  styles.dropdownHeader,
-                  {
-                    backgroundColor: colors.background,
-                    borderColor: dropdownOpen
-                      ? colors.primary
-                      : colors.bottomBarBorder,
+                  styles.dropdownOption,
+                  daysBefore === d && {
+                    backgroundColor: colors.primary + '15',
                   },
                 ]}
               >
                 <Text
                   style={[
-                    styles.dropdownHeaderText,
-                    { color: colors.textPrimary },
-                  ]}
-                >
-                  {getDaysLabel(daysBefore)}
-                </Text>
-                <Text
-                  style={[
-                    styles.dropdownArrow,
-                    { color: colors.textSecondary },
-                  ]}
-                >
-                  {dropdownOpen ? '▲' : '▼'}
-                </Text>
-              </Pressable>
-              {dropdownOpen && (
-                <View
-                  style={[
-                    styles.dropdownList,
+                    styles.dropdownOptionText,
                     {
-                      backgroundColor: colors.background,
-                      borderColor: colors.bottomBarBorder,
+                      color:
+                        daysBefore === d
+                          ? colors.primary
+                          : colors.textPrimary,
                     },
                   ]}
                 >
-                  {NOTIFICATION_DAYS_OPTIONS.map((d) => (
-                    <Pressable
-                      key={d}
-                      onPress={() => {
-                        handleDaysChange(d);
-                        setDropdownOpen(false);
-                      }}
-                      style={[
-                        styles.dropdownOption,
-                        daysBefore === d && {
-                          backgroundColor: colors.primary + '15',
-                        },
-                      ]}
-                    >
-                      <Text
-                        style={[
-                          styles.dropdownOptionText,
-                          {
-                            color:
-                              daysBefore === d
-                                ? colors.primary
-                                : colors.textPrimary,
-                          },
-                        ]}
-                      >
-                        {getDaysLabel(d)}
-                      </Text>
-                      {daysBefore === d && (
-                        <Text style={{ color: colors.primary, fontSize: 16 }}>
-                          ✓
-                        </Text>
-                      )}
-                    </Pressable>
-                  ))}
-                </View>
-              )}
-            </View>
-
-            <Text
-              style={[styles.sectionTitle, { color: colors.textSecondary }]}
-            >
-              Upcoming Reminders
-            </Text>
+                  {getDaysLabel(d)}
+                </Text>
+                {daysBefore === d && (
+                  <Text style={{ color: colors.primary, fontSize: 16 }}>
+                    ✓
+                  </Text>
+                )}
+              </Pressable>
+            ))}
           </View>
-        }
+        )}
+      </View>
+    </View>
+  );
+
+  return (
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
+      <TopBar title="Notifications" />
+
+      <SectionList
+        sections={sections}
+        keyExtractor={(item) => item.id}
+        ListHeaderComponent={renderHeader}
+        renderSectionHeader={({ section }) => (
+          <Text
+            style={[styles.monthHeader, { color: colors.textSecondary }]}
+          >
+            {section.title}
+          </Text>
+        )}
         renderItem={({ item }) => (
-          <View
-            style={[
+          <Pressable
+            onPress={() => router.push(`/person/${item.id}`)}
+            style={({ pressed }) => [
               styles.notifRow,
-              { backgroundColor: colors.surface },
+              { backgroundColor: colors.surface, opacity: pressed ? 0.85 : 1 },
             ]}
           >
             <Avatar uri={item.photo_url} size={40} />
@@ -216,7 +271,7 @@ export default function NotificationsScreen() {
                 ? 'Today!'
                 : `In ${item.daysUntil}d`}
             </Text>
-          </View>
+          </Pressable>
         )}
         ListEmptyComponent={
           <View style={styles.empty}>
@@ -229,6 +284,7 @@ export default function NotificationsScreen() {
         }
         contentContainerStyle={styles.list}
         showsVerticalScrollIndicator={false}
+        stickySectionHeadersEnabled={false}
       />
     </View>
   );
@@ -297,9 +353,10 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontFamily: 'DMSans_500Medium',
   },
-  sectionTitle: {
-    fontSize: 13,
-    fontFamily: 'DMSans_500Medium',
+  monthHeader: {
+    fontSize: 14,
+    fontWeight: '700',
+    fontFamily: 'DMSans_700Bold',
     textTransform: 'uppercase',
     letterSpacing: 1,
     marginHorizontal: 20,

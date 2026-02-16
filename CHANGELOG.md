@@ -4,6 +4,20 @@ All notable changes to Birthminder will be documented in this file.
 
 ---
 
+## v0.9.3 - 2026-02-16
+
+### Improved
+- **Notifications tab overhaul**: Replaced flat list with SectionList grouped by month. Months display as uppercase headers with birthdays sorted by day within each month.
+- **Rolling month order**: Sections start from the current month and wrap around, so the most relevant birthdays are always at the top.
+- **Clickable birthday rows**: Tapping a birthday in the Notifications tab now navigates to the person detail screen, matching Home and Search tab behavior.
+- **No birthday limit**: Removed the 20-birthday cap — all birthdays are now shown.
+
+### Current Status
+- TSC: 0 errors | Jest: 16/16 suites, 97/97 tests passing
+- No known bugs
+
+---
+
 ## v0.9.2 - 2026-02-16
 
 ### Fixed

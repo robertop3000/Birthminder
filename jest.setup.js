@@ -33,6 +33,28 @@ jest.mock('react-native', () => {
   };
   FlatList.displayName = 'FlatList';
 
+  const SectionList = ({ sections, renderItem, renderSectionHeader, keyExtractor, ListHeaderComponent, ListEmptyComponent, ...props }) => {
+    const header = ListHeaderComponent
+      ? (typeof ListHeaderComponent === 'function' ? React.createElement(ListHeaderComponent) : ListHeaderComponent)
+      : null;
+    const allItems = (sections || []).flatMap((section) => {
+      const sectionHeader = renderSectionHeader
+        ? React.createElement(React.Fragment, { key: `header-${section.title}` }, renderSectionHeader({ section }))
+        : null;
+      const items = (section.data || []).map((item, index) =>
+        React.createElement(React.Fragment, { key: keyExtractor ? keyExtractor(item, index) : index },
+          renderItem({ item, index, section, separators: {} })
+        )
+      );
+      return [sectionHeader, ...items];
+    });
+    const empty = (!sections || sections.length === 0) && ListEmptyComponent
+      ? (typeof ListEmptyComponent === 'function' ? React.createElement(ListEmptyComponent) : ListEmptyComponent)
+      : null;
+    return React.createElement('SectionList', props, header, ...allItems, empty);
+  };
+  SectionList.displayName = 'SectionList';
+
   const TextInput = React.forwardRef(({ onChangeText, value, placeholder, placeholderTextColor, testID, ...props }, ref) => {
     return React.createElement('TextInput', {
       ...props,
@@ -151,6 +173,7 @@ jest.mock('react-native', () => {
     Image,
     ScrollView,
     FlatList,
+    SectionList,
     Pressable,
     TouchableOpacity,
     Modal,
@@ -164,6 +187,7 @@ jest.mock('react-native', () => {
     Dimensions,
     Animated,
     Linking,
+    Share: { share: jest.fn().mockResolvedValue({ action: 'sharedAction' }) },
     Appearance,
     useColorScheme,
     useWindowDimensions,
