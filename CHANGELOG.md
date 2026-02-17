@@ -4,7 +4,7 @@ All notable changes to Birthminder will be documented in this file.
 
 ---
 
-## v0.10 - 2026-02-16
+## v0.10 - 2026-02-16 (First stable development release)
 
 ### Fixed
 - Resolved "Invalid Refresh Token" error on app startup by handling auth session errors gracefully.
