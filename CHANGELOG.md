@@ -10,6 +10,7 @@ All notable changes to Birthminder will be documented in this file.
 - Resolved "Invalid Refresh Token" error on app startup by handling auth session errors gracefully.
 - Fixed photo upload failure by ensuring user authentication before upload.
 - Resolved `expo-file-system` deprecation error by switching to legacy API.
+- Updated app icon, adaptive icon, and splash screen with new "Birthminder Logo".
 
 ### Changed
 - **Notifications Tab**: Redesigned to group birthdays by month (rolling order).
