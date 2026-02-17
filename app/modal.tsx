@@ -6,13 +6,14 @@ import { useTheme } from '../hooks/useTheme';
 import { useBirthdays } from '../hooks/useBirthdays';
 import { useGroups } from '../hooks/useGroups';
 import { decode } from 'base64-arraybuffer';
-import * as FileSystem from 'expo-file-system';
+import * as FileSystem from 'expo-file-system/legacy';
 import * as ImageManipulator from 'expo-image-manipulator';
 import { supabase } from '../lib/supabase';
 import {
   BirthdayForm,
   BirthdayFormData,
 } from '../components/birthday/BirthdayForm';
+import { useAuth } from '../hooks/useAuth';
 
 export default function AddEditBirthdayModal() {
   const { colors } = useTheme();
@@ -47,9 +48,15 @@ export default function AddEditBirthdayModal() {
     }
     : undefined;
 
+  const { user } = useAuth(); // Get user from auth hook
+
   const handleSubmit = async (data: BirthdayFormData) => {
     setLoading(true);
     try {
+      if (!user) {
+        throw new Error('You must be signed in to save data.');
+      }
+
       let photoUrl = data.photo_uri;
 
       // If we have a photo and it's a local URI (not http/s), upload it first

@@ -17,6 +17,7 @@ import { Avatar } from '../../components/ui/Avatar';
 import {
   getDaysUntilBirthday,
   formatBirthdayDate,
+  getNextBirthday,
 } from '../../lib/dateHelpers';
 import { NOTIFICATION_DAYS_OPTIONS } from '../../lib/constants';
 import { Person } from '../../hooks/useBirthdays';
@@ -31,11 +32,14 @@ const getDaysLabel = (d: number) =>
 
 interface BirthdayWithDays extends Person {
   daysUntil: number;
+  nextBirthday: Date;
 }
 
 interface MonthSection {
   title: string;
   data: BirthdayWithDays[];
+  monthIndex: number;
+  year: number;
 }
 
 export default function NotificationsScreen() {
@@ -74,44 +78,41 @@ export default function NotificationsScreen() {
     }
   };
 
-  const sections = useMemo((): MonthSection[] => {
-    const currentMonth = new Date().getMonth() + 1; // 1-12
-
-    // Add daysUntil to each birthday
-    const withDays = birthdays.map((p) => ({
+  const sections = useMemo(() => {
+    // 1. Calculate next birthday for everyone
+    const withNext = birthdays.map((p) => ({
       ...p,
       daysUntil: getDaysUntilBirthday(p.birthday_month, p.birthday_day),
+      nextBirthday: getNextBirthday(p.birthday_month, p.birthday_day),
     }));
 
-    // Group by month
-    const byMonth = new Map<number, BirthdayWithDays[]>();
-    for (const p of withDays) {
-      const month = p.birthday_month;
-      if (!byMonth.has(month)) byMonth.set(month, []);
-      byMonth.get(month)!.push(p);
-    }
+    // 2. Sort by next birthday (absolute time)
+    withNext.sort((a, b) => a.nextBirthday.getTime() - b.nextBirthday.getTime());
 
-    // Sort within each month by day ascending
-    for (const entries of byMonth.values()) {
-      entries.sort((a, b) => a.birthday_day - b.birthday_day);
-    }
-
-    // Build rolling month order: current month first, then next months, then earlier months
-    const monthOrder: number[] = [];
-    for (let i = 0; i < 12; i++) {
-      const month = ((currentMonth - 1 + i) % 12) + 1;
-      monthOrder.push(month);
-    }
-
-    // Build sections
+    // 3. Group by Month (and Year to handle wrap-around of same month)
     const result: MonthSection[] = [];
-    for (const month of monthOrder) {
-      const entries = byMonth.get(month);
-      if (entries && entries.length > 0) {
+
+    for (const item of withNext) {
+      const mIndex = item.nextBirthday.getMonth();
+      const year = item.nextBirthday.getFullYear();
+      const monthName = MONTH_NAMES[mIndex];
+
+      // Check if we need a new section
+      const lastSection = result[result.length - 1];
+
+      if (
+        !lastSection ||
+        lastSection.monthIndex !== mIndex ||
+        lastSection.year !== year
+      ) {
         result.push({
-          title: MONTH_NAMES[month - 1],
-          data: entries,
+          title: monthName,
+          data: [item],
+          monthIndex: mIndex,
+          year: year,
         });
+      } else {
+        lastSection.data.push(item);
       }
     }
 

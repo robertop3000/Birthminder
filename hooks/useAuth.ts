@@ -39,15 +39,23 @@ export function useAuth() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      setLoading(false);
+    supabase.auth.getSession().then(({ data: { session }, error }) => {
+      if (error) {
+        console.warn('Auth check failed:', error.message);
+        // If the refresh token is invalid, we should clear the session
+        // so the user can sign in again cleanly.
+        setSession(null);
+        setUser(null);
+      } else {
+        setSession(session);
+        setUser(session?.user ?? null);
 
-      // Ensure profile exists for already-signed-in users
-      if (session?.user) {
-        ensureProfile(session.user);
+        // Ensure profile exists for already-signed-in users
+        if (session?.user) {
+          ensureProfile(session.user);
+        }
       }
+      setLoading(false);
     });
 
     const {

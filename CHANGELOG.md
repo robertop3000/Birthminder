@@ -4,6 +4,24 @@ All notable changes to Birthminder will be documented in this file.
 
 ---
 
+## v0.10 - 2026-02-16
+
+### Fixed
+- Resolved "Invalid Refresh Token" error on app startup by handling auth session errors gracefully.
+- Fixed photo upload failure by ensuring user authentication before upload.
+- Resolved `expo-file-system` deprecation error by switching to legacy API.
+
+### Changed
+- **Notifications Tab**: Redesigned to group birthdays by month (rolling order).
+    - Birthdays are sorted by next occurrence.
+    - Month sections are created dynamically (e.g., February 2026 separate from February 2027).
+    - Items are now clickable and navigate to the person's detail view.
+
+### Planned
+- (None)
+
+---
+
 ## v0.9.3 - 2026-02-16
 
 ### Improved
