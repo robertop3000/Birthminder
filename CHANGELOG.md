@@ -16,6 +16,11 @@ Build number 4. Fixes SIGABRT crash on startup in TestFlight/App Store review.
 ### Changed
 - **iPad compatibility**: Set `supportsTablet: true` in app.json (reviewer was on iPad Air M3).
 - **Build number**: Bumped to "4".
+- **Dependencies**: Added `@expo/ngrok` for tunnel-based dev testing.
+
+### Verified
+- TSC: 0 errors | Jest: 16/16 suites, 97/97 tests passing
+- Tested on physical iPhone via Expo Go — app loads, login works, birthdays load correctly.
 
 ---
 
