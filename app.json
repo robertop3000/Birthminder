@@ -17,9 +17,9 @@
       "backgroundColor": "#FAF8F5"
     },
     "ios": {
-      "supportsTablet": false,
+      "supportsTablet": true,
       "bundleIdentifier": "com.birthminder.app",
-      "buildNumber": "3",
+      "buildNumber": "4",
       "jsEngine": "hermes",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,

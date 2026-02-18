@@ -4,6 +4,21 @@ All notable changes to Birthminder will be documented in this file.
 
 ---
 
+## v1.1.0 - 2026-02-18 (Critical: Fix Launch Crash)
+
+Build number 4. Fixes SIGABRT crash on startup in TestFlight/App Store review.
+
+### Fixed
+- **Launch crash (SIGABRT)**: Root cause was missing Supabase environment variables in production EAS builds. `createClient()` received `undefined` for URL/key, crashing the native bridge and triggering Expo's `ErrorRecovery.swift` → `abort()`.
+- **EAS Secrets**: Set `EXPO_PUBLIC_SUPABASE_URL` and `EXPO_PUBLIC_SUPABASE_ANON_KEY` as project-scoped EAS secrets so production builds have the credentials baked in.
+- **Supabase client hardening**: Replaced non-null assertions (`!`) with nullish coalescing (`??`). Wrapped `createClient()` in try/catch with fallback — app now shows login/error screen instead of crashing if credentials are missing.
+
+### Changed
+- **iPad compatibility**: Set `supportsTablet: true` in app.json (reviewer was on iPad Air M3).
+- **Build number**: Bumped to "4".
+
+---
+
 ## v1.0.0 - 2026-02-18 (First App Store Production Release)
 
 This is the first production release of Birthminder, corresponding to
