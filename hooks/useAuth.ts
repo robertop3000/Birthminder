@@ -29,7 +29,7 @@ async function ensureProfile(user: User) {
   });
 
   if (error) {
-    console.warn('ensureProfile insert failed:', error.message);
+    if (__DEV__) console.warn('ensureProfile insert failed:', error.message);
   }
 }
 
@@ -41,7 +41,7 @@ export function useAuth() {
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session }, error }) => {
       if (error) {
-        console.warn('Auth check failed:', error.message);
+        if (__DEV__) console.warn('Auth check failed:', error.message);
         // If the refresh token is invalid, we should clear the session
         // so the user can sign in again cleanly.
         setSession(null);
@@ -103,7 +103,7 @@ export function useAuth() {
           });
         } catch (profileErr) {
           // Not critical — ensureProfile will retry on next SIGNED_IN event
-          console.warn('Immediate profile insert failed, will retry:', profileErr);
+          if (__DEV__) console.warn('Immediate profile insert failed, will retry:', profileErr);
         }
       }
 

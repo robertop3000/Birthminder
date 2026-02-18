@@ -1,5 +1,8 @@
 const React = require('react');
 
+// Define __DEV__ for test environment (matches React Native runtime)
+global.__DEV__ = true;
+
 // Helper to create mock React Native components
 function mockComponent(name) {
   const component = ({ children, ...props }) => {

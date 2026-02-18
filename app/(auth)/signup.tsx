@@ -88,7 +88,7 @@ export default function SignUpScreen() {
           }
         } catch (photoErr) {
           // Photo upload failed, but sign-up succeeded - continue
-          console.warn('Photo upload failed:', photoErr);
+          if (__DEV__) console.warn('Photo upload failed:', photoErr);
         }
       }
 

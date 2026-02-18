@@ -66,7 +66,7 @@ export default function SettingsScreen() {
                 );
             }, 500);
         } catch (err) {
-            console.error('Delete account error:', err);
+            if (__DEV__) console.error('Delete account error:', err);
             Alert.alert('Error', 'Failed to delete account. Please try again.');
         } finally {
             setDeleting(false);

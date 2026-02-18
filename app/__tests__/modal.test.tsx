@@ -41,6 +41,19 @@ jest.mock('../../hooks/useGroups', () => ({
     }),
 }));
 
+// Mock useAuth to provide a signed-in user
+jest.mock('../../hooks/useAuth', () => ({
+    useAuth: () => ({
+        user: { id: 'test-user-id', email: 'test@example.com' },
+        session: { user: { id: 'test-user-id' } },
+        loading: false,
+        signUp: jest.fn(),
+        signIn: jest.fn(),
+        signOut: jest.fn(),
+        resetPassword: jest.fn(),
+    }),
+}));
+
 // Mock Avatar component to avoid image-related issues
 jest.mock('../../components/ui/Avatar', () => ({
     Avatar: () => 'Avatar',

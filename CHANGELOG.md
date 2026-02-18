@@ -4,6 +4,38 @@ All notable changes to Birthminder will be documented in this file.
 
 ---
 
+## v1.0.0 - 2026-02-17 (First App Store Production Release)
+
+This is the first production release of Birthminder, corresponding to
+repository version v0.11. App Store version 1.0.0, build number 1.
+
+### Added
+- **iOS Privacy Manifests**: Added `NSPrivacyAccessedAPITypes` entries for UserDefaults, FileTimestamp, and DiskSpace APIs (Apple 2025/2026 requirement).
+- **iOS Permissions**: Added `NSPhotoLibraryUsageDescription` and `NSCameraUsageDescription` with user-friendly descriptions.
+- **Build number**: Set `ios.buildNumber` to "1" in app.json.
+
+### Changed
+- **Production console cleanup**: All 17 `console.log/warn/error` calls wrapped in `__DEV__` guards so they are stripped from production builds.
+- **Environment cleanup**: Deleted `node_modules_old/` and `node_modules_old_main/` (leftover from dependency upgrades).
+- **`.gitignore`**: Added `node_modules_old/`, `node_modules_old_main/`, `.env`, and `*.bak` patterns.
+- **app.json**: Removed stale `android` permissions block (iOS-only app).
+- **Test fixes**: Added `useAuth` mock to modal test files; added `__DEV__` global to jest.setup.js.
+
+### Removed
+- Deleted `.bak` asset backup files.
+- Removed `android.permissions` block from app.json.
+
+### Pre-Flight Audit Results
+- TSC: 0 errors
+- Jest: 16/16 suites, 97/97 tests passing
+- No TODOs, FIXME, Lorem Ipsum, or placeholder text in source
+- No console statements in production builds
+- All iOS permissions and privacy manifests configured
+- Bundle ID: com.birthminder.app
+- Ready for `eas build --platform ios --profile production`
+
+---
+
 ## v0.11 - 2026-02-17
 
 ### Changed

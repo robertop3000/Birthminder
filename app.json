@@ -19,9 +19,28 @@
     "ios": {
       "supportsTablet": false,
       "bundleIdentifier": "com.birthminder.app",
+      "buildNumber": "1",
       "jsEngine": "hermes",
       "infoPlist": {
-        "ITSAppUsesNonExemptEncryption": false
+        "ITSAppUsesNonExemptEncryption": false,
+        "NSPhotoLibraryUsageDescription": "Birthminder uses your photo library to let you add personal photos to birthday reminders.",
+        "NSCameraUsageDescription": "Birthminder uses your camera to take photos for birthday reminders."
+      },
+      "privacyManifests": {
+        "NSPrivacyAccessedAPITypes": [
+          {
+            "NSPrivacyAccessedAPIType": "NSPrivacyAccessedAPICategoryUserDefaults",
+            "NSPrivacyAccessedAPITypeReasons": ["CA92.1"]
+          },
+          {
+            "NSPrivacyAccessedAPIType": "NSPrivacyAccessedAPICategoryFileTimestamp",
+            "NSPrivacyAccessedAPITypeReasons": ["C617.1"]
+          },
+          {
+            "NSPrivacyAccessedAPIType": "NSPrivacyAccessedAPICategoryDiskSpace",
+            "NSPrivacyAccessedAPITypeReasons": ["E174.1"]
+          }
+        ]
       }
     },
     "plugins": [
@@ -46,11 +65,6 @@
     },
     "updates": {
       "url": "https://u.expo.dev/f094907d-a438-4375-aec5-3fe9329d380c"
-    },
-    "android": {
-      "permissions": [
-        "android.permission.RECORD_AUDIO"
-      ]
     }
   }
 }
