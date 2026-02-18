@@ -19,7 +19,10 @@
     "ios": {
       "supportsTablet": false,
       "bundleIdentifier": "com.birthminder.app",
-      "jsEngine": "hermes"
+      "jsEngine": "hermes",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "plugins": [
       "expo-router",
@@ -31,6 +34,23 @@
           "photosPermission": "Birthminder needs access to your photos to add birthday and profile pictures."
         }
       ]
-    ]
+    ],
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "f094907d-a438-4375-aec5-3fe9329d380c"
+      }
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/f094907d-a438-4375-aec5-3fe9329d380c"
+    },
+    "android": {
+      "permissions": [
+        "android.permission.RECORD_AUDIO"
+      ]
+    }
   }
 }

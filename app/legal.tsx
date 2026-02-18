@@ -33,7 +33,7 @@ Your data is stored securely using Supabase, a cloud database platform with ente
 **Data Retention & Deletion**
 You may delete your account and all associated data at any time from the Profile tab. For data deletion requests or questions, contact us at:
 
-📧 birthdaycalendarapp@gmail.com
+📧 deverobertt@gmail.com
 
 **Children's Privacy**
 Birthminder is not directed at children under 13. We do not knowingly collect information from children under 13.
@@ -72,7 +72,7 @@ https://www.apple.com/legal/internet-services/itunes/dev/stdeula/
 **Contact**
 For questions about these Terms, contact us at:
 
-📧 birthdaycalendarapp@gmail.com`;
+📧 deverobertt@gmail.com`;
 
 export default function LegalScreen() {
     const { colors } = useTheme();

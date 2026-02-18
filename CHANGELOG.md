@@ -4,6 +4,20 @@ All notable changes to Birthminder will be documented in this file.
 
 ---
 
+## v0.11 - 2026-02-17
+
+### Changed
+- **Legal**: Updated contact email to deverobertt@gmail.com in both Privacy Policy and Terms of Service.
+- **EAS config**: Added eas.json with development, preview, and production build profiles.
+- **app.json**: Added EAS project ID, OTA updates config, and `ITSAppUsesNonExemptEncryption: false` for App Store compliance.
+- **Dependencies**: Added expo-dev-client and expo-updates.
+
+### Current Status
+- TSC: 0 source errors | Jest: 16/16 suites, 97/97 tests passing
+- No known bugs
+
+---
+
 ## v0.10 - 2026-02-16 (First stable development release)
 
 ### Fixed
