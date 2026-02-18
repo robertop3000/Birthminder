@@ -4,6 +4,18 @@ All notable changes to Birthminder will be documented in this file.
 
 ---
 
+## v1.1.2 - 2026-02-18 (Security: Remove credentials from repo)
+
+### Security
+- **Removed `.env` from git tracking**: File was committed before `.gitignore` rule existed. Supabase credentials were exposed in git history. Now untracked — local file kept for dev, production uses EAS secrets.
+- **Enhanced `.gitignore`**: Added patterns for `.env.*`, `*.secret`, `credentials.json`, `google-services.json`, `GoogleService-Info.plist`.
+
+### Verified
+- No sensitive data in any tracked files (scanned for API keys, tokens, credentials).
+- `.env` confirmed untracked by git.
+
+---
+
 ## v1.1.0 - 2026-02-18 (Critical: Fix Launch Crash)
 
 Build number 4. Fixes SIGABRT crash on startup in TestFlight/App Store review.
