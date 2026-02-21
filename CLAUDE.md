@@ -390,10 +390,10 @@ When bumping to version X.Y.Z:
 # PART 4: CURRENT PROJECT STATE
 
 **Last Updated:** 2026-02-21
-**Current Version:** v1.3.0 (In Progress — Notification scheduling fixed, unique IDs, test button)
+**Current Version:** v1.3.0 (Stable — Developed using Gemini 3 Flash)
 **Build Number:** 1.3.0
 **Test Status:** 17 suites, 100 tests — all passing
-**Build Status:** v1.2.0 tested via Expo Go, ready for production build
+**Build Status:** v1.3.0 tested via Expo Go, ready for production build
 **Pre-Flight Audit:** PASSED
 **EAS Secrets:** EXPO_PUBLIC_SUPABASE_URL and EXPO_PUBLIC_SUPABASE_ANON_KEY configured
 **GitHub Pages:** Enabled — serves OG landing page at https://robertop3000.github.io/Birthminder/

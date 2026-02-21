@@ -4,11 +4,13 @@ All notable changes to Birthminder will be documented in this file.
 
 ---
 
-## v1.3.0 - 2026-02-21 (In Progress)
+## v1.3.0 - 2026-02-21
+*Developed using Gemini 3 Flash.*
 
 ### Added
 - **Removed diagnostic tools**: Removed the visible "Send Test Notification" button from the Home screen.
 - **Hidden Diagnostic Tool**: Added a hidden bell icon in the Settings header for manual notification testing.
+- **Reactive UI updates**: Group name and color changes now reflect immediately across all birthday cards and profiles without requiring a refetch.
 - **Explicit Permission Bootstrap**: Added automatic notification permission request during initial app launch in `RootLayout`
 
 ### Fixed
