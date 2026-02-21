@@ -14,6 +14,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../hooks/useTheme';
 import { useAuth } from '../hooks/useAuth';
+import * as Notifications from 'expo-notifications';
 import { supabase } from '../lib/supabase';
 import { APP_VERSION } from '../lib/constants';
 
@@ -24,6 +25,25 @@ export default function SettingsScreen() {
     const { user, signOut } = useAuth();
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
     const [deleting, setDeleting] = useState(false);
+
+    const handleSendTestNotification = async () => {
+        try {
+            await Notifications.scheduleNotificationAsync({
+                content: {
+                    title: 'Birthminder Test 🧪',
+                    body: 'This is a test notification! It will appear in 5 seconds.',
+                    data: { type: 'test' },
+                },
+                trigger: {
+                    type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL,
+                    seconds: 5,
+                },
+            });
+            Alert.alert('Test Scheduled', 'A test notification will appear in 5 seconds.');
+        } catch (err) {
+            Alert.alert('Error', 'Failed to schedule test notification');
+        }
+    };
 
     const handleDeleteAccount = async () => {
         if (!user) return;
@@ -88,7 +108,17 @@ export default function SettingsScreen() {
                 <Text style={[styles.headerTitle, { color: colors.textPrimary }]}>
                     Settings
                 </Text>
-                <View style={{ width: 32 }} />
+                <Pressable
+                    onPress={handleSendTestNotification}
+                    hitSlop={12}
+                    style={styles.bellButton}
+                >
+                    <Ionicons
+                        name="notifications-outline"
+                        size={20}
+                        color={colors.background} // Invisible/Hidden by matching background
+                    />
+                </Pressable>
             </View>
 
             <ScrollView
@@ -249,6 +279,11 @@ const styles = StyleSheet.create({
         fontSize: 18,
         fontWeight: '700',
         fontFamily: 'DMSans_700Bold',
+    },
+    bellButton: {
+        padding: 6,
+        width: 32,
+        alignItems: 'center',
     },
     content: {
         paddingHorizontal: 20,
