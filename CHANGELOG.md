@@ -4,6 +4,13 @@ All notable changes to Birthminder will be documented in this file.
 
 ---
 
+## v1.3.0 - 2026-02-21 (In Progress)
+
+### Added
+- Created branch 1.3.0 for new development
+
+---
+
 ## v1.2.0 - 2026-02-19 (Stable — Group photos, edit groups, fix shared groups, OG previews)
 
 ### Added

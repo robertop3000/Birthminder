@@ -2,7 +2,7 @@
   "expo": {
     "name": "Birthminder",
     "slug": "birthminder",
-    "version": "1.0.0",
+    "version": "1.3.0",
     "orientation": "portrait",
     "scheme": "birthminder",
     "icon": "./assets/icon.png",
@@ -19,7 +19,7 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.birthminder.app",
-      "buildNumber": "4",
+      "buildNumber": "1.3.0",
       "jsEngine": "hermes",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
