@@ -7,7 +7,9 @@ export interface Group {
     user_id: string;
     name: string;
     color: string | null;
+    photo_url: string | null;
     share_code: string | null;
+    source_share_code: string | null;
     created_at: string;
     member_count?: number;
 }
@@ -15,6 +17,7 @@ export interface Group {
 export interface GroupInput {
     name: string;
     color?: string | null;
+    photo_url?: string | null;
 }
 
 interface GroupsContextValue {
@@ -86,6 +89,7 @@ export function GroupsProvider({ children }: { children: React.ReactNode }) {
                     user_id: user.id,
                     name: input.name,
                     color: input.color ?? null,
+                    photo_url: input.photo_url ?? null,
                 })
                 .select()
                 .single();

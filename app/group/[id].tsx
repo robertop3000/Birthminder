@@ -18,6 +18,9 @@ import { useTheme } from '../../hooks/useTheme';
 import { useGroups } from '../../hooks/useGroups';
 import { useBirthdays } from '../../hooks/useBirthdays';
 import { Avatar } from '../../components/ui/Avatar';
+import { GroupForm } from '../../components/group/GroupForm';
+import { uploadImage } from '../../lib/uploadImage';
+import { SHARE_BASE_URL } from '../../lib/constants';
 import {
   getDaysUntilBirthday,
   formatBirthdayDate,
@@ -28,9 +31,11 @@ export default function GroupDetailScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { id } = useLocalSearchParams<{ id: string }>();
-  const { groups, deleteGroup, generateShareCode, addPersonToGroup, removePersonFromGroup } = useGroups();
+  const { groups, deleteGroup, generateShareCode, addPersonToGroup, removePersonFromGroup, updateGroup } = useGroups();
   const { birthdays, refetch: refetchBirthdays } = useBirthdays();
   const [showAddModal, setShowAddModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editLoading, setEditLoading] = useState(false);
 
   const group = groups.find((g) => g.id === id);
 
@@ -62,12 +67,29 @@ export default function GroupDetailScreen() {
     );
   }
 
+  const handleEditSubmit = async (name: string, color: string, photoUri: string | null) => {
+    setEditLoading(true);
+    try {
+      let photoUrl = photoUri;
+      if (photoUri && !photoUri.startsWith('http')) {
+        photoUrl = await uploadImage(photoUri, 'groups');
+      }
+      await updateGroup(group.id, { name, color, photo_url: photoUrl });
+      setShowEditModal(false);
+    } catch {
+      Alert.alert('Error', 'Failed to update group');
+    } finally {
+      setEditLoading(false);
+    }
+  };
+
   const handleShare = async () => {
     try {
       const code = group.share_code || (await generateShareCode(group.id));
-      const shareUrl = `birthminder://shared/${code}`;
+      const shareUrl = `${SHARE_BASE_URL}?code=${code}`;
       await Share.share({
         message: `Check out my "${group.name}" birthdays on Birthminder! ${shareUrl}`,
+        url: shareUrl,
       });
     } catch {
       Alert.alert('Error', 'Failed to share group');
@@ -137,6 +159,13 @@ export default function GroupDetailScreen() {
             {group.name}
           </Text>
           <View style={styles.headerActions}>
+            <Pressable onPress={() => setShowEditModal(true)}>
+              <Ionicons
+                name="pencil-outline"
+                size={22}
+                color={colors.primary}
+              />
+            </Pressable>
             <Pressable onPress={handleShare}>
               <Ionicons
                 name="share-outline"
@@ -155,12 +184,16 @@ export default function GroupDetailScreen() {
         </View>
 
         <View style={styles.colorBanner}>
-          <View
-            style={[
-              styles.colorStrip,
-              { backgroundColor: group.color || colors.primary },
-            ]}
-          />
+          {group.photo_url ? (
+            <Avatar uri={group.photo_url} size={64} />
+          ) : (
+            <View
+              style={[
+                styles.colorStrip,
+                { backgroundColor: group.color || colors.primary },
+              ]}
+            />
+          )}
           <Text style={[styles.groupName, { color: colors.textPrimary }]}>
             {group.name}
           </Text>
@@ -252,6 +285,38 @@ export default function GroupDetailScreen() {
           )}
         </View>
       </ScrollView>
+
+      {/* Edit Group Modal */}
+      <Modal visible={showEditModal} animationType="slide" transparent>
+        <View style={styles.modalOverlay}>
+          <View
+            style={[
+              styles.modalContent,
+              {
+                backgroundColor: colors.background,
+                paddingBottom: insets.bottom + 20,
+              },
+            ]}
+          >
+            <View style={styles.modalHeader}>
+              <Text style={[styles.modalTitle, { color: colors.textPrimary }]}>
+                Edit Group
+              </Text>
+              <Pressable onPress={() => setShowEditModal(false)}>
+                <Ionicons name="close" size={24} color={colors.textSecondary} />
+              </Pressable>
+            </View>
+            <GroupForm
+              initialName={group.name}
+              initialColor={group.color}
+              initialPhotoUrl={group.photo_url}
+              onSubmit={handleEditSubmit}
+              onCancel={() => setShowEditModal(false)}
+              loading={editLoading}
+            />
+          </View>
+        </View>
+      </Modal>
 
       {/* Add People Modal */}
       <Modal visible={showAddModal} animationType="slide" transparent>

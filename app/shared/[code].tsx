@@ -6,7 +6,6 @@ import {
   ScrollView,
   ActivityIndicator,
   Alert,
-  Pressable,
 } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -22,16 +21,20 @@ import {
 } from '../../lib/dateHelpers';
 
 interface SharedPerson {
+  id: string;
   name: string;
   birthday_month: number;
   birthday_day: number;
+  birthday_year: number | null;
   photo_url: string | null;
+  notes: string | null;
 }
 
 interface SharedGroup {
   id: string;
   name: string;
   color: string | null;
+  photo_url: string | null;
   members: SharedPerson[];
 }
 
@@ -55,7 +58,7 @@ export default function SharedGroupScreen() {
       const { data, error } = await supabase
         .from('groups')
         .select(
-          'id, name, color, person_groups(people(name, birthday_month, birthday_day, photo_url))'
+          'id, name, color, photo_url, person_groups(people(id, name, birthday_month, birthday_day, birthday_year, photo_url, notes))'
         )
         .eq('share_code', code)
         .single();
@@ -75,12 +78,142 @@ export default function SharedGroupScreen() {
         id: data.id,
         name: data.name,
         color: data.color,
+        photo_url: data.photo_url ?? null,
         members,
       });
     } catch {
       setGroup(null);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const performFreshImport = async () => {
+    if (!user || !group) return;
+
+    const { data: newGroup, error: groupError } = await supabase
+      .from('groups')
+      .insert({
+        user_id: user.id,
+        name: group.name,
+        color: group.color,
+        photo_url: group.photo_url,
+        source_share_code: code,
+      })
+      .select()
+      .single();
+
+    if (groupError) throw groupError;
+
+    for (const member of group.members) {
+      // Check if this person already exists in user's data
+      const { data: existingPerson } = await supabase
+        .from('people')
+        .select('id')
+        .eq('user_id', user.id)
+        .eq('name', member.name)
+        .eq('birthday_month', member.birthday_month)
+        .eq('birthday_day', member.birthday_day)
+        .maybeSingle();
+
+      if (existingPerson) {
+        // Person already exists — just link to the new group
+        await supabase.from('person_groups').insert({
+          person_id: existingPerson.id,
+          group_id: newGroup.id,
+        });
+      } else {
+        // Create new person
+        const { data: person, error: personError } = await supabase
+          .from('people')
+          .insert({
+            user_id: user.id,
+            name: member.name,
+            birthday_month: member.birthday_month,
+            birthday_day: member.birthday_day,
+            birthday_year: member.birthday_year,
+            photo_url: member.photo_url,
+            notes: member.notes,
+          })
+          .select()
+          .single();
+
+        if (!personError && person) {
+          await supabase.from('person_groups').insert({
+            person_id: person.id,
+            group_id: newGroup.id,
+          });
+        }
+      }
+    }
+
+    Alert.alert('Imported!', `Group "${group.name}" has been added to your calendar.`);
+    router.replace('/(tabs)/groups');
+  };
+
+  const handleReimport = async (existingGroupId: string) => {
+    if (!user || !group) return;
+
+    try {
+      // Update group metadata
+      await supabase
+        .from('groups')
+        .update({
+          name: group.name,
+          color: group.color,
+          photo_url: group.photo_url,
+        })
+        .eq('id', existingGroupId);
+
+      for (const member of group.members) {
+        const { data: existingPerson } = await supabase
+          .from('people')
+          .select('id')
+          .eq('user_id', user.id)
+          .eq('name', member.name)
+          .eq('birthday_month', member.birthday_month)
+          .eq('birthday_day', member.birthday_day)
+          .maybeSingle();
+
+        if (!existingPerson) {
+          // New member — create and link
+          const { data: person } = await supabase
+            .from('people')
+            .insert({
+              user_id: user.id,
+              name: member.name,
+              birthday_month: member.birthday_month,
+              birthday_day: member.birthday_day,
+              birthday_year: member.birthday_year,
+              photo_url: member.photo_url,
+              notes: member.notes,
+            })
+            .select()
+            .single();
+
+          if (person) {
+            await supabase.from('person_groups').insert({
+              person_id: person.id,
+              group_id: existingGroupId,
+            });
+          }
+        } else {
+          // Existing person — ensure linked to group
+          await supabase
+            .from('person_groups')
+            .upsert(
+              { person_id: existingPerson.id, group_id: existingGroupId },
+              { onConflict: 'person_id,group_id' }
+            );
+        }
+      }
+
+      Alert.alert('Updated!', `Group "${group.name}" has been refreshed.`);
+      router.replace('/(tabs)/groups');
+    } catch {
+      Alert.alert('Error', 'Failed to update group.');
+    } finally {
+      setImporting(false);
     }
   };
 
@@ -94,43 +227,34 @@ export default function SharedGroupScreen() {
 
     setImporting(true);
     try {
-      // Create a group copy
-      const { data: newGroup, error: groupError } = await supabase
+      // Check if already imported
+      const { data: existingGroup } = await supabase
         .from('groups')
-        .insert({
-          user_id: user.id,
-          name: group.name,
-          color: group.color,
-        })
-        .select()
-        .single();
+        .select('id')
+        .eq('user_id', user.id)
+        .eq('source_share_code', code)
+        .maybeSingle();
 
-      if (groupError) throw groupError;
-
-      // Copy members
-      for (const member of group.members) {
-        const { data: person, error: personError } = await supabase
-          .from('people')
-          .insert({
-            user_id: user.id,
-            name: member.name,
-            birthday_month: member.birthday_month,
-            birthday_day: member.birthday_day,
-            photo_url: member.photo_url,
-          })
-          .select()
-          .single();
-
-        if (!personError && person && newGroup) {
-          await supabase.from('person_groups').insert({
-            person_id: person.id,
-            group_id: newGroup.id,
-          });
-        }
+      if (existingGroup) {
+        setImporting(false);
+        Alert.alert(
+          'Already Imported',
+          'You have already imported this group. Would you like to update it with the latest data?',
+          [
+            { text: 'Cancel', style: 'cancel' },
+            {
+              text: 'Update',
+              onPress: async () => {
+                setImporting(true);
+                await handleReimport(existingGroup.id);
+              },
+            },
+          ]
+        );
+        return;
       }
 
-      Alert.alert('Imported!', 'The group has been added to your calendar.');
-      router.replace('/(tabs)/groups');
+      await performFreshImport();
     } catch {
       Alert.alert('Error', 'Failed to import group.');
     } finally {
@@ -182,7 +306,11 @@ export default function SharedGroupScreen() {
       }}
     >
       <View style={[styles.banner, { backgroundColor: colors.surface }]}>
-        <Ionicons name="people" size={28} color={colors.primary} />
+        {group.photo_url ? (
+          <Avatar uri={group.photo_url} size={48} />
+        ) : (
+          <Ionicons name="people" size={28} color={colors.primary} />
+        )}
         <Text style={[styles.bannerText, { color: colors.textPrimary }]}>
           Someone shared their{' '}
           <Text style={{ color: colors.primary }}>{group.name}</Text>{' '}
@@ -203,7 +331,7 @@ export default function SharedGroupScreen() {
 
           return (
             <View
-              key={index}
+              key={member.id || index}
               style={[
                 styles.memberCard,
                 { backgroundColor: colors.surface },

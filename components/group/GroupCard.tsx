@@ -4,6 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useTheme } from '../../hooks/useTheme';
 import { Group } from '../../hooks/useGroups';
+import { Avatar } from '../ui/Avatar';
 
 interface GroupCardProps {
   group: Group;
@@ -22,12 +23,16 @@ export function GroupCard({ group, onShare }: GroupCardProps) {
         { backgroundColor: colors.surface, opacity: pressed ? 0.85 : 1 },
       ]}
     >
-      <View
-        style={[
-          styles.colorBar,
-          { backgroundColor: group.color || colors.primary },
-        ]}
-      />
+      {group.photo_url ? (
+        <Avatar uri={group.photo_url} size={40} />
+      ) : (
+        <View
+          style={[
+            styles.colorBar,
+            { backgroundColor: group.color || colors.primary },
+          ]}
+        />
+      )}
       <View style={styles.info}>
         <Text style={[styles.name, { color: colors.textPrimary }]}>
           {group.name}

@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, StyleSheet, Pressable } from 'react-native';
+import * as ImagePicker from 'expo-image-picker';
 import { useTheme } from '../../hooks/useTheme';
+import { Avatar } from '../ui/Avatar';
 
 const GROUP_COLORS = [
   '#E07A5F',
@@ -16,7 +18,8 @@ const GROUP_COLORS = [
 interface GroupFormProps {
   initialName?: string;
   initialColor?: string | null;
-  onSubmit: (name: string, color: string) => void;
+  initialPhotoUrl?: string | null;
+  onSubmit: (name: string, color: string, photoUri: string | null) => void;
   onCancel: () => void;
   loading?: boolean;
 }
@@ -24,6 +27,7 @@ interface GroupFormProps {
 export function GroupForm({
   initialName = '',
   initialColor,
+  initialPhotoUrl,
   onSubmit,
   onCancel,
   loading = false,
@@ -31,9 +35,42 @@ export function GroupForm({
   const { colors } = useTheme();
   const [name, setName] = useState(initialName);
   const [color, setColor] = useState(initialColor || GROUP_COLORS[0]);
+  const [photoUri, setPhotoUri] = useState<string | null>(initialPhotoUrl ?? null);
+
+  const pickPhoto = async () => {
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ['images'],
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.5,
+    });
+    if (!result.canceled && result.assets[0]) {
+      setPhotoUri(result.assets[0].uri);
+    }
+  };
 
   return (
     <View style={styles.container}>
+      <View style={styles.photoSection}>
+        <Pressable onPress={pickPhoto}>
+          <Avatar uri={photoUri} size={80} />
+        </Pressable>
+        <View style={styles.photoActions}>
+          <Pressable onPress={pickPhoto}>
+            <Text style={[styles.photoLabel, { color: colors.primary }]}>
+              {photoUri ? 'Change Photo' : 'Add Photo'}
+            </Text>
+          </Pressable>
+          {photoUri && (
+            <Pressable onPress={() => setPhotoUri(null)}>
+              <Text style={[styles.removeLabel, { color: colors.textSecondary }]}>
+                Remove
+              </Text>
+            </Pressable>
+          )}
+        </View>
+      </View>
+
       <View style={styles.inputGroup}>
         <Text style={[styles.label, { color: colors.textSecondary }]}>
           Group Name
@@ -81,7 +118,7 @@ export function GroupForm({
           </Text>
         </Pressable>
         <Pressable
-          onPress={() => name.trim() && onSubmit(name.trim(), color)}
+          onPress={() => name.trim() && onSubmit(name.trim(), color, photoUri)}
           disabled={loading || !name.trim()}
           style={[
             styles.saveButton,
@@ -103,6 +140,23 @@ export function GroupForm({
 const styles = StyleSheet.create({
   container: {
     padding: 20,
+  },
+  photoSection: {
+    alignItems: 'center',
+    marginBottom: 20,
+    gap: 8,
+  },
+  photoActions: {
+    flexDirection: 'row',
+    gap: 16,
+  },
+  photoLabel: {
+    fontSize: 14,
+    fontFamily: 'DMSans_500Medium',
+  },
+  removeLabel: {
+    fontSize: 14,
+    fontFamily: 'DMSans_400Regular',
   },
   inputGroup: {
     marginBottom: 16,

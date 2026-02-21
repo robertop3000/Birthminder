@@ -4,6 +4,41 @@ All notable changes to Birthminder will be documented in this file.
 
 ---
 
+## v1.2.0 - 2026-02-19 (Stable — Group photos, edit groups, fix shared groups, OG previews)
+
+### Added
+- **Group photos**: Groups now support photo uploads (displayed in group cards and detail view)
+- **Group editing**: Pencil icon in group detail header opens edit modal (name, color, photo)
+- **Reusable upload utility**: Extracted `lib/uploadImage.ts` from modal.tsx for shared use
+- **OG meta tag landing page**: `docs/index.html` served via GitHub Pages for rich link previews on WhatsApp, Telegram, iMessage
+- **Import deduplication**: `source_share_code` column tracks import origin; re-importing shows "Already Imported" with Update option
+- **Full field import**: Shared group imports now copy `birthday_year`, `notes`, and `photo_url`
+
+### Fixed
+- **Empty shared groups**: Root cause was circular RLS policy dependencies between `people` and `person_groups` tables. Replaced with `SECURITY DEFINER` helper functions (`is_person_in_shared_group`, `is_person_group_in_shared_group`) that bypass RLS internally
+- **Share URLs**: Changed from `birthminder://` custom scheme (only works in iMessage) to `https://robertop3000.github.io/Birthminder/?code=X` (works on all platforms with OG previews)
+
+### Changed
+- **GroupForm component**: Now supports photo picker and `initialPhotoUrl` prop
+- **GroupCard component**: Shows Avatar when group has photo, color bar otherwise
+- **Share.share()**: Now includes both `message` and `url` fields for better iOS support
+- **Git remote**: Updated from `Birthday-Calendar` to `Birthminder` (repo renamed)
+
+### Database Migration (run in Supabase SQL Editor)
+- `ALTER TABLE groups ADD COLUMN photo_url TEXT`
+- `ALTER TABLE groups ADD COLUMN source_share_code TEXT`
+- Two `SECURITY DEFINER` functions + two new RLS SELECT policies for shared group visibility
+
+### Known Issues
+- **Notifications**: Push notification scheduling needs review — may require users to toggle notifications off/on for changes to take effect. Will be addressed in a future version.
+
+### Verified
+- TSC: 0 errors | Jest: 16/16 suites, 97/97 tests passing
+- Tested on physical iPhone via Expo Go — group editing, photos, and data loading all work correctly
+- Friends' data restored after RLS policy fix
+
+---
+
 ## v1.1.2 - 2026-02-18 (Security: Remove credentials from repo)
 
 ### Security

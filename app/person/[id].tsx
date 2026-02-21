@@ -15,6 +15,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../hooks/useTheme';
 import { useBirthdays, Person } from '../../hooks/useBirthdays';
 import { Avatar } from '../../components/ui/Avatar';
+import { SHARE_BASE_URL } from '../../lib/constants';
 import {
   getDaysUntilBirthday,
   getAge,
@@ -62,9 +63,10 @@ export default function PersonDetailScreen() {
   const handleShare = async () => {
     try {
       const code = person.share_code || (await generatePersonShareCode(person.id));
-      const shareUrl = `birthminder://shared/person/${code}`;
+      const shareUrl = `${SHARE_BASE_URL}?person=${code}`;
       await Share.share({
         message: `${person.name}'s birthday is on ${dateStr}! Save it on Birthminder: ${shareUrl}`,
+        url: shareUrl,
       });
     } catch {
       Alert.alert('Error', 'Failed to share birthday');

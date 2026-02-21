@@ -2,7 +2,7 @@
 -- Birthminder — Complete Database Schema
 -- ============================================
 -- Run this in Supabase > SQL Editor
--- Last updated: 2026-02-15
+-- Last updated: 2026-02-19
 
 -- Enable UUID extension
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
@@ -41,7 +41,9 @@ CREATE TABLE groups (
   user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
   name TEXT NOT NULL,
   color TEXT,
+  photo_url TEXT,
   share_code TEXT UNIQUE,
+  source_share_code TEXT,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
@@ -160,6 +162,46 @@ CREATE POLICY "Users can delete person_groups for their people"
       AND people.user_id = auth.uid()
     )
   );
+
+-- Helper functions for shared group RLS (SECURITY DEFINER avoids circular policy references)
+CREATE OR REPLACE FUNCTION is_person_in_shared_group(p_person_id UUID)
+RETURNS BOOLEAN
+LANGUAGE sql
+SECURITY DEFINER
+STABLE
+AS $$
+  SELECT EXISTS (
+    SELECT 1
+    FROM person_groups pg
+    JOIN groups g ON g.id = pg.group_id
+    WHERE pg.person_id = p_person_id
+    AND g.share_code IS NOT NULL
+  );
+$$;
+
+CREATE OR REPLACE FUNCTION is_person_group_in_shared_group(p_group_id UUID)
+RETURNS BOOLEAN
+LANGUAGE sql
+SECURITY DEFINER
+STABLE
+AS $$
+  SELECT EXISTS (
+    SELECT 1
+    FROM groups g
+    WHERE g.id = p_group_id
+    AND g.share_code IS NOT NULL
+  );
+$$;
+
+-- Allow reading people that belong to a shared group (fixes empty shared groups)
+CREATE POLICY "Public can view people in shared groups"
+  ON people FOR SELECT
+  USING (is_person_in_shared_group(id));
+
+-- Allow reading person_groups for shared groups
+CREATE POLICY "Public can view person_groups in shared groups"
+  ON person_groups FOR SELECT
+  USING (is_person_group_in_shared_group(group_id));
 
 -- ============================================
 -- TRIGGERS

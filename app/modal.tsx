@@ -5,10 +5,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../hooks/useTheme';
 import { useBirthdays } from '../hooks/useBirthdays';
 import { useGroups } from '../hooks/useGroups';
-import { decode } from 'base64-arraybuffer';
-import * as FileSystem from 'expo-file-system/legacy';
-import * as ImageManipulator from 'expo-image-manipulator';
-import { supabase } from '../lib/supabase';
+import { uploadImage } from '../lib/uploadImage';
 import {
   BirthdayForm,
   BirthdayFormData,
@@ -59,66 +56,10 @@ export default function AddEditBirthdayModal() {
 
       let photoUrl = data.photo_uri;
 
-      // If we have a photo and it's a local URI (not http/s), upload it first
       if (photoUrl && !photoUrl.startsWith('http')) {
-        if (__DEV__) console.log('[AddBirthday] Processing photo upload for:', photoUrl);
-        try {
-          // 0. Manipulate image (resize & compress)
-          const manipulated = await ImageManipulator.manipulateAsync(
-            photoUrl,
-            [{ resize: { width: 600 } }], // Resize to max width 600
-            { compress: 0.7, format: ImageManipulator.SaveFormat.JPEG }
-          );
-
-          const processedUri = manipulated.uri;
-          if (__DEV__) console.log('[AddBirthday] Processed image:', processedUri);
-
-          // 1. Read file as base64 using expo-file-system
-          const base64 = await FileSystem.readAsStringAsync(processedUri, {
-            encoding: 'base64',
-          });
-
-          // 2. Prepare filename
-          const fileName = `${Date.now()}_${Math.random().toString(36).substring(7)}.jpg`;
-          const filePath = `people/${fileName}`;
-          if (__DEV__) console.log('[AddBirthday] Uploading to path:', filePath);
-
-          // 3. Upload to Supabase
-          const arrayBuffer = decode(base64);
-
-          const { error: uploadError, data: uploadData } = await supabase.storage
-            .from('avatars')
-            .upload(filePath, arrayBuffer, {
-              contentType: 'image/jpeg',
-              upsert: false,
-            });
-
-          if (uploadError) {
-            if (__DEV__) console.error('[AddBirthday] Upload failed:', uploadError);
-            throw new Error(`Photo upload failed: ${uploadError.message}`);
-          }
-          if (__DEV__) console.log('[AddBirthday] Upload successful:', uploadData);
-
-          // 4. Get Public URL
-          const { data: urlData } = supabase.storage
-            .from('avatars')
-            .getPublicUrl(filePath);
-
-          if (__DEV__) console.log('[AddBirthday] Generated public URL:', urlData.publicUrl);
-          // Add timestamp to force image refresh
-          photoUrl = `${urlData.publicUrl}?t=${Date.now()}`;
-
-        } catch (uploadErr: any) {
-          if (__DEV__) console.error('[AddBirthday] Critical upload error:', uploadErr);
-          const msg = uploadErr.message || 'Unknown upload error';
-          throw new Error(`Failed to upload photo: ${msg}`);
-        }
+        photoUrl = await uploadImage(photoUrl, 'people');
       } else if (!photoUrl) {
-        // Photo was removed
-        if (__DEV__) console.log('[AddBirthday] Photo removed');
         photoUrl = null;
-      } else {
-        if (__DEV__) console.log('[AddBirthday] Photo is already remote:', photoUrl);
       }
 
       if (isEdit && params.id) {

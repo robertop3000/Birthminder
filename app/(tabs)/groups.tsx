@@ -6,7 +6,6 @@ import {
   StyleSheet,
   ActivityIndicator,
   Alert,
-  TextInput,
   Modal,
   Pressable,
   Share,
@@ -16,34 +15,25 @@ import { useTheme } from '../../hooks/useTheme';
 import { useGroups } from '../../hooks/useGroups';
 import { TopBar } from '../../components/ui/TopBar';
 import { GroupCard } from '../../components/group/GroupCard';
-import { Button } from '../../components/ui/Button';
-
-const GROUP_COLORS = [
-  '#E07A5F',
-  '#F2C94C',
-  '#81B29A',
-  '#3D405B',
-  '#F4845F',
-  '#7EC8E3',
-  '#C77DFF',
-  '#FF6B6B',
-];
+import { GroupForm } from '../../components/group/GroupForm';
+import { uploadImage } from '../../lib/uploadImage';
+import { SHARE_BASE_URL } from '../../lib/constants';
 
 export default function GroupsScreen() {
   const { colors } = useTheme();
   const { groups, loading, addGroup, generateShareCode } = useGroups();
   const [showModal, setShowModal] = useState(false);
-  const [newName, setNewName] = useState('');
-  const [selectedColor, setSelectedColor] = useState(GROUP_COLORS[0]);
   const [creating, setCreating] = useState(false);
 
-  const handleCreate = async () => {
-    if (!newName.trim()) return;
+  const handleCreate = async (name: string, color: string, photoUri: string | null) => {
     setCreating(true);
     try {
-      await addGroup({ name: newName.trim(), color: selectedColor });
+      let photoUrl: string | null = null;
+      if (photoUri && !photoUri.startsWith('http')) {
+        photoUrl = await uploadImage(photoUri, 'groups');
+      }
+      await addGroup({ name, color, photo_url: photoUrl });
       setShowModal(false);
-      setNewName('');
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Failed to create group';
       Alert.alert('Error', msg);
@@ -55,9 +45,10 @@ export default function GroupsScreen() {
   const handleShare = async (groupId: string) => {
     try {
       const code = await generateShareCode(groupId);
-      const shareUrl = `birthminder://shared/${code}`;
+      const shareUrl = `${SHARE_BASE_URL}?code=${code}`;
       await Share.share({
         message: `Check out my group birthdays on Birthminder! ${shareUrl}`,
+        url: shareUrl,
       });
     } catch {
       Alert.alert('Error', 'Failed to share group');
@@ -112,59 +103,11 @@ export default function GroupsScreen() {
             <Text style={[styles.modalTitle, { color: colors.textPrimary }]}>
               New Group
             </Text>
-
-            <TextInput
-              style={[
-                styles.input,
-                {
-                  backgroundColor: colors.surface,
-                  color: colors.textPrimary,
-                  borderColor: colors.bottomBarBorder,
-                },
-              ]}
-              placeholder="Group name"
-              placeholderTextColor={colors.textSecondary}
-              value={newName}
-              onChangeText={setNewName}
+            <GroupForm
+              onSubmit={handleCreate}
+              onCancel={() => setShowModal(false)}
+              loading={creating}
             />
-
-            <Text
-              style={[styles.colorLabel, { color: colors.textSecondary }]}
-            >
-              Color
-            </Text>
-            <View style={styles.colorRow}>
-              {GROUP_COLORS.map((c) => (
-                <Pressable
-                  key={c}
-                  onPress={() => setSelectedColor(c)}
-                  style={[
-                    styles.colorCircle,
-                    {
-                      backgroundColor: c,
-                      borderWidth: selectedColor === c ? 3 : 0,
-                      borderColor: colors.textPrimary,
-                    },
-                  ]}
-                />
-              ))}
-            </View>
-
-            <View style={styles.modalButtons}>
-              <Button
-                title="Cancel"
-                variant="text"
-                onPress={() => {
-                  setShowModal(false);
-                  setNewName('');
-                }}
-              />
-              <Button
-                title="Create"
-                onPress={handleCreate}
-                loading={creating}
-              />
-            </View>
           </View>
         </View>
       </Modal>
@@ -216,35 +159,6 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     fontFamily: 'DMSans_700Bold',
     marginBottom: 20,
-  },
-  input: {
-    borderRadius: 12,
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    fontSize: 16,
-    fontFamily: 'DMSans_400Regular',
-    borderWidth: 1,
-    marginBottom: 16,
-  },
-  colorLabel: {
-    fontSize: 14,
-    fontFamily: 'DMSans_500Medium',
-    marginBottom: 10,
-  },
-  colorRow: {
-    flexDirection: 'row',
-    gap: 12,
-    marginBottom: 24,
-    flexWrap: 'wrap',
-  },
-  colorCircle: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-  },
-  modalButtons: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-    gap: 12,
+    textAlign: 'center',
   },
 });
