@@ -4,6 +4,12 @@ All notable changes to Birthminder will be documented in this file.
 
 ---
 
+## v1.3.1 - 2026-02-21
+*Developed using Gemini 3 Flash.*
+
+### Fixed
+- **UI Lag After Import**: Eliminated the 20-60s delay after importing shared groups by forcing an immediate context refetch.
+
 ## v1.3.0 - 2026-02-21
 *Developed using Gemini 3 Flash.*
 
