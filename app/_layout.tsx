@@ -41,6 +41,21 @@ export default function RootLayout() {
     }
   }, [fontsLoaded, fontsError]);
 
+  useEffect(() => {
+    async function setupNotifications() {
+      const { status } = await Notifications.getPermissionsAsync();
+      if (status === 'undetermined') {
+        const { status: newStatus } = await Notifications.requestPermissionsAsync();
+        if (newStatus !== 'granted') {
+          console.warn('[Notifications] Permission denied during bootstrap');
+        }
+      } else if (status === 'denied') {
+        console.warn('[Notifications] Permission is denied. Notifications will not be received.');
+      }
+    }
+    setupNotifications();
+  }, []);
+
   if (!fontsLoaded && !fontsError) {
     return (
       <View style={styles.loading}>

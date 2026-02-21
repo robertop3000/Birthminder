@@ -19,6 +19,16 @@ export function useNotifications() {
 
   const checkPermission = useCallback(async () => {
     const { status } = await Notifications.getPermissionsAsync();
+
+    if (status === 'undetermined') {
+      const granted = await requestPermission();
+      if (!granted) {
+        console.warn('[Notifications] Permission denied after request');
+      }
+    } else if (status === 'denied') {
+      console.warn('[Notifications] Permission is currently denied. Users must enable it in system settings.');
+    }
+
     setPermissionStatus(status);
   }, []);
 
@@ -57,11 +67,16 @@ export function useNotifications() {
     async (birthdays: Person[]) => {
       await Notifications.cancelAllScheduledNotificationsAsync();
 
-      if (permissionStatus !== 'granted') return;
+      if (permissionStatus !== 'granted') {
+        console.warn(`[Notifications] Skipping scheduling: permission is ${permissionStatus}`);
+        return;
+      }
 
       for (const person of birthdays) {
         // Schedule birthday-day notification
+        const birthdayIdentifier = person.id;
         await Notifications.scheduleNotificationAsync({
+          identifier: birthdayIdentifier,
           content: {
             title: `Happy Birthday ${person.name}! 🎂`,
             body: `Today is ${person.name}'s birthday!`,
@@ -71,7 +86,7 @@ export function useNotifications() {
             type: Notifications.SchedulableTriggerInputTypes.CALENDAR,
             month: person.birthday_month,
             day: person.birthday_day,
-            hour: 9,
+            hour: 8,
             minute: 0,
             repeats: true,
           },
@@ -84,8 +99,10 @@ export function useNotifications() {
             person.birthday_day
           );
           const reminderDate = subDays(nextBday, daysBefore);
+          const reminderIdentifier = `${person.id}-reminder`;
 
           await Notifications.scheduleNotificationAsync({
+            identifier: reminderIdentifier,
             content: {
               title: `Birthday Reminder 🔔`,
               body: `${person.name}'s birthday is in ${daysBefore} day${daysBefore > 1 ? 's' : ''}!`,
@@ -95,13 +112,15 @@ export function useNotifications() {
               type: Notifications.SchedulableTriggerInputTypes.CALENDAR,
               month: reminderDate.getMonth() + 1,
               day: reminderDate.getDate(),
-              hour: 9,
+              hour: 8,
               minute: 0,
               repeats: true,
             },
           });
         }
       }
+
+      console.log(`[Notifications] Successfully scheduled ${birthdays.length} birthday alerts (at 8:00 AM)`);
     },
     [permissionStatus, daysBefore]
   );
