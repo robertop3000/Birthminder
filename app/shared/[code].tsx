@@ -13,6 +13,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../hooks/useTheme';
 import { useAuth } from '../../hooks/useAuth';
 import { supabase } from '../../lib/supabase';
+import { useBirthdays } from '../../hooks/useBirthdays';
+import { useGroups } from '../../hooks/useGroups';
 import { Avatar } from '../../components/ui/Avatar';
 import { Button } from '../../components/ui/Button';
 import {
@@ -44,6 +46,8 @@ export default function SharedGroupScreen() {
   const insets = useSafeAreaInsets();
   const { code } = useLocalSearchParams<{ code: string }>();
   const { user } = useAuth();
+  const { refetch: refetchBirthdays } = useBirthdays();
+  const { refetch: refetchGroups } = useGroups();
 
   const [group, setGroup] = useState<SharedGroup | null>(null);
   const [loading, setLoading] = useState(true);
@@ -147,6 +151,9 @@ export default function SharedGroupScreen() {
       }
     }
 
+    // Force context refetch to update UI across all tabs immediately
+    await Promise.all([refetchBirthdays(), refetchGroups()]);
+
     Alert.alert('Imported!', `Group "${group.name}" has been added to your calendar.`);
     router.replace('/(tabs)/groups');
   };
@@ -207,6 +214,9 @@ export default function SharedGroupScreen() {
             );
         }
       }
+
+      // Force context refetch to update UI across all tabs immediately
+      await Promise.all([refetchBirthdays(), refetchGroups()]);
 
       Alert.alert('Updated!', `Group "${group.name}" has been refreshed.`);
       router.replace('/(tabs)/groups');
