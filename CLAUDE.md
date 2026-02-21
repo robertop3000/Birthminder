@@ -253,8 +253,8 @@ Every main screen has a top bar:
    month-grouped rolling calendar view
 3. Groups — name, 8 color presets, and optional photo; same person in multiple groups,
    deleting a group does not delete people, inline creation from birthday form, edit from detail screen
-4. Notifications — local notifications on birthday date (9 AM), advance reminders
-   (0/1/3/7 days before, 9 AM), re-scheduled on every app launch
+4. Notifications — local notifications on birthday date (8 AM), advance reminders
+   (0/1/3/7 days before, 8 AM), re-scheduled on every app launch
 5. Sharing — unique share_code per group or person, HTTPS share URLs via GitHub Pages
    landing page (OG meta tags for rich previews on WhatsApp/Telegram/iMessage),
    deep link redirect to birthminder:// scheme, import with deduplication
@@ -297,7 +297,7 @@ Source code must produce ZERO errors.
 
 STEP 2 — UNIT TESTS
 Run: npx jest --no-cache
-Must reach 100% pass rate. Current baseline: 16 suites, 97 tests.
+Must reach 100% pass rate. Current baseline: 17 suites, 100 tests.
 Fix any failures before continuing.
 
 STEP 3 — CHECKLIST
@@ -311,13 +311,6 @@ Check each item:
 STEP 4 — CONFIRM
 Write: "Change [description] is complete and verified."
 Then wait for user confirmation before continuing.
-
----
-
-## Out of Scope for Version 1
-- Android support
-- In-app messaging
-- Paid tiers or subscriptions
 
 ---
 
@@ -392,47 +385,14 @@ When bumping to version X.Y.Z:
 4. If approved → merge to main and push
 5. If issues found → fix on branch, re-test, then merge
 
-### Legacy branches (pre-v1.0.0):
-- stable/v0.7, stable/v0.8, stable/v0.9 (kept for historical reference)
-
-### Rules
-- NEVER force-push to main or any version branch
-- ALWAYS test on a version branch before merging to main
-- If main breaks, the latest version branch is the recovery point
-- Git tag, app.json version, and package.json version must ALWAYS match
-
----
-
-## Working with Multiple AI Agents
-
-This project is worked on by different AI agents (Claude Code,
-Gemini, Sonnet, etc.) across sessions. Follow these rules:
-
-1. NEVER replace a file with placeholder comments like "// ... existing code"
-   — always write complete, working files
-2. Read the full file before modifying it — understand what exists
-3. Make surgical changes: add what is needed, do not rewrite surrounding code
-4. After any agent handoff, run: npx tsc --noEmit && npx jest --no-cache
-5. If errors are found, check git diff to see what the previous agent broke
-6. Update CHANGELOG.md after every significant change
-
----
-
-## Repository
-
-- GitHub: https://github.com/robertop3000/Birthminder
-- Remote: origin (main branch)
-- GitHub Pages: enabled on main branch, /docs folder
-- Always push after committing stable changes
-
 ---
 
 # PART 4: CURRENT PROJECT STATE
 
-**Last Updated:** 2026-02-19
-**Current Version:** v1.2.0 (Group photos, edit groups, fix shared groups, OG previews)
-**Build Number:** 4 (pending new build for v1.2.0)
-**Test Status:** 16 suites, 97 tests — all passing
+**Last Updated:** 2026-02-21
+**Current Version:** v1.3.0 (In Progress — Notification scheduling fixed, unique IDs, test button)
+**Build Number:** 1.3.0
+**Test Status:** 17 suites, 100 tests — all passing
 **Build Status:** v1.2.0 tested via Expo Go, ready for production build
 **Pre-Flight Audit:** PASSED
 **EAS Secrets:** EXPO_PUBLIC_SUPABASE_URL and EXPO_PUBLIC_SUPABASE_ANON_KEY configured
@@ -445,7 +405,6 @@ Gemini, Sonnet, etc.) across sessions. Follow these rules:
 ```
 Birthminder/                          # Outer folder
 ├── CLAUDE.md                         # This file
-├── Birthminder Logo.png              # App logo source
 │
 └── Birthminder/                      # Expo project root
     ├── app.json                      # Expo config (bundleId: com.birthminder.app)
@@ -545,8 +504,6 @@ ErrorBoundary → ThemeProvider → BirthdaysProvider → GroupsProvider
 | BirthdaysContext | people[] with person_groups | addBirthday, updateBirthday, deleteBirthday, generatePersonShareCode, refetch |
 | GroupsContext | groups[] with member counts | addGroup, updateGroup, deleteGroup, generateShareCode, addPersonToGroup, removePersonFromGroup, refetch |
 
-No Redux or external state library — React Context is sufficient for this app's complexity.
-
 ---
 
 ## Supabase Database Schema
@@ -561,138 +518,14 @@ Canonical reference: `supabase-schema.sql` in project root.
 | groups | Organizing people | id, user_id (FK), name, color, photo_url, share_code, source_share_code |
 | person_groups | Junction (many-to-many) | person_id (FK), group_id (FK) |
 
-### RLS Policies
-- All tables: RLS enabled
-- Users can only CRUD their own data (auth.uid() = user_id/id)
-- Shared data (share_code IS NOT NULL) is publicly readable via SELECT
-- Shared group members visible via SECURITY DEFINER functions (avoids circular RLS)
-
-### Triggers
-- `update_updated_at_column()` — auto-updates updated_at on people
-- `handle_new_user()` — auto-creates profile on auth.users INSERT (SECURITY DEFINER)
-
-### Storage
-- Bucket: `avatars` (public read, authenticated write)
-- Profile photos: `{userId}/avatar.{ext}`
-- Birthday photos: `people/{filename}`
-
-### Indexes
-- idx_people_user_id, idx_people_birthday (month, day)
-- idx_groups_user_id
-- idx_person_groups_person, idx_person_groups_group
-
----
-
-## Key Technical Patterns
-
-### Photo Upload Pipeline (lib/uploadImage.ts)
-1. User picks image via expo-image-picker
-2. expo-image-manipulator resizes to 600px, compresses 0.7, converts to JPEG
-3. expo-file-system/legacy reads file as base64 string
-4. base64-arraybuffer decodes to ArrayBuffer
-5. Upload to Supabase Storage (avatars bucket, subfolder: 'people' or 'groups')
-6. Cache-busted URL: append `?t={timestamp}` after upload
-7. Reusable: used by modal.tsx (birthdays), groups.tsx, and group/[id].tsx (groups)
-
-### Avatar Rendering
-- expo-image with disk caching (contentFit: 'cover')
-- Retry mechanism: 3 attempts with 2s delay on load error
-- Fallback: Ionicons person icon when all retries fail
-
-### Auth Flow
-- Session stored in AsyncStorage via Supabase client config
-- On auth state change (SIGNED_IN): ensureProfile() checks/creates profile
-- Invalid refresh tokens: caught gracefully, session cleared, user redirected to login
-
-### Notification Scheduling
-- Two notifications per birthday: on-the-day (9 AM) + advance reminder (9 AM)
-- Advance options: 0 (same day only), 1, 3, or 7 days before
-- Calendar triggers with repeating: true (annual)
-- All notifications re-scheduled on every app launch (Home screen useEffect)
-
-### Deep Linking & Sharing
-- Scheme: birthminder://
-- Routes: birthminder://shared/{code} (group), birthminder://shared/person/{code}
-- Share URLs: https://robertop3000.github.io/Birthminder/?code=X (groups), ?person=X (people)
-- Landing page (docs/index.html) provides OG meta tags for rich previews, then redirects to deep link
-- Deep links only work in development/production builds (NOT Expo Go)
-
----
-
-## EAS Build Configuration
-
-```json
-// eas.json
-{
-  "build": {
-    "development": { "developmentClient": true, "distribution": "internal" },
-    "preview": { "distribution": "internal" },
-    "production": { "autoIncrement": true }
-  },
-  "submit": { "production": {} }
-}
-```
-
-### Build History
-| Build # | Date | Profile | Status | Notes |
-|---------|------|---------|--------|-------|
-| 1-3 | Feb 16, 2026 | preview/dev | CRASHED | Missing env vars (SIGABRT) |
-| 4 | Feb 18, 2026 | production | SUCCESS | v1.1.0, TestFlight approved, tested by friends |
-| 5 | Pending | production | — | v1.2.0, needs `eas build --platform ios --profile production` |
-EAS Secrets configured for production builds.
-
----
-
-## Test Infrastructure
-
-- **Framework:** Jest + ts-jest (jsdom environment)
-- **Mocks:** Comprehensive jest.setup.js mocking React Native, all Expo modules, Supabase client
-- **Current baseline:** 16 suites, 97 tests — all passing
-
-### Test file locations:
-- lib/__tests__/ (dateHelpers, theme, constants)
-- components/ui/__tests__/ (Avatar, Button, Card, FAB, TopBar, ThemeToggle)
-- components/birthday/__tests__/ (BirthdayForm)
-- hooks/__tests__/ (useAuth, useBirthdays, useGroups)
-- app/__tests__/ (modal, modal_photo)
-- e2e/flow.test.ts (end-to-end flow)
-
----
-
-## app.json Key Configuration
-
-```
-name: Birthminder
-slug: birthminder
-bundleIdentifier: com.birthminder.app
-scheme: birthminder
-platforms: [ios]
-jsEngine: hermes
-newArchEnabled: true
-supportsTablet: true
-ITSAppUsesNonExemptEncryption: false
-runtimeVersion: { policy: "appVersion" }
-```
-
----
-
-## Known Issues
-
-1. **Share codes never expire** — Security consideration for production.
-2. **Deep links** only work in dev/production builds, not Expo Go.
-3. **Account deletion** is client-side cascade only (no server-side admin deletion).
-4. **Notifications**: May require users to toggle off/on for scheduling changes to take effect. Needs review.
-5. **Git history**: `.env` with Supabase anon key exists in git history (commit 49681c3). Key is publishable/client-side so low risk, but should be scrubbed.
-
 ---
 
 ## Next Steps
 
-1. **Fix notifications** — Review and fix push notification scheduling reliability
-2. **Production build** — Run: `eas build --platform ios --profile production` for v1.2.0
-3. **TestFlight testing** — Verify all v1.2.0 features on device
-4. **App Store submission** — Prepare screenshots (6.9" display: 1320x2868) and metadata
-5. **Scrub git history** — Remove `.env` from commit 49681c3
+1. **TestFlight testing** — Verify 1.3.0 notification scheduling on device via diagnostic button
+2. **Production build** — Run: `eas build --platform ios --profile production` for v1.3.0
+3. **App Store submission** — Prepare screenshots (6.9" display: 1320x2868) and metadata
+4. **Scrub git history** — Remove `.env` from commit 49681c3
 
 ### Out of Scope for v1
 - Android support
