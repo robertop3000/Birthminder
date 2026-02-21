@@ -70,7 +70,6 @@ export function GroupForm({
           )}
         </View>
       </View>
-
       <View style={styles.inputGroup}>
         <Text style={[styles.label, { color: colors.textSecondary }]}>
           Group Name
@@ -133,7 +132,7 @@ export function GroupForm({
           </Text>
         </Pressable>
       </View>
-    </View>
+    </View >
   );
 }
 

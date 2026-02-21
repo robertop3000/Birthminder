@@ -355,18 +355,26 @@ export function BirthdayForm({
                   },
                 ]}
               >
-                <Text
-                  style={[
-                    styles.groupChipText,
-                    {
-                      color: selectedGroups.includes(g.id)
-                        ? g.color || colors.primary
-                        : colors.textPrimary,
-                    },
-                  ]}
-                >
-                  {g.name}
-                </Text>
+                <View style={styles.chipContent}>
+                  <View
+                    style={[
+                      styles.colorDotSmall,
+                      { backgroundColor: g.color || colors.primary },
+                    ]}
+                  />
+                  <Text
+                    style={[
+                      styles.groupChipText,
+                      {
+                        color: selectedGroups.includes(g.id)
+                          ? g.color || colors.primary
+                          : colors.textPrimary,
+                      },
+                    ]}
+                  >
+                    {g.name}
+                  </Text>
+                </View>
               </Pressable>
             ))}
             <Pressable
@@ -639,6 +647,16 @@ const styles = StyleSheet.create({
   groupChipText: {
     fontSize: 14,
     fontFamily: 'DMSans_500Medium',
+  },
+  chipContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  colorDotSmall: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
   },
   newGroupChip: {
     flexDirection: 'row',

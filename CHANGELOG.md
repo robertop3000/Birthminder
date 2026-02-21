@@ -7,7 +7,7 @@ All notable changes to Birthminder will be documented in this file.
 ## v1.3.0 - 2026-02-21 (In Progress)
 
 ### Added
-- **Diagnostic Test Tool**: "Send Test Notification (5s)" button on Home screen for verification
+- **Removed diagnostic tools**: Removed the "Send Test Notification" button from the Home screen.
 - **Explicit Permission Bootstrap**: Added automatic notification permission request during initial app launch in `RootLayout`
 
 ### Fixed
