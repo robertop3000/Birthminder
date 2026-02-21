@@ -74,20 +74,6 @@ export default function HomeScreen() {
     [birthdays]
   );
 
-  const handleSendTestNotification = async () => {
-    console.log('[Diagnostic] Scheduling test notification for 5 seconds from now...');
-    await Notifications.scheduleNotificationAsync({
-      content: {
-        title: 'Diagnostic Test 🧪',
-        body: 'This is a test notification from Birthminder! It should appear even if the app is open.',
-        data: { type: 'test' },
-      },
-      trigger: {
-        type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL,
-        seconds: 5,
-      },
-    });
-  };
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
@@ -122,19 +108,6 @@ export default function HomeScreen() {
                 />
               ))}
 
-              <View style={styles.diagnosticSection}>
-                <Text style={[styles.diagnosticText, { color: colors.textSecondary }]}>
-                  DIAGNOSTICS
-                </Text>
-                <View style={styles.buttonContainer}>
-                  <Text
-                    style={[styles.testButton, { color: colors.primary }]}
-                    onPress={handleSendTestNotification}
-                  >
-                    Send Test Notification (5s)
-                  </Text>
-                </View>
-              </View>
 
               {upcomingBirthdays.length > 0 && (
                 <Text

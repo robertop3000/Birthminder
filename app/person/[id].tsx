@@ -14,6 +14,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../hooks/useTheme';
 import { useBirthdays, Person } from '../../hooks/useBirthdays';
+import { useGroups } from '../../hooks/useGroups';
 import { Avatar } from '../../components/ui/Avatar';
 import { SHARE_BASE_URL } from '../../lib/constants';
 import {
@@ -28,6 +29,7 @@ export default function PersonDetailScreen() {
   const insets = useSafeAreaInsets();
   const { id } = useLocalSearchParams<{ id: string }>();
   const { birthdays, deleteBirthday, generatePersonShareCode } = useBirthdays();
+  const { groups } = useGroups();
 
   const person = birthdays.find((p) => p.id === id);
 
@@ -197,19 +199,17 @@ export default function PersonDetailScreen() {
                 style={[
                   styles.pill,
                   {
-                    backgroundColor: pg.groups?.color
-                      ? pg.groups.color + '20'
-                      : colors.primary + '20',
+                    backgroundColor: (groups.find(g => g.id === pg.group_id)?.color || pg.groups?.color || colors.primary) + '20',
                   },
                 ]}
               >
                 <Text
                   style={[
                     styles.pillText,
-                    { color: pg.groups?.color || colors.primary },
+                    { color: groups.find(g => g.id === pg.group_id)?.color || pg.groups?.color || colors.primary },
                   ]}
                 >
-                  {pg.groups?.name}
+                  {groups.find(g => g.id === pg.group_id)?.name || pg.groups?.name}
                 </Text>
               </View>
             ))}

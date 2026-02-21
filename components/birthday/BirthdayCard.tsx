@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, Pressable } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useTheme } from '../../hooks/useTheme';
+import { useGroups } from '../../hooks/useGroups';
 import { Avatar } from '../ui/Avatar';
 import {
   getDaysUntilBirthday,
@@ -15,6 +16,7 @@ interface BirthdayCardProps {
 
 export function BirthdayCard({ person }: BirthdayCardProps) {
   const { colors } = useTheme();
+  const { groups } = useGroups();
   const router = useRouter();
 
   const daysUntil = getDaysUntilBirthday(
@@ -57,9 +59,7 @@ export function BirthdayCard({ person }: BirthdayCardProps) {
                 style={[
                   styles.pill,
                   {
-                    backgroundColor: pg.groups?.color
-                      ? pg.groups.color + '20'
-                      : colors.primary + '20',
+                    backgroundColor: (groups.find(g => g.id === pg.group_id)?.color || pg.groups?.color || colors.primary) + '20',
                   },
                 ]}
               >
@@ -67,12 +67,12 @@ export function BirthdayCard({ person }: BirthdayCardProps) {
                   style={[
                     styles.pillText,
                     {
-                      color: pg.groups?.color || colors.primary,
+                      color: groups.find(g => g.id === pg.group_id)?.color || pg.groups?.color || colors.primary,
                     },
                   ]}
                   numberOfLines={1}
                 >
-                  {pg.groups?.name}
+                  {groups.find(g => g.id === pg.group_id)?.name || pg.groups?.name}
                 </Text>
               </View>
             ))}
