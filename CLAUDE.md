@@ -175,9 +175,9 @@ Every main screen has a top bar:
 
 ### Tab 3: Groups
 - List of GroupCards
-- Each card: color tag bar on left, group name, member count, share icon
-- Create group via + icon in TopBar (modal with name + color picker)
-- Share via native Share sheet with deep link
+- Each card: group photo or color bar on left, group name, member count, share icon
+- Create group via + icon in TopBar (modal with name, color picker, and photo)
+- Share via native Share sheet with HTTPS landing page URL
 - Empty state: "Create your first group!"
 
 ### Tab 4: Notifications
@@ -221,17 +221,20 @@ Every main screen has a top bar:
 - Share generates share_code, opens native Share with deep link
 
 ### Group Detail Screen
-- Group name and color banner at top with member count
+- Group photo or color banner at top with member count
+- Edit modal (pencil icon): change name, color, photo
 - Member list as BirthdayCards
 - Add button: modal shows available people not already in group
 - Remove: tap X icon with confirmation alert
-- Share and Delete actions in header
+- Edit, Share, and Delete actions in header
 
 ### Shared Group View (public, no auth required)
-- Fetches group by share_code (public RLS policy)
-- Banner: "Someone shared their [Group Name] birthdays with you"
-- Read-only birthday card list
+- Fetches group by share_code (SECURITY DEFINER RLS policies)
+- Banner: "Someone shared their [Group Name] birthdays with you" (shows group photo if available)
+- Read-only birthday card list with all fields (name, date, year, photo, notes)
 - "Import to my Birthminder" button
+- Deduplication: detects if group was already imported (via source_share_code), offers "Update" option
+- Person dedup: matches by name + birthday_month + birthday_day to avoid duplicates
 - If not logged in, redirects to signup
 
 ### Shared Person View (public, no auth required)
@@ -248,12 +251,13 @@ Every main screen has a top bar:
    profile auto-created by DB trigger + client-side ensureProfile() fallback
 2. Birthdays — add/edit/delete, multi-group, photos optimized and stored in Supabase Storage,
    month-grouped rolling calendar view
-3. Groups — name and 8 color presets, same person in multiple groups,
-   deleting a group does not delete people, inline creation from birthday form
+3. Groups — name, 8 color presets, and optional photo; same person in multiple groups,
+   deleting a group does not delete people, inline creation from birthday form, edit from detail screen
 4. Notifications — local notifications on birthday date (9 AM), advance reminders
    (0/1/3/7 days before, 9 AM), re-scheduled on every app launch
-5. Sharing — unique share_code per group or person, deep links (birthminder://shared/{code}
-   and birthminder://shared/person/{code}), public read-only view, importable when logged in
+5. Sharing — unique share_code per group or person, HTTPS share URLs via GitHub Pages
+   landing page (OG meta tags for rich previews on WhatsApp/Telegram/iMessage),
+   deep link redirect to birthminder:// scheme, import with deduplication
 6. Dark/Light Mode — full theme support, persisted, toggled from Profile
 7. Error Handling — ErrorBoundary class component, auth error recovery, photo upload retries
 8. Legal — Privacy Policy + Terms of Service for App Store compliance
@@ -630,13 +634,11 @@ Canonical reference: `supabase-schema.sql` in project root.
 ```
 
 ### Build History
-| Date | Profile | Status | SDK |
-|------|---------|--------|-----|
-| Feb 16, 2026 9:02 PM | preview | SUCCESS | 54.0.0 |
-| Feb 16, 2026 | development | SUCCESS | 51.0.0 |
-| Feb 16, 2026 6:24 PM | preview | SUCCESS | 51.0.0 |
-
-Build #1-3: Crashed on launch (missing env vars). Build #4 pending.
+| Build # | Date | Profile | Status | Notes |
+|---------|------|---------|--------|-------|
+| 1-3 | Feb 16, 2026 | preview/dev | CRASHED | Missing env vars (SIGABRT) |
+| 4 | Feb 18, 2026 | production | SUCCESS | v1.1.0, TestFlight approved, tested by friends |
+| 5 | Pending | production | — | v1.2.0, needs `eas build --platform ios --profile production` |
 EAS Secrets configured for production builds.
 
 ---
