@@ -6,6 +6,7 @@ import {
   StyleSheet,
   ActivityIndicator,
 } from 'react-native';
+import * as Notifications from 'expo-notifications';
 import { useTheme } from '../../hooks/useTheme';
 import { useAuth } from '../../hooks/useAuth';
 import { useBirthdays } from '../../hooks/useBirthdays';
@@ -25,7 +26,7 @@ export default function HomeScreen() {
   const { colors } = useTheme();
   const { user } = useAuth();
   const { birthdays, loading, refetch } = useBirthdays();
-  const { scheduleAllNotifications } = useNotifications();
+  const { scheduleAllNotifications, permissionStatus } = useNotifications();
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
 
   useEffect(() => {
@@ -42,10 +43,10 @@ export default function HomeScreen() {
   }, [user]);
 
   useEffect(() => {
-    if (birthdays.length > 0) {
+    if (birthdays.length > 0 && permissionStatus === 'granted') {
       scheduleAllNotifications(birthdays);
     }
-  }, [birthdays]);
+  }, [birthdays, permissionStatus, scheduleAllNotifications]);
 
   const todayBirthdays = useMemo(
     () =>

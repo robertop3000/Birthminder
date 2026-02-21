@@ -7,7 +7,14 @@ All notable changes to Birthminder will be documented in this file.
 ## v1.3.0 - 2026-02-21 (In Progress)
 
 ### Added
-- Created branch 1.3.0 for new development
+- **Diagnostic Test Tool**: "Send Test Notification (5s)" button on Home screen for verification
+- **Explicit Permission Bootstrap**: Added automatic notification permission request during initial app launch in `RootLayout`
+
+### Fixed
+- **Notification Scheduling**: Hardened local notifications to trigger at 8:00 AM local time
+- **Unique Identifiers**: Assigned birthday UUIDs to notification identifiers to prevent scheduling conflicts
+- **Foreground Notifications**: Enabled alert visibility even when the app is active
+- **Reference Error**: Fixed missing `Notifications` import in `HomeScreen`
 
 ---
 

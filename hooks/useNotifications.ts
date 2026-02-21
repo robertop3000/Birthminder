@@ -67,6 +67,8 @@ export function useNotifications() {
     async (birthdays: Person[]) => {
       await Notifications.cancelAllScheduledNotificationsAsync();
 
+      if (permissionStatus === null) return;
+
       if (permissionStatus !== 'granted') {
         console.warn(`[Notifications] Skipping scheduling: permission is ${permissionStatus}`);
         return;
