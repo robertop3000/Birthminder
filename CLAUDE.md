@@ -150,98 +150,17 @@ Every main screen has a top bar:
 
 ---
 
-## Screens (ALL IMPLEMENTED)
-
-### Auth Flow
-- Splash Screen: logo centered, auto-redirects based on Supabase session
-- Onboarding: 3 slides, skippable, dot pagination, remembers completion in AsyncStorage
-- Sign Up: email, password, display name, optional profile photo upload
-- Login: email, password, forgot password link
-- Forgot Password: email input, triggers Supabase password reset
-
-### Tab 1: Home
-- Top bar: avatar left, "Birthminder" center
-- If today is someone's birthday: CelebrationBanner with confetti, photo, name
-- Feed of upcoming birthdays in next 30 days as BirthdayCards
-- Each card: circular avatar left, name, birthday date, days remaining badge, group pills
-- Empty state: cake emoji and "Add your first birthday!" text
-- Auto-schedules notifications on mount
-
-### Tab 2: Search
-- Full-width search bar at top, auto-focused when tab opens
-- Results appear as BirthdayCards as user types (case-insensitive)
-- Empty search state: all birthdays sorted alphabetically
-- No results: friendly message with suggestion to add them
-
-### Tab 3: Groups
-- List of GroupCards
-- Each card: group photo or color bar on left, group name, member count, share icon
-- Create group via + icon in TopBar (modal with name, color picker, and photo)
-- Share via native Share sheet with HTTPS landing page URL
-- Empty state: "Create your first group!"
-
-### Tab 4: Notifications
-- SectionList grouped by month (rolling order: current month first, wraps to next year)
-- Month sections displayed as uppercase headers
-- Toggle at top to enable/disable all notifications
-- Dropdown selector: 0 / 1 / 3 / 7 days before
-- Rows clickable — navigate to person detail
-
-### Tab 5: Profile
-- Large circular profile photo centered at top
-- Display name and email below photo
-- Dark/light mode toggle with sun and moon icons — prominent
-- Gear icon (top-right) navigates to Settings
-- Sign out button
-- App version number at very bottom in small secondary text
-
-### Settings Screen
-- Legal section: link to Privacy Policy & Terms of Service
-- Danger zone: Delete Account with confirmation modal
-- Delete flow: person_groups → people → groups → profiles → signOut
-
-### Legal Screen
-- Tabs: Privacy Policy | Terms of Service
-- Privacy: data collection disclosure, Supabase storage, GDPR deletion
-- Terms: Standard EULA, Apple EULA reference
-
-### Add/Edit Birthday Modal
-- Slides up from bottom
-- Fields: name, month (custom modal picker), day, year (optional), photo, groups multi-select, notes
-- Inline group creation: "+ New Group" chip with name input + 8 color presets
-- Photo pipeline: Pick → ImageManipulator (resize 600px, compress 0.7, JPEG) → base64 → Supabase Storage → cache-busted URL
-- Save button top right, Cancel top left
-
-### Person Detail Screen
-- Large photo at top
-- Name, formatted date, stats cards (days until, age turning)
-- Group pills
-- Notes section
-- Share, Edit, Delete actions in header
-- Share generates share_code, opens native Share with deep link
-
-### Group Detail Screen
-- Group photo or color banner at top with member count
-- Edit modal (pencil icon): change name, color, photo
-- Member list as BirthdayCards
-- Add button: modal shows available people not already in group
-- Remove: tap X icon with confirmation alert
-- Edit, Share, and Delete actions in header
-
-### Shared Group View (public, no auth required)
-- Fetches group by share_code (SECURITY DEFINER RLS policies)
-- Banner: "Someone shared their [Group Name] birthdays with you" (shows group photo if available)
-- Read-only birthday card list with all fields (name, date, year, photo, notes)
-- "Import to my Birthminder" button
-- Deduplication: detects if group was already imported (via source_share_code), offers "Update" option
-- Person dedup: matches by name + birthday_month + birthday_day to avoid duplicates
-- If not logged in, redirects to signup
-
-### Shared Person View (public, no auth required)
-- Fetches person by share_code
-- Profile + stats display
-- "Save to my Birthminder" button
-- Import creates duplicate entry for logged-in user
+### Screens
+- **Auth Flow**: Splash, Onboarding (3 slides), Sign Up (with photo), Login, Forgot Password.
+- **Home**: Today's celebration banner + feed of upcoming birthdays (30 days).
+- **Search**: Live search with auto-focus and alphabetical fallback.
+- **Groups**: List of groups with inline creation (+ icon/modal) and native sharing.
+- **Notifications**: SectionList grouped by month (rolling order) for all birthdays.
+- **Profile & Settings**: Theme toggle (dark/light), legal links, and account deletion.
+- **Modals & Details**: 
+  - Add/Edit Birthday: Full form, photo pipeline (pick/optimize/upload), inline group creation.
+  - Person/Group Details: Stats, photo, notes, and management actions (Edit, Share, Delete).
+  - Shared Views: Public landing pages for importing shared persons or groups with dedup.
 
 ---
 
@@ -389,7 +308,7 @@ When bumping to version X.Y.Z:
 
 # PART 4: CURRENT PROJECT STATE
 
-**Last Updated:** 2026-02-22
+**Last Updated:** 2026-02-23
 **Current Version:** v1.4.0 (Development — Gemini 3.5 Sonnet)
 **Build Number:** 6
 **Test Status:** 17 suites, 100 tests — all passing

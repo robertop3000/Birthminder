@@ -4,11 +4,14 @@ All notable changes to Birthminder will be documented in this file.
 
 ---
 
-## v1.4.0 - 2026-02-22
+## v1.4.0 - 2026-02-23
 *Developed using Gemini 3.5 Sonnet.*
 
 ### Added
-- Started development of v1.4.0.
+- **Link to Contact**: Ability to link birthdays to phone contacts for easy messaging.
+- **Import from Calendar**: Integration to import friend birthdays directly from the iOS Calendar.
+- **New Dependencies**: Added `expo-calendar` and `expo-contacts`.
+- **Permissions**: Configured mandatory iOS privacy descriptions for Calendar and Contacts access.
 
 ## v1.3.2 - 2026-02-22
 *Developed using Gemini 3.5 Sonnet.*
