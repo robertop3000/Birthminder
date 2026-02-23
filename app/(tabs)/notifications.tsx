@@ -3,10 +3,8 @@ import {
   View,
   Text,
   SectionList,
-  Switch,
   StyleSheet,
   Pressable,
-  Alert,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useTheme } from '../../hooks/useTheme';
@@ -47,29 +45,14 @@ export default function NotificationsScreen() {
   const router = useRouter();
   const { birthdays } = useBirthdays();
   const {
-    permissionStatus,
     daysBefore,
-    requestPermission,
     updatePreference,
     scheduleAllNotifications,
+    permissionStatus,
   } = useNotifications();
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
   const isEnabled = permissionStatus === 'granted';
-
-  const handleToggle = async () => {
-    if (!isEnabled) {
-      const granted = await requestPermission();
-      if (granted) {
-        scheduleAllNotifications(birthdays);
-      }
-    } else {
-      Alert.alert(
-        'Disable Notifications',
-        'To disable notifications, go to your device settings.'
-      );
-    }
-  };
 
   const handleDaysChange = async (days: number) => {
     await updatePreference(days);
@@ -123,22 +106,15 @@ export default function NotificationsScreen() {
     <View>
       <View
         style={[
-          styles.toggleRow,
+          styles.infoRow,
           { backgroundColor: colors.surface },
         ]}
       >
-        <Text style={[styles.toggleLabel, { color: colors.textPrimary }]}>
-          Enable Notifications
+        <Text style={[styles.infoText, { color: colors.textSecondary }]}>
+          {isEnabled
+            ? 'Notifications are enabled.'
+            : 'To receive birthday reminders, enable notifications for Birthminder in your iOS Settings.'}
         </Text>
-        <Switch
-          value={isEnabled}
-          onValueChange={handleToggle}
-          trackColor={{
-            false: colors.bottomBarBorder,
-            true: colors.primary,
-          }}
-          thumbColor="#FFFFFF"
-        />
       </View>
 
       <View
@@ -295,19 +271,16 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  toggleRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+  infoRow: {
     marginHorizontal: 16,
     marginTop: 12,
     padding: 16,
     borderRadius: 14,
   },
-  toggleLabel: {
-    fontSize: 16,
-    fontWeight: '600',
-    fontFamily: 'DMSans_500Medium',
+  infoText: {
+    fontSize: 14,
+    fontFamily: 'DMSans_400Regular',
+    lineHeight: 20,
   },
   prefSection: {
     marginHorizontal: 16,
