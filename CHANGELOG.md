@@ -4,6 +4,12 @@ All notable changes to Birthminder will be documented in this file.
 
 ---
 
+## v1.3.2 - 2026-02-22
+*Developed using Gemini 3.5 Sonnet.*
+
+### Changed
+- **UI Legibility**: Improved readability in the Notifications tab by increasing `lineHeight` to 20 for text content.
+
 ## v1.3.1 - 2026-02-21
 *Developed using Gemini 3 Flash.*
 
