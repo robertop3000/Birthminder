@@ -24,7 +24,9 @@
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
         "NSPhotoLibraryUsageDescription": "Birthminder uses your photo library to let you add personal photos to birthday reminders.",
-        "NSCameraUsageDescription": "Birthminder uses your camera to take photos for birthday reminders."
+        "NSCameraUsageDescription": "Birthminder uses your camera to take photos for birthday reminders.",
+        "NSCalendarsUsageDescription": "Birthminder uses your calendar to import your friends' birthdays.",
+        "NSContactsUsageDescription": "Birthminder links your birthdays to your contacts for easy messaging."
       },
       "privacyManifests": {
         "NSPrivacyAccessedAPITypes": [
@@ -57,6 +59,18 @@
         "expo-image-picker",
         {
           "photosPermission": "Birthminder needs access to your photos to add birthday and profile pictures."
+        }
+      ],
+      [
+        "expo-calendar",
+        {
+          "calendarPermission": "Birthminder uses your calendar to import your friends' birthdays."
+        }
+      ],
+      [
+        "expo-contacts",
+        {
+          "contactsPermission": "Birthminder links your birthdays to your contacts for easy messaging."
         }
       ]
     ],
