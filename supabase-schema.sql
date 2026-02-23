@@ -31,6 +31,7 @@ CREATE TABLE people (
   photo_url TEXT,
   notes TEXT,
   share_code TEXT UNIQUE,
+  contact_id TEXT,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );

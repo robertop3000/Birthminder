@@ -4,6 +4,7 @@ import {
   Text,
   TextInput,
   FlatList,
+  Pressable,
   StyleSheet,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
@@ -12,11 +13,13 @@ import { useBirthdays } from '../../hooks/useBirthdays';
 import { TopBar } from '../../components/ui/TopBar';
 import { FAB } from '../../components/ui/FAB';
 import { BirthdayCard } from '../../components/birthday/BirthdayCard';
+import { CalendarImportModal } from '../../components/birthday/CalendarImportModal';
 
 export default function SearchScreen() {
   const { colors } = useTheme();
   const { birthdays, loading } = useBirthdays();
   const [query, setQuery] = useState('');
+  const [showImportModal, setShowImportModal] = useState(false);
 
   const results = useMemo(() => {
     const sorted = [...birthdays].sort((a, b) =>
@@ -54,6 +57,16 @@ export default function SearchScreen() {
         />
       </View>
 
+      <Pressable
+        onPress={() => setShowImportModal(true)}
+        style={[styles.importButton, { backgroundColor: colors.surface }]}
+      >
+        <Ionicons name="calendar-outline" size={20} color={colors.primary} />
+        <Text style={[styles.importButtonText, { color: colors.primary }]}>
+          Import from Calendar
+        </Text>
+      </Pressable>
+
       <FlatList
         data={results}
         keyExtractor={(item) => item.id}
@@ -72,6 +85,12 @@ export default function SearchScreen() {
       />
 
       <FAB />
+
+      <CalendarImportModal
+        visible={showImportModal}
+        onClose={() => setShowImportModal(false)}
+        onImportComplete={() => setShowImportModal(false)}
+      />
     </View>
   );
 }
@@ -95,6 +114,20 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontFamily: 'DMSans_400Regular',
     paddingVertical: 0,
+  },
+  importButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginHorizontal: 16,
+    marginBottom: 10,
+    paddingVertical: 12,
+    borderRadius: 12,
+    gap: 8,
+  },
+  importButtonText: {
+    fontSize: 15,
+    fontFamily: 'DMSans_500Medium',
   },
   list: {
     paddingBottom: 120,

@@ -254,6 +254,34 @@ jest.mock('@expo/vector-icons', () => ({
   Ionicons: 'Ionicons',
 }));
 
+// Mock expo-calendar
+jest.mock('expo-calendar', () => ({
+  requestCalendarPermissionsAsync: jest.fn().mockResolvedValue({ status: 'granted' }),
+  getCalendarsAsync: jest.fn().mockResolvedValue([]),
+  getEventsAsync: jest.fn().mockResolvedValue([]),
+  EntityTypes: { EVENT: 'event', REMINDER: 'reminder' },
+  CalendarType: {
+    LOCAL: 'local',
+    CALDAV: 'caldav',
+    EXCHANGE: 'exchange',
+    BIRTHDAYS: 'birthdays',
+  },
+}));
+
+// Mock expo-contacts
+jest.mock('expo-contacts', () => ({
+  presentContactPickerAsync: jest.fn().mockResolvedValue(null),
+  getContactsAsync: jest.fn().mockResolvedValue({ data: [], hasNextPage: false, hasPreviousPage: false }),
+  requestPermissionsAsync: jest.fn().mockResolvedValue({ status: 'granted' }),
+  Fields: {
+    FirstName: 'firstName',
+    LastName: 'lastName',
+    Image: 'image',
+    Birthday: 'birthday',
+    ID: 'id',
+  },
+}));
+
 // Mock expo-notifications
 jest.mock('expo-notifications', () => ({
   setNotificationHandler: jest.fn(),

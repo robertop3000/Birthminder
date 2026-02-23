@@ -16,6 +16,7 @@ import * as ImagePicker from 'expo-image-picker';
 import { useTheme } from '../../hooks/useTheme';
 import { useGroups } from '../../hooks/useGroups';
 import { Avatar } from '../ui/Avatar';
+import { ContactLinkButton } from './ContactLinkButton';
 
 export interface BirthdayFormData {
   name: string;
@@ -25,6 +26,7 @@ export interface BirthdayFormData {
   photo_uri: string | null;
   notes: string;
   group_ids: string[];
+  contact_id: string | null;
 }
 
 interface BirthdayFormProps {
@@ -61,6 +63,9 @@ export function BirthdayForm({
   const [notes, setNotes] = useState(initialValues?.notes ?? '');
   const [selectedGroups, setSelectedGroups] = useState<string[]>(
     initialValues?.group_ids ?? []
+  );
+  const [contactId, setContactId] = useState<string | null>(
+    initialValues?.contact_id ?? null
   );
   const [showNewGroup, setShowNewGroup] = useState(false);
   const [newGroupName, setNewGroupName] = useState('');
@@ -134,6 +139,7 @@ export function BirthdayForm({
       photo_uri: photoUri,
       notes: notes.trim(),
       group_ids: selectedGroups,
+      contact_id: contactId,
     });
   };
 
@@ -470,6 +476,17 @@ export function BirthdayForm({
               </Pressable>
             </Pressable>
           </Modal>
+        </View>
+
+        <View style={styles.inputGroup}>
+          <Text style={[styles.label, { color: colors.textSecondary }]}>
+            Linked Contact
+          </Text>
+          <ContactLinkButton
+            contactId={contactId}
+            onContactLinked={(id) => setContactId(id)}
+            onContactUnlinked={() => setContactId(null)}
+          />
         </View>
 
         <View style={styles.inputGroup}>

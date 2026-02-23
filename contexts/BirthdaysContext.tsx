@@ -21,6 +21,7 @@ export interface Person {
     photo_url: string | null;
     notes: string | null;
     share_code: string | null;
+    contact_id: string | null;
     created_at: string;
     person_groups: PersonGroup[];
 }
@@ -33,6 +34,7 @@ export interface BirthdayInput {
     photo_url?: string | null;
     notes?: string | null;
     group_ids?: string[];
+    contact_id?: string | null;
 }
 
 interface BirthdaysContextValue {
@@ -99,6 +101,7 @@ export function BirthdaysProvider({ children }: { children: React.ReactNode }) {
                     birthday_year: input.birthday_year ?? null,
                     photo_url: input.photo_url ?? null,
                     notes: input.notes ?? null,
+                    contact_id: input.contact_id ?? null,
                 })
                 .select()
                 .single();
@@ -130,6 +133,7 @@ export function BirthdaysProvider({ children }: { children: React.ReactNode }) {
             if (input.birthday_year !== undefined) updateData.birthday_year = input.birthday_year;
             if (input.photo_url !== undefined) updateData.photo_url = input.photo_url;
             if (input.notes !== undefined) updateData.notes = input.notes;
+            if (input.contact_id !== undefined) updateData.contact_id = input.contact_id;
 
             if (Object.keys(updateData).length > 0) {
                 const { error: updateError } = await supabase

@@ -27,6 +27,7 @@ export default function AddEditBirthdayModal() {
     photo?: string;
     notes?: string;
     groups?: string;
+    contact_id?: string;
   }>();
 
   const [loading, setLoading] = useState(false);
@@ -42,6 +43,7 @@ export default function AddEditBirthdayModal() {
       photo_uri: params.photo ?? null,
       notes: params.notes ?? '',
       group_ids: params.groups ? params.groups.split(',') : [],
+      contact_id: params.contact_id ?? null,
     }
     : undefined;
 
@@ -71,6 +73,7 @@ export default function AddEditBirthdayModal() {
           photo_url: photoUrl,
           notes: data.notes || null,
           group_ids: data.group_ids,
+          contact_id: data.contact_id,
         });
       } else {
         await addBirthday({
@@ -81,6 +84,7 @@ export default function AddEditBirthdayModal() {
           photo_url: photoUrl,
           notes: data.notes || null,
           group_ids: data.group_ids,
+          contact_id: data.contact_id,
         });
       }
 

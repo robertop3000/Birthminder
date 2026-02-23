@@ -16,6 +16,7 @@ import { useTheme } from '../../hooks/useTheme';
 import { useBirthdays, Person } from '../../hooks/useBirthdays';
 import { useGroups } from '../../hooks/useGroups';
 import { Avatar } from '../../components/ui/Avatar';
+import { ContactLinkButton } from '../../components/birthday/ContactLinkButton';
 import { SHARE_BASE_URL } from '../../lib/constants';
 import {
   getDaysUntilBirthday,
@@ -28,7 +29,7 @@ export default function PersonDetailScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { id } = useLocalSearchParams<{ id: string }>();
-  const { birthdays, deleteBirthday, generatePersonShareCode } = useBirthdays();
+  const { birthdays, deleteBirthday, updateBirthday, generatePersonShareCode } = useBirthdays();
   const { groups } = useGroups();
 
   const person = birthdays.find((p) => p.id === id);
@@ -91,6 +92,7 @@ export default function PersonDetailScreen() {
         photo: person.photo_url ?? '',
         notes: person.notes ?? '',
         groups: groupIds ?? '',
+        contact_id: person.contact_id ?? '',
       },
     });
   };
@@ -183,6 +185,21 @@ export default function PersonDetailScreen() {
             </Text>
           </View>
         )}
+      </View>
+
+      <View style={styles.section}>
+        <Text style={[styles.sectionTitle, { color: colors.textSecondary }]}>
+          Linked Contact
+        </Text>
+        <ContactLinkButton
+          contactId={person.contact_id}
+          onContactLinked={async (cid) => {
+            await updateBirthday(person.id, { contact_id: cid });
+          }}
+          onContactUnlinked={async () => {
+            await updateBirthday(person.id, { contact_id: null });
+          }}
+        />
       </View>
 
       {person.person_groups && person.person_groups.length > 0 && (

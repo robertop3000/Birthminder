@@ -103,6 +103,7 @@ describe('BirthdayForm', () => {
       photo_uri: null,
       notes: 'Loves chocolate',
       group_ids: [],
+      contact_id: null,
     });
   });
 
