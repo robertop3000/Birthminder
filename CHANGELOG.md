@@ -4,6 +4,12 @@ All notable changes to Birthminder will be documented in this file.
 
 ---
 
+## v1.4.0 - 2026-02-22
+*Developed using Gemini 3.5 Sonnet.*
+
+### Added
+- Started development of v1.4.0.
+
 ## v1.3.2 - 2026-02-22
 *Developed using Gemini 3.5 Sonnet.*
 
