@@ -64,9 +64,33 @@ export function useContactLink() {
     }
   }, []);
 
+  const getContactPhone = useCallback(async (contactId: string): Promise<string | null> => {
+    try {
+      const { status } = await Contacts.requestPermissionsAsync();
+      if (status !== 'granted') {
+        return null;
+      }
+
+      const { data } = await Contacts.getContactsAsync({
+        id: contactId,
+        fields: [Contacts.Fields.PhoneNumbers],
+      });
+
+      if (data.length === 0) return null;
+
+      const phones = data[0].phoneNumbers;
+      if (!phones || phones.length === 0) return null;
+
+      return phones[0].number ?? null;
+    } catch {
+      return null;
+    }
+  }, []);
+
   return {
     linking,
     pickContact,
     getContactInfo,
+    getContactPhone,
   };
 }

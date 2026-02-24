@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import {
   View,
   Text,
@@ -13,10 +13,12 @@ import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../hooks/useTheme';
-import { useBirthdays, Person } from '../../hooks/useBirthdays';
+import { useBirthdays } from '../../hooks/useBirthdays';
 import { useGroups } from '../../hooks/useGroups';
+import { useContactLink } from '../../hooks/useContactLink';
 import { Avatar } from '../../components/ui/Avatar';
 import { ContactLinkButton } from '../../components/birthday/ContactLinkButton';
+import { openWhatsApp, openIMessage } from '../../lib/messaging';
 import { SHARE_BASE_URL } from '../../lib/constants';
 import {
   getDaysUntilBirthday,
@@ -31,6 +33,7 @@ export default function PersonDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { birthdays, deleteBirthday, updateBirthday, generatePersonShareCode } = useBirthdays();
   const { groups } = useGroups();
+  const { getContactPhone } = useContactLink();
 
   const person = birthdays.find((p) => p.id === id);
 
@@ -95,6 +98,20 @@ export default function PersonDetailScreen() {
         contact_id: person.contact_id ?? '',
       },
     });
+  };
+
+  const handleMessaging = async (type: 'whatsapp' | 'imessage') => {
+    if (!person?.contact_id) return;
+    const phone = await getContactPhone(person.contact_id);
+    if (!phone) {
+      Alert.alert('No Phone Number', 'No phone number found for this contact.');
+      return;
+    }
+    if (type === 'whatsapp') {
+      await openWhatsApp(phone);
+    } else {
+      await openIMessage(phone);
+    }
   };
 
   const handleDelete = () => {
@@ -201,6 +218,30 @@ export default function PersonDetailScreen() {
           }}
         />
       </View>
+
+      {person.contact_id && (
+        <View style={styles.section}>
+          <Text style={[styles.sectionTitle, { color: colors.textSecondary }]}>
+            Send Birthday Wish
+          </Text>
+          <View style={styles.messagingRow}>
+            <Pressable
+              onPress={() => handleMessaging('whatsapp')}
+              style={[styles.messagingButton, { backgroundColor: '#25D366' }]}
+            >
+              <Ionicons name="logo-whatsapp" size={20} color="#FFFFFF" />
+              <Text style={styles.messagingButtonText}>WhatsApp</Text>
+            </Pressable>
+            <Pressable
+              onPress={() => handleMessaging('imessage')}
+              style={[styles.messagingButton, { backgroundColor: '#007AFF' }]}
+            >
+              <Ionicons name="chatbubble-outline" size={20} color="#FFFFFF" />
+              <Text style={styles.messagingButtonText}>iMessage</Text>
+            </Pressable>
+          </View>
+        </View>
+      )}
 
       {person.person_groups && person.person_groups.length > 0 && (
         <View style={styles.section}>
@@ -341,5 +382,24 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontFamily: 'DMSans_400Regular',
     lineHeight: 22,
+  },
+  messagingRow: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  messagingButton: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    paddingVertical: 12,
+    borderRadius: 12,
+  },
+  messagingButtonText: {
+    color: '#FFFFFF',
+    fontSize: 15,
+    fontWeight: '600',
+    fontFamily: 'DMSans_500Medium',
   },
 });

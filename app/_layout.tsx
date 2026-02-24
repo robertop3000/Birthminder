@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { View, ActivityIndicator, StyleSheet } from 'react-native';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
@@ -10,11 +10,14 @@ import {
 } from '@expo-google-fonts/dm-sans';
 import * as SplashScreen from 'expo-splash-screen';
 import * as Notifications from 'expo-notifications';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { ThemeProvider } from '../contexts/ThemeContext';
 import { BirthdaysProvider } from '../contexts/BirthdaysContext';
 import { GroupsProvider } from '../contexts/GroupsContext';
 import { ErrorBoundary } from '../components/ErrorBoundary';
 import { useTheme } from '../hooks/useTheme';
+import { useBirthdays } from '../hooks/useBirthdays';
+import { useNotifications } from '../hooks/useNotifications';
 
 SplashScreen.preventAutoHideAsync().catch(() => { });
 
@@ -69,12 +72,41 @@ export default function RootLayout() {
       <ThemeProvider>
         <BirthdaysProvider>
           <GroupsProvider>
+            <NotificationMigration />
             <RootNavigator />
           </GroupsProvider>
         </BirthdaysProvider>
       </ThemeProvider>
     </ErrorBoundary>
   );
+}
+
+const MIGRATION_KEY = 'v1.4.1_migrated';
+
+function NotificationMigration() {
+  const { birthdays } = useBirthdays();
+  const { scheduleAllNotifications, permissionStatus } = useNotifications();
+  const migrated = useRef(false);
+
+  useEffect(() => {
+    if (migrated.current) return;
+    if (permissionStatus === null || birthdays.length === 0) return;
+
+    (async () => {
+      const already = await AsyncStorage.getItem(MIGRATION_KEY);
+      if (already) {
+        migrated.current = true;
+        return;
+      }
+
+      await Notifications.cancelAllScheduledNotificationsAsync();
+      await scheduleAllNotifications(birthdays);
+      await AsyncStorage.setItem(MIGRATION_KEY, 'true');
+      migrated.current = true;
+    })();
+  }, [permissionStatus, birthdays, scheduleAllNotifications]);
+
+  return null;
 }
 
 function RootNavigator() {

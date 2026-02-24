@@ -16,7 +16,6 @@ const TAB_ITEMS: {
   { name: 'index', icon: 'home-outline', iconFocused: 'home', showFAB: true },
   { name: 'search', icon: 'search-outline', iconFocused: 'search', showFAB: true },
   { name: 'groups', icon: 'people-outline', iconFocused: 'people', showFAB: true },
-  { name: 'notifications', icon: 'notifications-outline', iconFocused: 'notifications', showFAB: false },
   { name: 'profile', icon: 'person-outline', iconFocused: 'person', showFAB: false },
 ];
 

@@ -139,6 +139,7 @@ describe('useCalendarImport', () => {
 
     const items = [
       {
+        uid: 'evt-2-0',
         eventId: 'evt-2',
         name: 'Bob',
         birthday_month: 7,

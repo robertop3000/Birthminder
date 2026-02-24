@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import {
   View,
   Text,
@@ -57,7 +57,7 @@ export function CalendarImportModal({
     const nonDuplicateIds = new Set(
       calendarBirthdays
         .filter((item) => !item.isDuplicate)
-        .map((item) => item.eventId)
+        .map((item) => item.uid)
     );
     setSelectedIds(nonDuplicateIds);
   }, [calendarBirthdays]);
@@ -67,7 +67,12 @@ export function CalendarImportModal({
     [calendarBirthdays]
   );
 
-  const toggleItem = (eventId: string) => {
+  const allSelected = useMemo(
+    () => calendarBirthdays.length > 0 && selectedIds.size === calendarBirthdays.length,
+    [selectedIds.size, calendarBirthdays.length]
+  );
+
+  const toggleItem = useCallback((eventId: string) => {
     setSelectedIds((prev) => {
       const next = new Set(prev);
       if (next.has(eventId)) {
@@ -77,19 +82,20 @@ export function CalendarImportModal({
       }
       return next;
     });
-  };
+  }, []);
 
-  const toggleAll = () => {
-    if (selectedIds.size === calendarBirthdays.length) {
-      setSelectedIds(new Set());
-    } else {
-      setSelectedIds(new Set(calendarBirthdays.map((item) => item.eventId)));
-    }
-  };
+  const toggleAll = useCallback(() => {
+    setSelectedIds((prev) => {
+      if (prev.size === calendarBirthdays.length && calendarBirthdays.length > 0) {
+        return new Set<string>();
+      }
+      return new Set(calendarBirthdays.map((item) => item.uid));
+    });
+  }, [calendarBirthdays]);
 
   const handleImport = async () => {
     const selected = calendarBirthdays.filter((item) =>
-      selectedIds.has(item.eventId)
+      selectedIds.has(item.uid)
     );
     if (selected.length === 0) return;
 
@@ -106,12 +112,12 @@ export function CalendarImportModal({
   };
 
   const renderItem = ({ item }: { item: CalendarBirthdayItem }) => {
-    const isSelected = selectedIds.has(item.eventId);
+    const isSelected = selectedIds.has(item.uid);
     const dateStr = `${MONTH_NAMES[item.birthday_month]} ${item.birthday_day}${item.birthday_year ? `, ${item.birthday_year}` : ''}`;
 
     return (
       <Pressable
-        onPress={() => toggleItem(item.eventId)}
+        onPress={() => toggleItem(item.uid)}
         style={[
           styles.row,
           { backgroundColor: isSelected ? colors.primary + '10' : 'transparent' },
@@ -193,9 +199,7 @@ export function CalendarImportModal({
                 </Text>
                 <Pressable onPress={toggleAll}>
                   <Text style={[styles.selectAllText, { color: colors.primary }]}>
-                    {selectedIds.size === calendarBirthdays.length
-                      ? 'Deselect All'
-                      : 'Select All'}
+                    {allSelected ? 'Deselect All' : 'Select All'}
                   </Text>
                 </Pressable>
               </View>
@@ -203,7 +207,7 @@ export function CalendarImportModal({
               {/* List */}
               <FlatList
                 data={calendarBirthdays}
-                keyExtractor={(item) => item.eventId}
+                keyExtractor={(item) => item.uid}
                 renderItem={renderItem}
                 contentContainerStyle={styles.list}
                 showsVerticalScrollIndicator={false}

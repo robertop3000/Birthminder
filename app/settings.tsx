@@ -32,6 +32,7 @@ export default function SettingsScreen() {
                 content: {
                     title: 'Birthminder Test 🧪',
                     body: 'This is a test notification! It will appear in 5 seconds.',
+                    sound: 'default',
                     data: { type: 'test' },
                 },
                 trigger: {

@@ -3,10 +3,11 @@ import {
   View,
   Text,
   FlatList,
+  Pressable,
   StyleSheet,
   ActivityIndicator,
 } from 'react-native';
-import * as Notifications from 'expo-notifications';
+import { useRouter } from 'expo-router';
 import { useTheme } from '../../hooks/useTheme';
 import { useAuth } from '../../hooks/useAuth';
 import { useBirthdays } from '../../hooks/useBirthdays';
@@ -24,8 +25,9 @@ import { supabase } from '../../lib/supabase';
 
 export default function HomeScreen() {
   const { colors } = useTheme();
+  const router = useRouter();
   const { user } = useAuth();
-  const { birthdays, loading, refetch } = useBirthdays();
+  const { birthdays, loading } = useBirthdays();
   const { scheduleAllNotifications, permissionStatus } = useNotifications();
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
 
@@ -101,11 +103,12 @@ export default function HomeScreen() {
           ListHeaderComponent={
             <>
               {todayBirthdays.map((p) => (
-                <CelebrationBanner
-                  key={p.id}
-                  name={p.name}
-                  photoUrl={p.photo_url}
-                />
+                <Pressable key={p.id} onPress={() => router.push(`/person/${p.id}`)}>
+                  <CelebrationBanner
+                    name={p.name}
+                    photoUrl={p.photo_url}
+                  />
+                </Pressable>
               ))}
 
 

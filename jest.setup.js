@@ -278,6 +278,7 @@ jest.mock('expo-contacts', () => ({
     LastName: 'lastName',
     Image: 'image',
     Birthday: 'birthday',
+    PhoneNumbers: 'phoneNumbers',
     ID: 'id',
   },
 }));

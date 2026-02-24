@@ -6,6 +6,7 @@ import { useAuth } from './useAuth';
 import { useBirthdays, Person } from './useBirthdays';
 
 export interface CalendarBirthdayItem {
+  uid: string;
   eventId: string;
   name: string;
   birthday_month: number;
@@ -69,7 +70,7 @@ export function useCalendarImport() {
       );
 
       // Deduplicate by name (birthday calendar repeats events annually)
-      const seen = new Map<string, CalendarBirthdayItem>();
+      const seen = new Map<string, Omit<CalendarBirthdayItem, 'uid'>>();
 
       for (const event of events) {
         if (!event.title) continue;
@@ -102,9 +103,9 @@ export function useCalendarImport() {
         });
       }
 
-      const items = Array.from(seen.values()).sort((a, b) =>
-        a.name.localeCompare(b.name)
-      );
+      const items: CalendarBirthdayItem[] = Array.from(seen.values())
+        .sort((a, b) => a.name.localeCompare(b.name))
+        .map((item, index) => ({ ...item, uid: `${item.eventId}-${index}` }));
 
       setCalendarBirthdays(items);
       setLoading(false);
