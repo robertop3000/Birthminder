@@ -56,87 +56,16 @@ Familiar social-app layout so users feel at home immediately.
 ---
 
 ## Tech Stack
+- **Framework**: Expo SDK 54 (React Native), TypeScript, Expo Router.
+- **Backend/Auth**: Supabase (PostgreSQL + Auth + Storage).
+- **Native APIs**: `expo-notifications`, `expo-calendar`, `expo-contacts`, `expo-image`, `expo-image-manipulator`, `expo-image-picker`.
+- **Utilities**: `date-fns`, `AsyncStorage`, `Hermes`.
+- **Testing**: Jest + @testing-library/react-native.
 
-- Framework: React Native with Expo SDK 54
-- Language: TypeScript (strict mode) — no plain .js source files
-- Navigation: Expo Router (file-based routing)
-- Backend & Auth: Supabase (PostgreSQL + Auth + Storage)
-- Push Notifications: expo-notifications (local scheduling)
-- Image Rendering: expo-image (disk-cached, with retry)
-- Image Processing: expo-image-manipulator (resize/compress on upload)
-- Image Picking: expo-image-picker
-- File I/O: expo-file-system (legacy import for base64 reads)
-- Theme Storage: @react-native-async-storage/async-storage
-- Date Math: date-fns
-- Typography: DM Sans (400, 500, 700) via @expo-google-fonts/dm-sans
-- JS Engine: Hermes
-- Target Platform: iOS only
-- Build Tool: EAS Build (cloud, no Mac needed)
-- Testing: Jest + ts-jest + @testing-library/react-native
-
----
-
-## Theme System — Dark and Light Mode
-
-The app supports both modes with a toggle in the Profile tab.
-User preference is persisted using AsyncStorage (key: @theme_mode).
-
-Light Mode Colors:
-- Background: #FAF8F5
-- Surface/Cards: #F0EDE8
-- Primary: #E07A5F
-- Text Primary: #2D2D2D
-- Text Secondary: #9E9E9E
-- Accent: #F2C94C
-- Bottom Bar Background: #FFFFFF
-- Bottom Bar Border: #E8E3DE
-
-Dark Mode Colors:
-- Background: #000000
-- Surface/Cards: #1A1A1A
-- Primary: #E07A5F
-- Text Primary: #FFFFFF
-- Text Secondary: #6E6E6E
-- Accent: #F2C94C
-- Bottom Bar Background: #000000
-- Bottom Bar Border: #2A2A2A
-
-Theme Rules:
-- ThemeContext wraps the entire app (in app/_layout.tsx)
-- useTheme() hook exposes mode, colors, and toggleTheme()
-- All components use theme colors — never hardcode color values
-- Toggle lives in Profile tab as a sun/moon icon switch
-- Default to light mode on first launch
-
----
-
-## Navigation Layout — Bottom Tab Bar
-
-5 icon-only tabs — no text labels under icons, exactly like X/Twitter.
-
-Tab order left to right:
-1. Home icon — Today and Upcoming birthdays
-2. Search icon — Search all birthdays
-3. Groups icon — All groups
-4. Notifications icon — Notification history and settings
-5. Profile icon — User profile
-
-Bottom Bar Styling:
-- Fixed to bottom of screen, 80px height with 20px bottom padding
-- Icons 24-28px
-- Active tab uses Primary color #E07A5F
-- Inactive tabs use Text Secondary color
-- Small dot indicator below active icon
-- Subtle top border using theme border color
-- Solid background, no blur
-
-Floating Action Button (FAB):
-- Circular button (56x56px) bottom right corner above tab bar
-- Same style as X/Twitter compose button
-- Color: Primary #E07A5F with white + icon
-- Opens Add Birthday modal from anywhere
-- Visible on Home, Search, and Groups tabs only
-- Hidden on Notifications and Profile tabs
+## Navigation & UI
+- **Layout**: 4 icon-only tabs (Home, Search/Notifications, Groups, Profile) with X/Twitter-style FAB (Home/Search/Groups).
+- **Theme**: Light (#FAF8F5) and Dark (#000000) modes, persisted and toggled in Profile.
+- **Rules**: Icons only in tabs, active dot indicator, 80px height, TopBar on all screens (Avatar Left | Title Center | Action Right).
 
 ---
 
@@ -164,43 +93,21 @@ Every main screen has a top bar:
 
 ---
 
-## Core Features
+### Core Features
+- **Accounts**: Supabase Auth, private data, automated profile creation.
+- **Birthdays**: CRUD with optimized photo storage and rolling calendar view.
+- **Messaging (v1.4.1)**: WhatsApp/iMessage deep links with number sanitization and pre-filled greetings.
+- **Notifications (v1.4.1)**: Automated 8:00 AM local time day-of alerts with sound.
+- **Import (v1.4.1)**: Zero-lag iOS Calendar import with deduplication logic.
+- **Sharing**: Unique share codes for groups/persons with HTTPS/OG landing pages.
+- **Theme**: Full light/dark mode support throughout the app.
 
-1. Accounts — email/password via Supabase Auth, private data per user,
-   profile auto-created by DB trigger + client-side ensureProfile() fallback
-2. Birthdays — add/edit/delete, multi-group, photos optimized and stored in Supabase Storage,
-   month-grouped rolling calendar view
-3. Groups — name, 8 color presets, and optional photo; same person in multiple groups,
-   deleting a group does not delete people, inline creation from birthday form, edit from detail screen
-4. Notifications — local notifications on birthday date (8 AM), advance reminders
-   (0/1/3/7 days before, 8 AM), re-scheduled on every app launch
-5. Sharing — unique share_code per group or person, HTTPS share URLs via GitHub Pages
-   landing page (OG meta tags for rich previews on WhatsApp/Telegram/iMessage),
-   deep link redirect to birthminder:// scheme, import with deduplication
-6. Dark/Light Mode — full theme support, persisted, toggled from Profile
-7. Error Handling — ErrorBoundary class component, auth error recovery, photo upload retries
-8. Legal — Privacy Policy + Terms of Service for App Store compliance
-
----
-
-## Rules
-
-1. Always TypeScript — no .js source files
-2. Use @supabase/supabase-js for all backend work
-3. Read credentials from .env — never hardcode them
-4. Use Expo Router for all navigation
-5. Use expo-image-picker for photo selection, expo-image-manipulator for processing
-6. Use expo-image for rendering (with disk cache and retry)
-7. Use expo-notifications for notifications
-8. Use date-fns for all date math
-9. Every component uses useTheme() — never hardcode colors
-10. Bottom tab bar: icons only, no labels, active dot indicator
-11. FAB: bottom right, primary color, only on Home/Search/Groups tabs
-12. Top bar: avatar left, title center, action right on every main screen
-13. Keep components small and reusable
-14. Windows machine — never suggest Xcode or Mac-only tools
-15. All iOS builds via: eas build --platform ios
-16. Use expo-file-system/legacy for readAsStringAsync (Expo SDK 54 requirement)
+### Development Rules
+- **Tech**: Strict TypeScript, Supabase, Expo Router, `expo-image` (cache).
+- **Environment**: Use `.env` (never commit), Windows-based dev (no local iOS simulator).
+- **UI**: Icons-only tabs, active dot indicator, FAB on Home/Search/Groups, TopBar on all.
+- **Workflow**: `npx tsc` and `npx jest` required before any commit/visual test.
+- **Versioning**: Sync `app.json` (version/buildNumber) and `package.json` for all releases.
 
 ---
 

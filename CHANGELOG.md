@@ -4,11 +4,30 @@ All notable changes to Birthminder will be documented in this file.
 
 ---
 
-## v1.4.1 - 2026-02-23
+## v1.4.1 - 2026-02-23 — Communication & UX Overhaul
 *Developed using Gemini 3.5 Sonnet.*
 
-### Added
-- Started development of v1.4.1.
+### 💬 Messaging & Communication Hub
+- **Deep Link Integration**: Added direct WhatsApp and iMessage action buttons on birthday profiles.
+- **"No-Build" App Detection**: Graceful handling of missing messaging apps with user alerts (via `Linking.openURL` try/catch).
+- **E.164 Number Sanitization**: Automatically strips spaces/dashes from contacts for perfect WhatsApp formatting.
+- **Pre-filled Greetings**: Default "Hey! Happy Birthday! 🎂" message populates automatically.
+
+### 🔔 Notification System Refactoring
+- **"Day-Of" Strategy**: Alerts now fire exclusively on the actual birthday (removed "2 days before" clutter).
+- **8:00 AM Trigger**: Standardized, hardcoded alert time for all birthdays.
+- **Sound Restoration**: Fixed "silent notification" bug (enabled `shouldPlaySound` and system defaults).
+- **Auto-Migration**: AsyncStorage migration wipes "ghost reminders" and re-schedules for the new 8:00 AM slot.
+- **UI Cleanup**: Removed "Remind Me" toggle; notifications are now intelligently automatic.
+
+### 📅 Calendar Import & Logic Fixes
+- **Unique Identity Fix**: Resolved duplicate key errors in lists by combining event IDs with indices in `keyExtractor`.
+- **Select All Logic**: Fixed bi-directional toggle for clearing all selections.
+- **Performance**: Optimized selection logic using `useMemo` and `useCallback` for zero-lag with large datasets.
+
+### 🎨 Navigation & Interface Polish
+- **Interactive Home Banner**: Celebration banner now navigates directly to the birthday profile.
+- **Tab Consolidation**: Merged "Notifications" and "Search" into a single unified view.
 
 ## v1.4.0 - 2026-02-23
 *Developed using Gemini 3.5 Sonnet.*
