@@ -11,7 +11,7 @@ All notable changes to Birthminder will be documented in this file.
 - **Internal Password Reset**: Added a dedicated `reset-password` screen accessible from within the app for signed-in users.
 - **Improved Password Hooks**: Updated `useAuth` with `updatePassword` and `resetPassword` methods using Supabase.
 - **Sign Up Cleanup**: Removed the 'Add picture' icon from the Sign Up page for a sleeker initial onboarding experience.
-- **Forgot Password (WIP)**: Integrated initial logic for handling password recovery links.
+- **Forgot Password**: Implementation started but currently **not working properly** (WIP); requires deep link handler stabilization.
 
 ## v1.4.1 - 2026-02-23 — Communication & UX Overhaul
 *Developed using Gemini 3.5 Sonnet. Production build for TestFlight UAT.*

@@ -348,7 +348,8 @@ Canonical reference: `supabase-schema.sql` in project root.
 
 ## Next Steps
 
-1. **TestFlight testing** — Verify 1.3.0 notification scheduling on device via diagnostic button
+1. **Fix Forgot Password** — Stabilize deep link handler and recovery flow (currently non-functional).
+2. **TestFlight testing** — Verify 1.3.0 notification scheduling on device via diagnostic button
 2. **Production build** — Run: `eas build --platform ios --profile production` for v1.3.0
 3. **App Store submission** — Prepare screenshots (6.9" display: 1320x2868) and metadata
 4. **Scrub git history** — Remove `.env` from commit 49681c3
