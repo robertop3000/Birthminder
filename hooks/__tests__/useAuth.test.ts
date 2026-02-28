@@ -1,5 +1,6 @@
 import { renderHook, act, waitFor } from '@testing-library/react-native';
 import { useAuth } from '../useAuth';
+import { RECOVERY_REDIRECT_URL } from '../../lib/config';
 
 // Access the global mock supabase
 const mockSupabase = (global as any).__mockSupabase;
@@ -137,7 +138,7 @@ describe('useAuth', () => {
 
     expect(mockSupabase.auth.resetPasswordForEmail).toHaveBeenCalledWith(
       'reset@test.com',
-      { redirectTo: 'exp://jqomqng-robertop3000-8081.exp.direct' }
+      { redirectTo: RECOVERY_REDIRECT_URL }
     );
   });
 

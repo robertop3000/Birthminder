@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Session, User } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase';
+import { RECOVERY_REDIRECT_URL } from '../lib/config';
 
 /**
  * Ensures a profile row exists for the given user.
@@ -128,7 +129,7 @@ export function useAuth() {
 
   const resetPassword = useCallback(async (email: string) => {
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: 'exp://jqomqng-robertop3000-8081.exp.direct',
+      redirectTo: RECOVERY_REDIRECT_URL,
     });
     if (error) throw error;
   }, []);
