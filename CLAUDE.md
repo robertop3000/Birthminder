@@ -216,8 +216,8 @@ When bumping to version X.Y.Z:
 # PART 4: CURRENT PROJECT STATE
 
 **Last Updated:** 2026-02-23
-**Current Version:** v1.5.1 (Development — Gemini 3.5 Sonnet)
-**Build Number:** 7
+**Current Version:** v1.4.0 (Branch 1.5.1 — Gemini 3.5 Sonnet)
+**Build Number:** 6
 **Test Status:** 17 suites, 100 tests — all passing
 **Build Status:** v1.5.1 in Development. Forgot Password perfected in dev builds.
 **Pre-Flight Audit:** PASSED
