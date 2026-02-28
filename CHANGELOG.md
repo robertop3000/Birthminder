@@ -3,6 +3,12 @@
 All notable changes to Birthminder will be documented in this file.
 
 ---
+ 
+## v1.5.1 - 2026-02-28
+*Developed using Gemini 3.5 Sonnet.*
+
+### Added
+- Initialized branch 1.5.1 for new feature development.
 
 ## v1.5.0 — Auth & UX Refinement (Dev Branch)
 *Developed using Gemini 3.5 Sonnet. Branch: 1.5.0 (Expo Version: 1.4.0).*

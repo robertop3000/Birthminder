@@ -216,10 +216,10 @@ When bumping to version X.Y.Z:
 # PART 4: CURRENT PROJECT STATE
 
 **Last Updated:** 2026-02-23
-**Current Version:** v1.4.0 (Branch 1.5.0 — Gemini 3.5 Sonnet)
-**Build Number:** 6
+**Current Version:** v1.5.1 (Development — Gemini 3.5 Sonnet)
+**Build Number:** 7
 **Test Status:** 17 suites, 100 tests — all passing
-**Build Status:** v1.5.0 in Development (Using marketing v1.4.0). Password reset and Signup cleanup implemented.
+**Build Status:** v1.5.1 in Development. Forgot Password perfected in dev builds.
 **Pre-Flight Audit:** PASSED
 **EAS Secrets:** EXPO_PUBLIC_SUPABASE_URL and EXPO_PUBLIC_SUPABASE_ANON_KEY configured
 **GitHub Pages:** Enabled — serves OG landing page at https://robertop3000.github.io/Birthminder/
