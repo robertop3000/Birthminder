@@ -219,7 +219,7 @@ When bumping to version X.Y.Z:
 **Current Version:** v1.4.0 (Branch 1.5.1 — Gemini 3.5 Sonnet)
 **Build Number:** 6
 **Test Status:** 17 suites, 100 tests — all passing
-**Build Status:** v1.5.1 in Development. Forgot Password perfected in dev builds.
+**Build Status:** v1.5.1 in Development. Group birthday addition improved with search and "New Birthday" shortcut. Forgot Password perfected in dev builds.
 **Pre-Flight Audit:** PASSED
 **EAS Secrets:** EXPO_PUBLIC_SUPABASE_URL and EXPO_PUBLIC_SUPABASE_ANON_KEY configured
 **GitHub Pages:** Enabled — serves OG landing page at https://robertop3000.github.io/Birthminder/

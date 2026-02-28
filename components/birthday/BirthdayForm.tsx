@@ -31,6 +31,7 @@ export interface BirthdayFormData {
 
 interface BirthdayFormProps {
   initialValues?: Partial<BirthdayFormData>;
+  preselectedGroupId?: string;
   onSubmit: (data: BirthdayFormData) => void;
   onCancel: () => void;
   loading?: boolean;
@@ -43,6 +44,7 @@ const MONTHS = [
 
 export function BirthdayForm({
   initialValues,
+  preselectedGroupId,
   onSubmit,
   onCancel,
   loading = false,
@@ -62,7 +64,7 @@ export function BirthdayForm({
   const [photoUri, setPhotoUri] = useState(initialValues?.photo_uri ?? null);
   const [notes, setNotes] = useState(initialValues?.notes ?? '');
   const [selectedGroups, setSelectedGroups] = useState<string[]>(
-    initialValues?.group_ids ?? []
+    preselectedGroupId ? [preselectedGroupId] : (initialValues?.group_ids ?? [])
   );
   const [contactId, setContactId] = useState<string | null>(
     initialValues?.contact_id ?? null

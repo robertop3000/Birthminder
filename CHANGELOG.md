@@ -8,6 +8,9 @@ All notable changes to Birthminder will be documented in this file.
 *Developed using Gemini 3.5 Sonnet. Branch: 1.5.1 (Expo Version: 1.4.0, Build: 6).*
 
 ### Added
+- **Group Management**: Improved the flow for adding birthdays to groups.
+    - Added a search bar to filter existing people when adding to a group.
+    - Added a "New Birthday" shortcut in the group modal that pre-selects the current group.
 - Initialized branch 1.5.1 for new feature development.
 
 ## v1.5.0 — Auth & UX Refinement (Dev Branch)

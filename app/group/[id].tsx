@@ -2,6 +2,7 @@ import React, { useMemo, useState } from 'react';
 import {
   View,
   Text,
+  TextInput,
   StyleSheet,
   ScrollView,
   Alert,
@@ -36,6 +37,7 @@ export default function GroupDetailScreen() {
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [editLoading, setEditLoading] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
 
   const group = groups.find((g) => g.id === id);
 
@@ -52,6 +54,16 @@ export default function GroupDetailScreen() {
     const memberIds = new Set(members.map((m) => m.id));
     return birthdays.filter((p) => !memberIds.has(p.id));
   }, [birthdays, members, id]);
+
+  // Filter available people by search query
+  const filteredPeople = useMemo(() => {
+    if (!searchQuery.trim()) return availablePeople;
+
+    const query = searchQuery.toLowerCase().trim();
+    return availablePeople.filter(person =>
+      person.name.toLowerCase().includes(query)
+    );
+  }, [availablePeople, searchQuery]);
 
   if (!group) {
     return (
@@ -121,6 +133,16 @@ export default function GroupDetailScreen() {
     } catch {
       Alert.alert('Error', 'Failed to add person to group');
     }
+  };
+
+  const handleNewBirthday = () => {
+    // Close the modal first
+    setShowAddModal(false);
+    // Navigate to birthday creation with group ID pre-selected
+    router.push({
+      pathname: '/modal',
+      params: { preselectedGroupId: group.id }
+    });
   };
 
   const handleRemovePerson = (personId: string, personName: string) => {
@@ -319,7 +341,15 @@ export default function GroupDetailScreen() {
       </Modal>
 
       {/* Add People Modal */}
-      <Modal visible={showAddModal} animationType="slide" transparent>
+      <Modal
+        visible={showAddModal}
+        animationType="slide"
+        transparent
+        onRequestClose={() => {
+          setShowAddModal(false);
+          setSearchQuery('');
+        }}
+      >
         <View style={styles.modalOverlay}>
           <View
             style={[
@@ -330,28 +360,62 @@ export default function GroupDetailScreen() {
               },
             ]}
           >
+            {/* Header */}
             <View style={styles.modalHeader}>
               <Text style={[styles.modalTitle, { color: colors.textPrimary }]}>
                 Add People to {group.name}
               </Text>
-              <Pressable onPress={() => setShowAddModal(false)}>
+              <Pressable
+                onPress={() => {
+                  setShowAddModal(false);
+                  setSearchQuery('');
+                }}
+              >
                 <Ionicons name="close" size={24} color={colors.textSecondary} />
               </Pressable>
             </View>
 
-            {availablePeople.length === 0 ? (
+            {/* New Birthday Button */}
+            <Pressable
+              style={[styles.newBirthdayButton, { backgroundColor: colors.primary }]}
+              onPress={handleNewBirthday}
+            >
+              <Ionicons name="add-circle" size={20} color="#FFFFFF" />
+              <Text style={styles.newBirthdayButtonText}>New Birthday</Text>
+            </Pressable>
+
+            {/* Search Bar */}
+            <TextInput
+              style={[
+                styles.searchInput,
+                {
+                  backgroundColor: colors.surface,
+                  color: colors.textPrimary,
+                  borderColor: colors.textSecondary + '20',
+                },
+              ]}
+              placeholder="Search by name..."
+              placeholderTextColor={colors.textSecondary}
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+            />
+
+            {/* People List */}
+            {filteredPeople.length === 0 ? (
               <View style={styles.emptyModal}>
                 <Text
                   style={[styles.emptyText, { color: colors.textSecondary }]}
                 >
-                  {birthdays.length === 0
-                    ? 'No saved birthdays yet. Add some birthdays first!'
-                    : 'Everyone is already in this group!'}
+                  {searchQuery
+                    ? 'No matches found'
+                    : birthdays.length === 0
+                      ? 'No saved birthdays yet. Add some birthdays first!'
+                      : 'Everyone is already in this group!'}
                 </Text>
               </View>
             ) : (
               <FlatList
-                data={availablePeople}
+                data={filteredPeople}
                 keyExtractor={(item) => item.id}
                 renderItem={({ item }) => (
                   <Pressable
@@ -531,14 +595,10 @@ const styles = StyleSheet.create({
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    justifyContent: 'flex-end',
   },
   modalContent: {
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
+    flex: 1,
     padding: 24,
-    maxHeight: '70%',
   },
   modalHeader: {
     flexDirection: 'row',
@@ -578,5 +638,33 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontFamily: 'DMSans_400Regular',
     marginTop: 2,
+  },
+  newBirthdayButton: {
+    marginHorizontal: 16,
+    marginTop: 12,
+    marginBottom: 12,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+  },
+  newBirthdayButtonText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontFamily: 'DMSans_500Medium',
+    fontWeight: '500',
+  },
+  searchInput: {
+    marginHorizontal: 16,
+    marginBottom: 12,
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    borderRadius: 8,
+    fontSize: 14,
+    fontFamily: 'DMSans_400Regular',
+    borderWidth: 1,
   },
 });

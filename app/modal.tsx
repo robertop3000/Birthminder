@@ -28,6 +28,7 @@ export default function AddEditBirthdayModal() {
     notes?: string;
     groups?: string;
     contact_id?: string;
+    preselectedGroupId?: string;
   }>();
 
   const [loading, setLoading] = useState(false);
@@ -125,6 +126,7 @@ export default function AddEditBirthdayModal() {
     >
       <BirthdayForm
         initialValues={initialValues}
+        preselectedGroupId={params.preselectedGroupId}
         onSubmit={handleSubmit}
         onCancel={() => router.back()}
         loading={loading}
