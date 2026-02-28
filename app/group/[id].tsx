@@ -356,6 +356,7 @@ export default function GroupDetailScreen() {
               styles.modalContent,
               {
                 backgroundColor: colors.background,
+                paddingTop: insets.top,
                 paddingBottom: insets.bottom + 20,
               },
             ]}
