@@ -293,6 +293,13 @@ jest.mock('expo-notifications', () => ({
   SchedulableTriggerInputTypes: { CALENDAR: 'calendar' },
 }));
 
+// Mock expo-linking
+jest.mock('expo-linking', () => ({
+  getInitialURL: jest.fn().mockResolvedValue(null),
+  addEventListener: jest.fn().mockReturnValue({ remove: jest.fn() }),
+  createURL: jest.fn((path) => `exp://localhost/${path}`),
+}));
+
 // Mock expo-splash-screen
 jest.mock('expo-splash-screen', () => ({
   preventAutoHideAsync: jest.fn().mockResolvedValue(undefined),
@@ -355,6 +362,18 @@ const mockSupabase = {
     }),
     signOut: jest.fn().mockResolvedValue({ error: null }),
     resetPasswordForEmail: jest.fn().mockResolvedValue({ error: null }),
+    verifyOtp: jest.fn().mockResolvedValue({
+      data: { session: { user: { id: 'test-user-id' } } },
+      error: null,
+    }),
+    updateUser: jest.fn().mockResolvedValue({
+      data: { user: { id: 'test-user-id' } },
+      error: null,
+    }),
+    setSession: jest.fn().mockResolvedValue({
+      data: { session: { user: { id: 'test-user-id' } } },
+      error: null,
+    }),
   },
   from: jest.fn().mockReturnValue({
     select: jest.fn().mockReturnThis(),

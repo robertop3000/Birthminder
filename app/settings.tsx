@@ -151,6 +151,26 @@ export default function SettingsScreen() {
                     />
                 </Pressable>
 
+                {/* Account Section */}
+                <Text
+                    style={[
+                        styles.sectionLabel,
+                        { color: colors.textSecondary, marginTop: 32 },
+                    ]}
+                >
+                    Account
+                </Text>
+                <Pressable
+                    onPress={() => router.push('/(auth)/reset-password')}
+                    style={[styles.settingsRow, styles.primaryRow]}
+                >
+                    <Ionicons name="lock-closed-outline" size={20} color={colors.primary} />
+                    <Text style={[styles.settingsRowText, { color: colors.primary }]}>
+                        Change Password
+                    </Text>
+                    <Ionicons name="chevron-forward" size={18} color={colors.primary} />
+                </Pressable>
+
                 {/* Danger Zone */}
                 <Text
                     style={[
@@ -310,6 +330,11 @@ const styles = StyleSheet.create({
         flex: 1,
         fontSize: 15,
         fontFamily: 'DMSans_500Medium',
+    },
+    primaryRow: {
+        backgroundColor: '#E07A5F10',
+        borderWidth: 1,
+        borderColor: '#E07A5F30',
     },
     dangerRow: {
         backgroundColor: '#DC354510',

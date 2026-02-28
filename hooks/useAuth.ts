@@ -127,9 +127,16 @@ export function useAuth() {
   }, []);
 
   const resetPassword = useCallback(async (email: string) => {
-    const { error } = await supabase.auth.resetPasswordForEmail(email);
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: 'exp://jqomqng-robertop3000-8081.exp.direct',
+    });
     if (error) throw error;
   }, []);
 
-  return { session, user, loading, signUp, signIn, signOut, resetPassword };
+  const updatePassword = useCallback(async (password: string) => {
+    const { error } = await supabase.auth.updateUser({ password });
+    if (error) throw error;
+  }, []);
+
+  return { session, user, loading, signUp, signIn, signOut, resetPassword, updatePassword };
 }

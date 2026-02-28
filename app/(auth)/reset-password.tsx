@@ -5,32 +5,45 @@ import {
   TextInput,
   StyleSheet,
   ScrollView,
+  Alert,
   KeyboardAvoidingView,
   Platform,
-  Pressable,
 } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../../hooks/useTheme';
 import { useAuth } from '../../hooks/useAuth';
 import { Button } from '../../components/ui/Button';
-import { APP_NAME } from '../../lib/constants';
 
-export default function SignUpScreen() {
+export default function ResetPasswordScreen() {
   const { colors } = useTheme();
-  const { signUp } = useAuth();
+  const { updatePassword, signOut } = useAuth();
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const { source } = useLocalSearchParams<{ source?: string }>();
+  const isRecovery = source === 'recovery';
 
-  const [displayName, setDisplayName] = useState('');
-  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  const handleSignUp = async () => {
-    if (!displayName.trim() || !email.trim() || !password.trim()) {
-      setError('Please fill in all required fields.');
+  const isValid =
+    password.trim().length >= 6 && password === confirmPassword;
+
+  const handleSubmit = async () => {
+    if (!password.trim() || !confirmPassword.trim()) {
+      setError('Please fill in both fields.');
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      setError('Passwords do not match.');
+      return;
+    }
+
+    if (password.trim().length < 6) {
+      setError('Password must be at least 6 characters.');
       return;
     }
 
@@ -38,10 +51,29 @@ export default function SignUpScreen() {
     setError('');
 
     try {
-      await signUp(email.trim(), password, displayName.trim());
-      router.replace('/(tabs)');
+      await updatePassword(password);
+      if (isRecovery) {
+        await signOut();
+      }
+      Alert.alert(
+        'Password Updated',
+        'Your password has been changed successfully.',
+        [
+          {
+            text: 'OK',
+            onPress: () => {
+              if (isRecovery) {
+                router.replace('/(auth)/login');
+              } else {
+                router.back();
+              }
+            },
+          },
+        ]
+      );
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'Sign up failed';
+      const message =
+        err instanceof Error ? err.message : 'Failed to update password';
       setError(message);
     } finally {
       setLoading(false);
@@ -57,15 +89,15 @@ export default function SignUpScreen() {
         style={[styles.container, { backgroundColor: colors.background }]}
         contentContainerStyle={[
           styles.content,
-          { paddingTop: insets.top + 20, paddingBottom: insets.bottom + 20 },
+          { paddingTop: insets.top + 40, paddingBottom: insets.bottom + 20 },
         ]}
         keyboardShouldPersistTaps="handled"
       >
         <Text style={[styles.title, { color: colors.textPrimary }]}>
-          Create Account
+          New Password
         </Text>
         <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
-          Join {APP_NAME} to never forget a birthday
+          Enter your new password below.
         </Text>
 
         {error ? (
@@ -74,50 +106,7 @@ export default function SignUpScreen() {
 
         <View style={styles.inputGroup}>
           <Text style={[styles.label, { color: colors.textSecondary }]}>
-            Display Name
-          </Text>
-          <TextInput
-            style={[
-              styles.input,
-              {
-                backgroundColor: colors.surface,
-                color: colors.textPrimary,
-                borderColor: colors.bottomBarBorder,
-              },
-            ]}
-            value={displayName}
-            onChangeText={setDisplayName}
-            placeholder="Your name"
-            placeholderTextColor={colors.textSecondary}
-            autoCapitalize="words"
-          />
-        </View>
-
-        <View style={styles.inputGroup}>
-          <Text style={[styles.label, { color: colors.textSecondary }]}>
-            Email
-          </Text>
-          <TextInput
-            style={[
-              styles.input,
-              {
-                backgroundColor: colors.surface,
-                color: colors.textPrimary,
-                borderColor: colors.bottomBarBorder,
-              },
-            ]}
-            value={email}
-            onChangeText={setEmail}
-            placeholder="email@example.com"
-            placeholderTextColor={colors.textSecondary}
-            autoCapitalize="none"
-            keyboardType="email-address"
-          />
-        </View>
-
-        <View style={styles.inputGroup}>
-          <Text style={[styles.label, { color: colors.textSecondary }]}>
-            Password
+            New Password
           </Text>
           <TextInput
             style={[
@@ -133,22 +122,38 @@ export default function SignUpScreen() {
             placeholder="At least 6 characters"
             placeholderTextColor={colors.textSecondary}
             secureTextEntry
+            autoFocus
+          />
+        </View>
+
+        <View style={styles.inputGroup}>
+          <Text style={[styles.label, { color: colors.textSecondary }]}>
+            Confirm Password
+          </Text>
+          <TextInput
+            style={[
+              styles.input,
+              {
+                backgroundColor: colors.surface,
+                color: colors.textPrimary,
+                borderColor: colors.bottomBarBorder,
+              },
+            ]}
+            value={confirmPassword}
+            onChangeText={setConfirmPassword}
+            placeholder="Re-enter your password"
+            placeholderTextColor={colors.textSecondary}
+            secureTextEntry
           />
         </View>
 
         <Button
-          title="Create Account"
-          onPress={handleSignUp}
+          title="Update Password"
+          onPress={handleSubmit}
           loading={loading}
+          disabled={!isValid}
           style={styles.button}
         />
-
-        <Pressable onPress={() => router.push('/(auth)/login')}>
-          <Text style={[styles.linkText, { color: colors.textSecondary }]}>
-            Already have an account?{' '}
-            <Text style={{ color: colors.primary }}>Log in</Text>
-          </Text>
-        </Pressable>
       </ScrollView>
     </KeyboardAvoidingView>
   );
@@ -170,7 +175,7 @@ const styles = StyleSheet.create({
   subtitle: {
     fontSize: 16,
     fontFamily: 'DMSans_400Regular',
-    marginBottom: 28,
+    marginBottom: 32,
   },
   inputGroup: {
     marginBottom: 18,
@@ -197,10 +202,5 @@ const styles = StyleSheet.create({
   button: {
     marginTop: 8,
     marginBottom: 20,
-  },
-  linkText: {
-    textAlign: 'center',
-    fontSize: 15,
-    fontFamily: 'DMSans_400Regular',
   },
 });

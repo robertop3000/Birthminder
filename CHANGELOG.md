@@ -4,11 +4,14 @@ All notable changes to Birthminder will be documented in this file.
 
 ---
 
-## v1.5.0 - 2026-02-27
-*Developed using Gemini 3.5 Sonnet.*
+## v1.5.0 — Auth & UX Refinement (Dev Branch)
+*Developed using Gemini 3.5 Sonnet. Branch: 1.5.0 (Expo Version: 1.4.0).*
 
-### Added
-- Started development of v1.5.0.
+### 🔐 Authentication & Security
+- **Internal Password Reset**: Added a dedicated `reset-password` screen accessible from within the app for signed-in users.
+- **Improved Password Hooks**: Updated `useAuth` with `updatePassword` and `resetPassword` methods using Supabase.
+- **Sign Up Cleanup**: Removed the 'Add picture' icon from the Sign Up page for a sleeker initial onboarding experience.
+- **Forgot Password (WIP)**: Integrated initial logic for handling password recovery links.
 
 ## v1.4.1 - 2026-02-23 — Communication & UX Overhaul
 *Developed using Gemini 3.5 Sonnet. Production build for TestFlight UAT.*

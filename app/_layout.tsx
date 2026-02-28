@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { View, ActivityIndicator, StyleSheet } from 'react-native';
-import { Stack } from 'expo-router';
+import { Stack, useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import {
   useFonts,
@@ -10,6 +10,7 @@ import {
 } from '@expo-google-fonts/dm-sans';
 import * as SplashScreen from 'expo-splash-screen';
 import * as Notifications from 'expo-notifications';
+import * as Linking from 'expo-linking';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { ThemeProvider } from '../contexts/ThemeContext';
 import { BirthdaysProvider } from '../contexts/BirthdaysContext';
@@ -18,6 +19,7 @@ import { ErrorBoundary } from '../components/ErrorBoundary';
 import { useTheme } from '../hooks/useTheme';
 import { useBirthdays } from '../hooks/useBirthdays';
 import { useNotifications } from '../hooks/useNotifications';
+import { supabase } from '../lib/supabase';
 
 SplashScreen.preventAutoHideAsync().catch(() => { });
 
@@ -109,12 +111,58 @@ function NotificationMigration() {
   return null;
 }
 
+function RecoveryDeepLinkHandler() {
+  const router = useRouter();
+
+  useEffect(() => {
+    async function handleRecoveryUrl(url: string) {
+      const hashIndex = url.indexOf('#');
+      if (hashIndex === -1) return;
+
+      const hash = url.substring(hashIndex + 1);
+      const params = new URLSearchParams(hash);
+
+      const accessToken = params.get('access_token');
+      const refreshToken = params.get('refresh_token');
+      const type = params.get('type');
+
+      if (type === 'recovery' && accessToken && refreshToken) {
+        try {
+          const { error } = await supabase.auth.setSession({
+            access_token: accessToken,
+            refresh_token: refreshToken,
+          });
+          if (error) throw error;
+          router.replace('/(auth)/reset-password?source=recovery');
+        } catch (err) {
+          if (__DEV__) console.warn('Recovery deep link error:', err);
+        }
+      }
+    }
+
+    // Handle URL when app is opened from a deep link
+    Linking.getInitialURL().then((url) => {
+      if (url) handleRecoveryUrl(url);
+    });
+
+    // Handle URL when app is already open
+    const subscription = Linking.addEventListener('url', ({ url }) => {
+      handleRecoveryUrl(url);
+    });
+
+    return () => subscription.remove();
+  }, [router]);
+
+  return null;
+}
+
 function RootNavigator() {
   const { mode } = useTheme();
 
   return (
     <>
       <StatusBar style={mode === 'dark' ? 'light' : 'dark'} />
+      <RecoveryDeepLinkHandler />
       <Stack screenOptions={{ headerShown: false }}>
         <Stack.Screen name="(auth)" />
         <Stack.Screen name="(tabs)" />

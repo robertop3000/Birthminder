@@ -136,8 +136,45 @@ describe('useAuth', () => {
     });
 
     expect(mockSupabase.auth.resetPasswordForEmail).toHaveBeenCalledWith(
-      'reset@test.com'
+      'reset@test.com',
+      { redirectTo: 'exp://jqomqng-robertop3000-8081.exp.direct' }
     );
+  });
+
+  it('updatePassword calls supabase.auth.updateUser', async () => {
+    mockSupabase.auth.updateUser.mockResolvedValue({
+      data: { user: { id: 'test-user-id' } },
+      error: null,
+    });
+
+    const { result } = renderHook(() => useAuth());
+    await waitFor(() => {
+      expect(result.current.loading).toBe(false);
+    });
+
+    await act(async () => {
+      await result.current.updatePassword('newSecurePass123');
+    });
+
+    expect(mockSupabase.auth.updateUser).toHaveBeenCalledWith({
+      password: 'newSecurePass123',
+    });
+  });
+
+  it('updatePassword throws on error', async () => {
+    mockSupabase.auth.updateUser.mockResolvedValue({
+      data: null,
+      error: new Error('Password too weak'),
+    });
+
+    const { result } = renderHook(() => useAuth());
+    await waitFor(() => {
+      expect(result.current.loading).toBe(false);
+    });
+
+    await expect(
+      result.current.updatePassword('weak')
+    ).rejects.toThrow('Password too weak');
   });
 
   it('returns all expected properties', async () => {
@@ -153,5 +190,6 @@ describe('useAuth', () => {
     expect(result.current).toHaveProperty('signIn');
     expect(result.current).toHaveProperty('signOut');
     expect(result.current).toHaveProperty('resetPassword');
+    expect(result.current).toHaveProperty('updatePassword');
   });
 });
