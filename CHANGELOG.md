@@ -4,8 +4,14 @@ All notable changes to Birthminder will be documented in this file.
 
 ---
 
-## v1.4.1 - 2026-02-23 — Communication & UX Overhaul
+## v1.5.0 - 2026-02-27
 *Developed using Gemini 3.5 Sonnet.*
+
+### Added
+- Started development of v1.5.0.
+
+## v1.4.1 - 2026-02-23 — Communication & UX Overhaul
+*Developed using Gemini 3.5 Sonnet. Production build for TestFlight UAT.*
 
 ### 💬 Messaging & Communication Hub
 - **Deep Link Integration**: Added direct WhatsApp and iMessage action buttons on birthday profiles.
