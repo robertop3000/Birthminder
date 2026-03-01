@@ -144,13 +144,14 @@ export function GroupsProvider({ children }: { children: React.ReactNode }) {
 
     const addPersonToGroup = useCallback(
         async (personId: string, groupId: string) => {
+            if (!user) throw new Error('Not authenticated');
             const { error: insertError } = await supabase
                 .from('person_groups')
-                .insert({ person_id: personId, group_id: groupId });
+                .insert({ person_id: personId, group_id: groupId, user_id: user.id });
             if (insertError) throw insertError;
             await fetchGroups();
         },
-        [fetchGroups]
+        [user, fetchGroups]
     );
 
     const removePersonFromGroup = useCallback(

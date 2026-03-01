@@ -224,10 +224,10 @@ When bumping to version X.Y.Z:
 # PART 4: CURRENT PROJECT STATE
 
 **Last Updated:** 2026-03-01
-**Current Version:** v1.4.0 (Branch 1.5.4 — Antigravity)
+**Current Version:** v1.4.0 (Branch 1.6.0-production-readiness)
 **Build Number:** 6
 **Test Status:** 18 suites, 115 tests — all passing
-**Build Status:** v1.5.4 started. Initialized from v1.5.3.
+**Build Status:** v1.6.0 production readiness fixes applied.
 **Pre-Flight Audit:** PASSED
 **EAS Secrets:** EXPO_PUBLIC_SUPABASE_URL and EXPO_PUBLIC_SUPABASE_ANON_KEY configured
 **GitHub Pages:** Enabled — serves OG landing page at https://robertop3000.github.io/Birthminder/
@@ -350,18 +350,20 @@ Canonical reference: `supabase-schema.sql` in project root.
 | profiles | User profile (extends auth.users) | id (PK/FK), display_name, avatar_url, notification_days_before |
 | people | Birthday entries | id, user_id (FK), name, birthday_day, birthday_month, birthday_year?, photo_url, notes, share_code |
 | groups | Organizing people | id, user_id (FK), name, color, photo_url, share_code, source_share_code |
-| person_groups | Junction (many-to-many) | person_id (FK), group_id (FK) |
+| person_groups | Junction (many-to-many) | person_id (FK), group_id (FK), user_id (FK — denormalized for O(1) RLS) |
 
 ---
 
-## v1.5.4 Changes (Recent)
+## v1.6.0 Changes (Recent)
 
-**Sharing & Deep-Linking Fixes:**
-- Fixed double-link bug: Removed duplicate `url` parameter from `Share.share()` calls (was causing links to appear twice in iMessage/WhatsApp)
-- Created missing `app/shared/person/[code].tsx` route for shared birthday deep links
-- Fixed Edit Group modal positioning to avoid iOS dynamic island overlap (added `paddingTop: insets.top`)
-- Updated error text colors to semantic red (`#DC3545`) for better UX clarity in auth screens
-- Fixed `APP_VERSION` in `lib/constants.ts` (was `1.0.0`, now `1.5.3`)
+**Production Readiness — Performance & Security:**
+- Notification scheduling now batched with `Promise.all` in chunks of 50 (was sequential await)
+- Deleting a birthday cancels its notifications first (prevents orphaned notifications)
+- Image uploads validated at 5 MB client-side before processing
+- Removed `?t=` cache-busting from image URLs — `expo-image` disk cache now works correctly
+- Denormalized `user_id` onto `person_groups` for O(1) RLS (was correlated subquery per row)
+- All `person_groups` inserts now include `user_id`
+- Schema file updated with `reminder_days` column and `person_groups.user_id`
 
 **All tests passing:** 18 suites, 115 tests.
 

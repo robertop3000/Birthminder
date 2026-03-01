@@ -125,6 +125,7 @@ export default function SharedGroupScreen() {
         await supabase.from('person_groups').insert({
           person_id: existingPerson.id,
           group_id: newGroup.id,
+          user_id: user.id,
         });
       } else {
         // Create new person
@@ -146,6 +147,7 @@ export default function SharedGroupScreen() {
           await supabase.from('person_groups').insert({
             person_id: person.id,
             group_id: newGroup.id,
+            user_id: user.id,
           });
         }
       }
@@ -202,6 +204,7 @@ export default function SharedGroupScreen() {
             await supabase.from('person_groups').insert({
               person_id: person.id,
               group_id: existingGroupId,
+              user_id: user.id,
             });
           }
         } else {
@@ -209,7 +212,7 @@ export default function SharedGroupScreen() {
           await supabase
             .from('person_groups')
             .upsert(
-              { person_id: existingPerson.id, group_id: existingGroupId },
+              { person_id: existingPerson.id, group_id: existingGroupId, user_id: user.id },
               { onConflict: 'person_id,group_id' }
             );
         }

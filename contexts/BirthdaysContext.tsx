@@ -119,6 +119,7 @@ export function BirthdaysProvider({ children }: { children: React.ReactNode }) {
                 const rows = input.group_ids.map((gid) => ({
                     person_id: data.id,
                     group_id: gid,
+                    user_id: user.id,
                 }));
                 await supabase.from('person_groups').insert(rows);
             }
@@ -157,6 +158,7 @@ export function BirthdaysProvider({ children }: { children: React.ReactNode }) {
                     const rows = input.group_ids.map((gid) => ({
                         person_id: id,
                         group_id: gid,
+                        user_id: user.id,
                     }));
                     await supabase.from('person_groups').insert(rows);
                 }

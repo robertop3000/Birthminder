@@ -32,6 +32,7 @@ CREATE TABLE people (
   notes TEXT,
   share_code TEXT UNIQUE,
   contact_id TEXT,
+  reminder_days INTEGER[] DEFAULT '{0}',
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
@@ -49,9 +50,11 @@ CREATE TABLE groups (
 );
 
 -- Person-Group junction table (many-to-many relationship)
+-- user_id is denormalized here for efficient RLS (avoids correlated subqueries)
 CREATE TABLE person_groups (
   person_id UUID NOT NULL REFERENCES people(id) ON DELETE CASCADE,
   group_id UUID NOT NULL REFERENCES groups(id) ON DELETE CASCADE,
+  user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
   PRIMARY KEY (person_id, group_id)
 );
 
@@ -64,6 +67,7 @@ CREATE INDEX idx_people_birthday ON people(birthday_month, birthday_day);
 CREATE INDEX idx_groups_user_id ON groups(user_id);
 CREATE INDEX idx_person_groups_person ON person_groups(person_id);
 CREATE INDEX idx_person_groups_group ON person_groups(group_id);
+CREATE INDEX idx_person_groups_user ON person_groups(user_id);
 
 -- ============================================
 -- ROW LEVEL SECURITY
@@ -133,36 +137,18 @@ CREATE POLICY "Public can view shared groups"
   ON groups FOR SELECT
   USING (share_code IS NOT NULL);
 
--- Person-Groups junction table policies
+-- Person-Groups junction table policies (use denormalized user_id for O(1) RLS)
 CREATE POLICY "Users can view person_groups for their people"
   ON person_groups FOR SELECT
-  USING (
-    EXISTS (
-      SELECT 1 FROM people
-      WHERE people.id = person_groups.person_id
-      AND people.user_id = auth.uid()
-    )
-  );
+  USING (auth.uid() = user_id);
 
 CREATE POLICY "Users can insert person_groups for their people"
   ON person_groups FOR INSERT
-  WITH CHECK (
-    EXISTS (
-      SELECT 1 FROM people
-      WHERE people.id = person_groups.person_id
-      AND people.user_id = auth.uid()
-    )
-  );
+  WITH CHECK (auth.uid() = user_id);
 
 CREATE POLICY "Users can delete person_groups for their people"
   ON person_groups FOR DELETE
-  USING (
-    EXISTS (
-      SELECT 1 FROM people
-      WHERE people.id = person_groups.person_id
-      AND people.user_id = auth.uid()
-    )
-  );
+  USING (auth.uid() = user_id);
 
 -- Helper functions for shared group RLS (SECURITY DEFINER avoids circular policy references)
 CREATE OR REPLACE FUNCTION is_person_in_shared_group(p_person_id UUID)

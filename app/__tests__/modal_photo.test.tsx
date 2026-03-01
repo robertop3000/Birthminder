@@ -82,6 +82,7 @@ jest.mock('expo-image-picker', () => ({
 // Mock expo-file-system
 jest.mock('expo-file-system/legacy', () => ({
     readAsStringAsync: jest.fn(),
+    getInfoAsync: jest.fn().mockResolvedValue({ exists: true, size: 1024 }),
     EncodingType: { Base64: 'base64' },
 }));
 
@@ -152,7 +153,7 @@ describe('AddEditBirthdayModal Photo Upload', () => {
             expect(mockAddBirthday).toHaveBeenCalledWith(
                 expect.objectContaining({
                     name: 'Photo User',
-                    photo_url: expect.stringMatching(/^https:\/\/supabase\.co\/.*\.jpg\?t=\d+$/),
+                    photo_url: expect.stringMatching(/^https:\/\/supabase\.co\/.*\.jpg$/),
                 })
             );
         });

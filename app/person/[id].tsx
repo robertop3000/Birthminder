@@ -47,7 +47,7 @@ export default function PersonDetailScreen() {
   const { birthdays, deleteBirthday, updateBirthday, generatePersonShareCode } = useBirthdays();
   const { groups } = useGroups();
   const { getContactPhone } = useContactLink();
-  const { scheduleAllNotifications, permissionStatus } = useNotifications();
+  const { scheduleAllNotifications, cancelNotificationsForPerson, permissionStatus } = useNotifications();
 
   const person = birthdays.find((p) => p.id === id);
   const [reminderDays, setReminderDays] = useState<number[]>(person?.reminder_days ?? [0]);
@@ -160,6 +160,7 @@ export default function PersonDetailScreen() {
           text: 'Delete',
           style: 'destructive',
           onPress: async () => {
+            await cancelNotificationsForPerson(person.id);
             await deleteBirthday(person.id);
             router.back();
           },

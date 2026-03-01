@@ -4,6 +4,38 @@ All notable changes to Birthminder will be documented in this file.
 
 ---
  
+## v1.6.0 - 2026-03-01
+*Developed using Claude Haiku + Sonnet. Branch: 1.6.0-production-readiness (Expo Version: 1.4.0, Build: 6).*
+
+### Production Readiness — Performance & Security
+
+#### Performance
+- **Notification scheduling batching**: Replaced sequential `await` loop with `Promise.all` chunked in batches of 50. Prevents UI thread blocking when scheduling 300+ birthday notifications.
+- **Orphaned notification cleanup**: Deleting a birthday now cancels all its scheduled notifications before removing from database.
+- **Image caching fix**: Removed `?t=${Date.now()}` cache-busting query parameter from uploaded image URLs. `expo-image` disk cache now works correctly since each upload already gets a unique filename.
+
+#### Security
+- **Upload file size validation**: Added client-side 5 MB file size check before image processing and upload to Supabase Storage.
+- **RLS policy optimization**: Denormalized `user_id` onto `person_groups` junction table, replacing correlated `EXISTS` subqueries with direct `auth.uid() = user_id` index lookups (O(1) vs O(n) per row).
+
+#### Schema Changes (Supabase SQL Editor)
+- Added `user_id UUID NOT NULL` column to `person_groups` table (backfilled from `people.user_id`)
+- Added `idx_person_groups_user` index
+- Replaced 3 RLS policies on `person_groups` with direct `user_id` checks
+- Documented `reminder_days INTEGER[] DEFAULT '{0}'` in `supabase-schema.sql` (column already existed in live DB)
+
+#### Code Changes
+- All `person_groups` insert/upsert calls now include `user_id` (7 locations across 3 files)
+- `useNotifications.ts`: new `cancelNotificationsForPerson()` function exported
+- `person/[id].tsx`: calls `cancelNotificationsForPerson` before `deleteBirthday`
+- `uploadImage.ts`: returns clean URL without cache-buster; validates file size before processing
+
+### Tests
+- All 115 tests passing (18 suites).
+- Updated `modal_photo.test.tsx` mock to include `getInfoAsync` and removed `?t=` URL expectation.
+
+---
+
 ## v1.5.4 - 2026-03-01
 *Developed using Claude Haiku. Branch: 1.5.4 (Expo Version: 1.4.0, Build: 6).*
 

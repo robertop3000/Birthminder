@@ -3,18 +3,18 @@ import * as FileSystem from 'expo-file-system/legacy';
 import { decode } from 'base64-arraybuffer';
 import { supabase } from './supabase';
 
-/**
- * Upload a local image URI to Supabase Storage.
- * Resizes to 600px width, compresses to JPEG 0.7, uploads to 'avatars' bucket.
- *
- * @param localUri - local file URI from image picker
- * @param subfolder - subfolder within 'avatars' bucket (e.g., 'people', 'groups')
- * @returns public URL string with cache-busting timestamp
- */
+const MAX_FILE_SIZE_BYTES = 5 * 1024 * 1024; // 5 MB
+
 export async function uploadImage(
   localUri: string,
   subfolder: 'people' | 'groups' = 'people'
 ): Promise<string> {
+  // Client-side file size check before processing
+  const fileInfo = await FileSystem.getInfoAsync(localUri);
+  if (fileInfo.exists && 'size' in fileInfo && fileInfo.size > MAX_FILE_SIZE_BYTES) {
+    throw new Error('Image is too large. Please choose an image under 5 MB.');
+  }
+
   const manipulated = await ImageManipulator.manipulateAsync(
     localUri,
     [{ resize: { width: 600 } }],
@@ -44,5 +44,8 @@ export async function uploadImage(
     .from('avatars')
     .getPublicUrl(filePath);
 
-  return `${urlData.publicUrl}?t=${Date.now()}`;
+  // Each upload gets a unique fileName (timestamp + random), so the URL is
+  // already unique — no cache-busting query param needed. This lets expo-image
+  // disk cache work correctly for all viewers.
+  return urlData.publicUrl;
 }
