@@ -50,5 +50,11 @@ GoogleService-Info.plist
 *.tsbuildinfo
 
 # generated native folders
-/ios
 /android
+/ios
+
+# Claude Code & Temporary Files
+.claude/
+full_diff.txt
+latest_diff.txt
+test_output.txt
