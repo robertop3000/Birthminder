@@ -224,10 +224,10 @@ When bumping to version X.Y.Z:
 # PART 4: CURRENT PROJECT STATE
 
 **Last Updated:** 2026-03-01
-**Current Version:** v1.4.0 (Branch 1.6.0-production-readiness)
+**Current Version:** v1.4.0 (Branch: main)
 **Build Number:** 6
 **Test Status:** 18 suites, 115 tests — all passing
-**Build Status:** v1.6.0 production readiness fixes applied.
+**Build Status:** v1.6.0 production readiness fixes applied. All features merged to main.
 **Pre-Flight Audit:** PASSED
 **EAS Secrets:** EXPO_PUBLIC_SUPABASE_URL and EXPO_PUBLIC_SUPABASE_ANON_KEY configured
 **GitHub Pages:** Enabled — serves OG landing page at https://robertop3000.github.io/Birthminder/
@@ -265,7 +265,8 @@ Birthminder/                          # Outer folder
     │   │   ├── onboarding.tsx        # 3 slides, skippable
     │   │   ├── login.tsx             # Email + password
     │   │   ├── signup.tsx            # Name, email, password, photo
-    │   │   └── forgot-password.tsx   # Email → Supabase reset
+    │   │   ├── forgot-password.tsx   # Email → Supabase reset
+    │   │   └── reset-password.tsx    # Change/reset password (settings + recovery)
     │   ├── (tabs)/
     │   │   ├── _layout.tsx           # Bottom tabs + FAB visibility
     │   │   ├── index.tsx             # Home (today + upcoming 30 days)
@@ -371,11 +372,10 @@ Canonical reference: `supabase-schema.sql` in project root.
 
 ## Next Steps
 
-1. **Production Build Verification** — Confirm deep link handling works in production environment.
-2. **TestFlight testing** — Verify 1.3.0 notification scheduling on device via diagnostic button
-2. **Production build** — Run: `eas build --platform ios --profile production` for v1.3.0
-3. **App Store submission** — Prepare screenshots (6.9" display: 1320x2868) and metadata
-4. **Scrub git history** — Remove `.env` from commit 49681c3
+1. **Version bump** — Update `app.json` + `package.json` for submission build.
+2. **Production build** — Run: `eas build --platform ios --profile production`
+3. **TestFlight testing** — Verify notifications, deep links, and sharing on device.
+4. **App Store submission** — Prepare screenshots (6.9" display: 1320x2868) and metadata.
 
 ### Out of Scope for v1
 - Android support
