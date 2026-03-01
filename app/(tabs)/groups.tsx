@@ -48,7 +48,6 @@ export default function GroupsScreen() {
       const shareUrl = `${SHARE_BASE_URL}?code=${code}`;
       await Share.share({
         message: `Check out my group birthdays on Birthminder! ${shareUrl}`,
-        url: shareUrl,
       });
     } catch {
       Alert.alert('Error', 'Failed to share group');

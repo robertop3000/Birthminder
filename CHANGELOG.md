@@ -5,10 +5,26 @@ All notable changes to Birthminder will be documented in this file.
 ---
  
 ## v1.5.4 - 2026-03-01
-*Developed using Antigravity. Branch: 1.5.4 (Expo Version: 1.4.0, Build: 6).*
+*Developed using Claude Haiku. Branch: 1.5.4 (Expo Version: 1.4.0, Build: 6).*
 
-### Added
-- Started development for version 1.5.4.
+### Fixed
+- **Sharing & Deep-Linking Audit**: Fixed critical sharing and deep-linking issues.
+  - **Double-Link Bug**: Removed duplicate `url` parameter from `Share.share()` calls. Previously, both `message` and `url` contained the same link, causing it to appear twice in iMessage/WhatsApp share sheets.
+  - **Missing Shared Person Route**: Created `app/shared/person/[code].tsx` to handle shared individual birthday deep links. Previously, clicking a shared person link showed "Unmatched Route" error.
+  - **Route Declaration**: Added `shared/person/[code]` route declaration to `app/_layout.tsx`.
+- **Edit Group Modal Positioning**: Fixed Edit Group modal overlapping with iOS dynamic island by adding `paddingTop: insets.top`.
+- **Version Metadata**: Updated `lib/constants.ts` `APP_VERSION` from `1.0.0` to `1.5.3`.
+- **Error Color Consistency**: Changed error text color from brand orange (`#E07A5F`) to semantic red (`#DC3545`) in all auth screens for better UX clarity.
+
+### Tests
+- Multi-agent conflict scan performed — no code conflicts detected.
+- All 115 tests passing (18 suites).
+
+### Verification
+- Sharing: Single link now appears in share sheets (person + group + groups tab).
+- Deep-linking: Shared person links now navigate correctly to `birthminder://shared/person/CODE` route.
+- Edit Group: Modal content no longer overlaps with dynamic island on iPhone 14+.
+- Tests: No regressions from new shared person route.
 
 ## v1.5.3 - 2026-03-01
 *Developed using Gemini / Claude Opus. Branch: 1.5.3 (Expo Version: 1.4.0, Build: 6).*

@@ -354,6 +354,19 @@ Canonical reference: `supabase-schema.sql` in project root.
 
 ---
 
+## v1.5.4 Changes (Recent)
+
+**Sharing & Deep-Linking Fixes:**
+- Fixed double-link bug: Removed duplicate `url` parameter from `Share.share()` calls (was causing links to appear twice in iMessage/WhatsApp)
+- Created missing `app/shared/person/[code].tsx` route for shared birthday deep links
+- Fixed Edit Group modal positioning to avoid iOS dynamic island overlap (added `paddingTop: insets.top`)
+- Updated error text colors to semantic red (`#DC3545`) for better UX clarity in auth screens
+- Fixed `APP_VERSION` in `lib/constants.ts` (was `1.0.0`, now `1.5.3`)
+
+**All tests passing:** 18 suites, 115 tests.
+
+---
+
 ## Next Steps
 
 1. **Production Build Verification** — Confirm deep link handling works in production environment.

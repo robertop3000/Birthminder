@@ -170,6 +170,7 @@ function RootNavigator() {
         <Stack.Screen name="person/[id]" />
         <Stack.Screen name="group/[id]" />
         <Stack.Screen name="shared/[code]" />
+        <Stack.Screen name="shared/person/[code]" />
         <Stack.Screen name="legal" />
         <Stack.Screen name="settings" />
       </Stack>

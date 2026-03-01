@@ -97,7 +97,6 @@ export default function PersonDetailScreen() {
       const shareUrl = `${SHARE_BASE_URL}?person=${code}`;
       await Share.share({
         message: `${person.name}'s birthday is on ${dateStr}! Save it on Birthminder: ${shareUrl}`,
-        url: shareUrl,
       });
     } catch {
       Alert.alert('Error', 'Failed to share birthday');
