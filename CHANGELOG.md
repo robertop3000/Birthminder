@@ -4,6 +4,12 @@ All notable changes to Birthminder will be documented in this file.
 
 ---
  
+## v1.5.4 - 2026-03-01
+*Developed using Antigravity. Branch: 1.5.4 (Expo Version: 1.5.4, Build: 6).*
+
+### Added
+- Started development for version 1.5.4.
+
 ## v1.5.3 - 2026-03-01
 *Developed using Gemini / Claude Opus. Branch: 1.5.3 (Expo Version: 1.4.0, Build: 6).*
 
