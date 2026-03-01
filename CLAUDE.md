@@ -224,10 +224,10 @@ When bumping to version X.Y.Z:
 # PART 4: CURRENT PROJECT STATE
 
 **Last Updated:** 2026-03-01
-**Current Version:** v1.4.0 (Branch 1.5.3 — Gemini / Claude Opus)
+**Current Version:** v1.4.0 (Branch 1.5.4 — Antigravity)
 **Build Number:** 6
-**Test Status:** 17 suites, 102 tests — all passing (8 notification tests)
-**Build Status:** v1.5.3 Complete. Fixed Change Password / Reset Password screen. Inherited all 1.5.2 features (per-birthday reminders, dropdown UI).
+**Test Status:** 18 suites, 115 tests — all passing
+**Build Status:** v1.5.4 started. Initialized from v1.5.3.
 **Pre-Flight Audit:** PASSED
 **EAS Secrets:** EXPO_PUBLIC_SUPABASE_URL and EXPO_PUBLIC_SUPABASE_ANON_KEY configured
 **GitHub Pages:** Enabled — serves OG landing page at https://robertop3000.github.io/Birthminder/
