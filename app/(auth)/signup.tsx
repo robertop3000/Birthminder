@@ -189,7 +189,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   errorText: {
-    color: '#E07A5F',
+    color: '#DC3545',
     fontSize: 14,
     marginBottom: 12,
     fontFamily: 'DMSans_400Regular',
