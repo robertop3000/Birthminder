@@ -104,6 +104,7 @@ describe('BirthdayForm', () => {
       notes: 'Loves chocolate',
       group_ids: [],
       contact_id: null,
+      reminder_days: [0],
     });
   });
 

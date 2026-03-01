@@ -62,7 +62,15 @@ Familiar social-app layout so users feel at home immediately.
 - **Utilities**: `date-fns`, `AsyncStorage`, `Hermes`.
 - **Testing**: Jest + @testing-library/react-native.
 
-## Navigation & UI
+## Guiding Principles
+
+### Git & Branching
+- **Branch Preservation**: ALWAYS keep individual version branches (e.g., `1.5.0`, `1.5.1`) active and push them to GitHub.
+- **Merge Flow**: Commit changes to the feature/version branch FIRST, push to origin, and then merge into `main` only when instructed.
+- **Versioning**: Maintain Expo version (marketing version) and build numbers accurately in `app.json` and `package.json` regardless of the technical Git branch name.
+- **History**: GitHub should reflect the full project history with all development branches preserved as save points.
+
+### Navigation & Routing
 - **Layout**: 4 icon-only tabs (Home, Search/Notifications, Groups, Profile) with X/Twitter-style FAB (Home/Search/Groups).
 - **Theme**: Light (#FAF8F5) and Dark (#000000) modes, persisted and toggled in Profile.
 - **Rules**: Icons only in tabs, active dot indicator, 80px height, TopBar on all screens (Avatar Left | Title Center | Action Right).
@@ -215,11 +223,11 @@ When bumping to version X.Y.Z:
 
 # PART 4: CURRENT PROJECT STATE
 
-**Last Updated:** 2026-02-23
-**Current Version:** v1.4.0 (Branch 1.5.1 — Gemini 3.5 Sonnet)
+**Last Updated:** 2026-03-01
+**Current Version:** v1.4.0 (Branch 1.5.2 — Gemini / Claude Opus)
 **Build Number:** 6
-**Test Status:** 17 suites, 100 tests — all passing
-**Build Status:** v1.5.1 in Development. Group birthday addition improved with search and "New Birthday" shortcut. Forgot Password perfected in dev builds.
+**Test Status:** 17 suites, 102 tests — all passing (8 notification tests)
+**Build Status:** v1.5.2 Complete. Per-birthday custom reminders with dropdown UI. Recovered missing CalendarImportModal and ContactLinkButton components. Known Issue: Change Password screen has issues (to be fixed in 1.5.3).
 **Pre-Flight Audit:** PASSED
 **EAS Secrets:** EXPO_PUBLIC_SUPABASE_URL and EXPO_PUBLIC_SUPABASE_ANON_KEY configured
 **GitHub Pages:** Enabled — serves OG landing page at https://robertop3000.github.io/Birthminder/

@@ -29,6 +29,7 @@ export default function AddEditBirthdayModal() {
     groups?: string;
     contact_id?: string;
     preselectedGroupId?: string;
+    reminder_days?: string;
   }>();
 
   const [loading, setLoading] = useState(false);
@@ -45,6 +46,7 @@ export default function AddEditBirthdayModal() {
       notes: params.notes ?? '',
       group_ids: params.groups ? params.groups.split(',') : [],
       contact_id: params.contact_id ?? null,
+      reminder_days: params.reminder_days ? JSON.parse(params.reminder_days) : [0],
     }
     : undefined;
 
@@ -75,6 +77,7 @@ export default function AddEditBirthdayModal() {
           notes: data.notes || null,
           group_ids: data.group_ids,
           contact_id: data.contact_id,
+          reminder_days: data.reminder_days,
         });
       } else {
         await addBirthday({
@@ -86,6 +89,7 @@ export default function AddEditBirthdayModal() {
           notes: data.notes || null,
           group_ids: data.group_ids,
           contact_id: data.contact_id,
+          reminder_days: data.reminder_days,
         });
       }
 

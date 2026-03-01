@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   View,
   Text,
@@ -8,6 +8,7 @@ import {
   Share,
   ActivityIndicator,
   Pressable,
+  Modal,
 } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -16,10 +17,22 @@ import { useTheme } from '../../hooks/useTheme';
 import { useBirthdays } from '../../hooks/useBirthdays';
 import { useGroups } from '../../hooks/useGroups';
 import { useContactLink } from '../../hooks/useContactLink';
+import { useNotifications } from '../../hooks/useNotifications';
 import { Avatar } from '../../components/ui/Avatar';
 import { ContactLinkButton } from '../../components/birthday/ContactLinkButton';
 import { openWhatsApp, openIMessage } from '../../lib/messaging';
 import { SHARE_BASE_URL } from '../../lib/constants';
+
+const REMINDER_OPTIONS = [
+  { value: 0, label: 'Same day' },
+  { value: 1, label: '1 day before' },
+  { value: 2, label: '2 days before' },
+  { value: 3, label: '3 days before' },
+  { value: 4, label: '4 days before' },
+  { value: 5, label: '5 days before' },
+  { value: 6, label: '6 days before' },
+  { value: 7, label: '1 week before' },
+];
 import {
   getDaysUntilBirthday,
   getAge,
@@ -34,8 +47,20 @@ export default function PersonDetailScreen() {
   const { birthdays, deleteBirthday, updateBirthday, generatePersonShareCode } = useBirthdays();
   const { groups } = useGroups();
   const { getContactPhone } = useContactLink();
+  const { scheduleAllNotifications, permissionStatus } = useNotifications();
 
   const person = birthdays.find((p) => p.id === id);
+  const [reminderDays, setReminderDays] = useState<number[]>(person?.reminder_days ?? [0]);
+  const [showReminderPicker, setShowReminderPicker] = useState(false);
+
+  const reminderSummary = useMemo(() => {
+    if (reminderDays.length === 0) return 'None';
+    return reminderDays
+      .slice()
+      .sort((a, b) => a - b)
+      .map((d) => REMINDER_OPTIONS.find((o) => o.value === d)?.label ?? `${d}d`)
+      .join(', ');
+  }, [reminderDays]);
 
   if (!person) {
     return (
@@ -96,6 +121,7 @@ export default function PersonDetailScreen() {
         notes: person.notes ?? '',
         groups: groupIds ?? '',
         contact_id: person.contact_id ?? '',
+        reminder_days: JSON.stringify(person.reminder_days ?? [0]),
       },
     });
   };
@@ -111,6 +137,17 @@ export default function PersonDetailScreen() {
       await openWhatsApp(phone);
     } else {
       await openIMessage(phone);
+    }
+  };
+
+  const handleToggleReminder = async (day: number) => {
+    const updated = reminderDays.includes(day)
+      ? reminderDays.filter((d) => d !== day)
+      : [...reminderDays, day].sort((a, b) => a - b);
+    setReminderDays(updated);
+    await updateBirthday(person.id, { reminder_days: updated });
+    if (permissionStatus === 'granted') {
+      scheduleAllNotifications(birthdays);
     }
   };
 
@@ -206,11 +243,93 @@ export default function PersonDetailScreen() {
 
       <View style={styles.section}>
         <Text style={[styles.sectionTitle, { color: colors.textSecondary }]}>
+          Remind me
+        </Text>
+        <Pressable
+          onPress={() => setShowReminderPicker(true)}
+          style={[
+            styles.reminderDropdown,
+            {
+              backgroundColor: colors.surface,
+              borderColor: colors.bottomBarBorder,
+            },
+          ]}
+        >
+          <Ionicons name="notifications-outline" size={18} color={colors.primary} />
+          <Text
+            style={[styles.reminderDropdownText, { color: colors.textPrimary }]}
+            numberOfLines={1}
+          >
+            {reminderSummary}
+          </Text>
+          <Text style={{ color: colors.textSecondary }}>▼</Text>
+        </Pressable>
+      </View>
+
+      <Modal
+        visible={showReminderPicker}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowReminderPicker(false)}
+      >
+        <Pressable
+          style={styles.reminderModalOverlay}
+          onPress={() => setShowReminderPicker(false)}
+        >
+          <View
+            style={[
+              styles.reminderModalContent,
+              { backgroundColor: colors.surface },
+            ]}
+          >
+            <Text style={[styles.reminderModalTitle, { color: colors.textPrimary }]}>
+              Remind me
+            </Text>
+            {REMINDER_OPTIONS.map((option) => {
+              const isSelected = reminderDays.includes(option.value);
+              return (
+                <Pressable
+                  key={option.value}
+                  onPress={() => handleToggleReminder(option.value)}
+                  style={[
+                    styles.reminderOption,
+                    {
+                      backgroundColor: isSelected
+                        ? colors.primary + '10'
+                        : 'transparent',
+                    },
+                  ]}
+                >
+                  <Ionicons
+                    name={isSelected ? 'checkbox' : 'square-outline'}
+                    size={22}
+                    color={isSelected ? colors.primary : colors.textSecondary}
+                  />
+                  <Text
+                    style={[
+                      styles.reminderOptionText,
+                      {
+                        color: isSelected ? colors.primary : colors.textPrimary,
+                        fontWeight: isSelected ? '600' : '400',
+                      },
+                    ]}
+                  >
+                    {option.label}
+                  </Text>
+                </Pressable>
+              );
+            })}
+          </View>
+        </Pressable>
+      </Modal>
+
+      <View style={styles.section}>
+        <Text style={[styles.sectionTitle, { color: colors.textSecondary }]}>
           Linked Contact
         </Text>
         <ContactLinkButton
           contactId={person.contact_id}
-          onContactLinked={async (cid) => {
+          onContactLinked={async (cid: string) => {
             await updateBirthday(person.id, { contact_id: cid });
           }}
           onContactUnlinked={async () => {
@@ -400,6 +519,52 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: 15,
     fontWeight: '600',
+    fontFamily: 'DMSans_500Medium',
+  },
+  reminderDropdown: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderRadius: 12,
+    borderWidth: 1,
+  },
+  reminderDropdownText: {
+    flex: 1,
+    fontSize: 15,
+    fontFamily: 'DMSans_400Regular',
+  },
+  reminderModalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  reminderModalContent: {
+    width: '80%',
+    maxHeight: '70%',
+    borderRadius: 16,
+    padding: 16,
+  },
+  reminderModalTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    fontFamily: 'DMSans_700Bold',
+    marginBottom: 12,
+    textAlign: 'center',
+  },
+  reminderOption: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    marginBottom: 4,
+  },
+  reminderOptionText: {
+    fontSize: 16,
     fontFamily: 'DMSans_500Medium',
   },
 });

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { View, Text, Pressable, StyleSheet, ActivityIndicator } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../hooks/useTheme';
@@ -98,7 +98,7 @@ export function ContactLinkButton({
     );
   }
 
-  // Unlinked state — show link button
+  // Unlinked state ΓÇö show link button
   return (
     <Pressable
       onPress={handleLink}

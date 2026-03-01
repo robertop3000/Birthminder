@@ -22,6 +22,7 @@ export interface Person {
     notes: string | null;
     share_code: string | null;
     contact_id: string | null;
+    reminder_days: number[];
     created_at: string;
     person_groups: PersonGroup[];
 }
@@ -35,6 +36,7 @@ export interface BirthdayInput {
     notes?: string | null;
     group_ids?: string[];
     contact_id?: string | null;
+    reminder_days?: number[];
 }
 
 interface BirthdaysContextValue {
@@ -73,7 +75,11 @@ export function BirthdaysProvider({ children }: { children: React.ReactNode }) {
                 .order('birthday_day', { ascending: true });
 
             if (fetchError) throw fetchError;
-            setBirthdays((data as Person[]) ?? []);
+            const normalized = (data ?? []).map((p: Record<string, unknown>) => ({
+                ...p,
+                reminder_days: (p.reminder_days as number[] | null) ?? [0],
+            }));
+            setBirthdays(normalized as Person[]);
             setError(null);
         } catch (err: unknown) {
             const message = err instanceof Error ? err.message : 'Failed to fetch birthdays';
@@ -102,6 +108,7 @@ export function BirthdaysProvider({ children }: { children: React.ReactNode }) {
                     photo_url: input.photo_url ?? null,
                     notes: input.notes ?? null,
                     contact_id: input.contact_id ?? null,
+                    reminder_days: input.reminder_days ?? [0],
                 })
                 .select()
                 .single();
@@ -134,6 +141,7 @@ export function BirthdaysProvider({ children }: { children: React.ReactNode }) {
             if (input.photo_url !== undefined) updateData.photo_url = input.photo_url;
             if (input.notes !== undefined) updateData.notes = input.notes;
             if (input.contact_id !== undefined) updateData.contact_id = input.contact_id;
+            if (input.reminder_days !== undefined) updateData.reminder_days = input.reminder_days;
 
             if (Object.keys(updateData).length > 0) {
                 const { error: updateError } = await supabase

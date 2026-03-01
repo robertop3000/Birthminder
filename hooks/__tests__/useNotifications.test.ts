@@ -63,6 +63,7 @@ describe('useNotifications', () => {
                 birthday_day: 15,
                 birthday_month: 5,
                 user_id: 'user-123',
+                reminder_days: [0], // Default: same-day reminder only
             },
         ];
 
@@ -75,7 +76,7 @@ describe('useNotifications', () => {
 
         expect(Notifications.scheduleNotificationAsync).toHaveBeenCalledWith(
             expect.objectContaining({
-                identifier: 'bday-1',
+                identifier: 'bday-1-0', // Now includes day offset
                 content: expect.objectContaining({
                     sound: 'default',
                 }),
@@ -86,5 +87,73 @@ describe('useNotifications', () => {
                 }),
             })
         );
+    });
+
+    it('falls back to same-day reminder when reminder_days is null', async () => {
+        const { result } = renderHook(() => useNotifications());
+
+        await act(async () => { });
+
+        const birthdays = [
+            {
+                id: 'bday-null',
+                name: 'NullTest',
+                birthday_day: 10,
+                birthday_month: 3,
+                user_id: 'user-123',
+                reminder_days: null, // Simulates missing column
+            },
+        ];
+
+        await act(async () => {
+            await result.current.scheduleAllNotifications(birthdays as any);
+        });
+
+        // Should schedule exactly 1 notification (same-day fallback)
+        expect(Notifications.scheduleNotificationAsync).toHaveBeenCalledTimes(1);
+        expect(Notifications.scheduleNotificationAsync).toHaveBeenCalledWith(
+            expect.objectContaining({
+                identifier: 'bday-null-0',
+                content: expect.objectContaining({
+                    title: expect.stringContaining('NullTest'),
+                }),
+                trigger: expect.objectContaining({
+                    day: 10,
+                    month: 3,
+                    hour: 8,
+                }),
+            })
+        );
+    });
+
+    it('schedules multiple notifications for multi-day reminders', async () => {
+        const { result } = renderHook(() => useNotifications());
+
+        await act(async () => { });
+
+        const birthdays = [
+            {
+                id: 'bday-multi',
+                name: 'MultiTest',
+                birthday_day: 20,
+                birthday_month: 6,
+                user_id: 'user-123',
+                reminder_days: [0, 3, 7], // Same day + 3 days + 1 week before
+            },
+        ];
+
+        await act(async () => {
+            await result.current.scheduleAllNotifications(birthdays as any);
+        });
+
+        // Should schedule exactly 3 notifications
+        expect(Notifications.scheduleNotificationAsync).toHaveBeenCalledTimes(3);
+
+        // Verify identifiers
+        const calls = (Notifications.scheduleNotificationAsync as jest.Mock).mock.calls;
+        const identifiers = calls.map(([arg]: any[]) => arg.identifier);
+        expect(identifiers).toContain('bday-multi-0');
+        expect(identifiers).toContain('bday-multi-3');
+        expect(identifiers).toContain('bday-multi-7');
     });
 });

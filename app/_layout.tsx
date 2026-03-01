@@ -83,7 +83,7 @@ export default function RootLayout() {
   );
 }
 
-const MIGRATION_KEY = 'v1.4.1_migrated';
+const MIGRATION_KEY = 'v1.6_reminders_migrated';
 
 function NotificationMigration() {
   const { birthdays } = useBirthdays();

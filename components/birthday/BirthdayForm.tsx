@@ -27,6 +27,7 @@ export interface BirthdayFormData {
   notes: string;
   group_ids: string[];
   contact_id: string | null;
+  reminder_days: number[];
 }
 
 interface BirthdayFormProps {
@@ -40,6 +41,17 @@ interface BirthdayFormProps {
 const MONTHS = [
   'January', 'February', 'March', 'April', 'May', 'June',
   'July', 'August', 'September', 'October', 'November', 'December',
+];
+
+const REMINDER_OPTIONS = [
+  { value: 0, label: 'Same day' },
+  { value: 1, label: '1 day before' },
+  { value: 2, label: '2 days before' },
+  { value: 3, label: '3 days before' },
+  { value: 4, label: '4 days before' },
+  { value: 5, label: '5 days before' },
+  { value: 6, label: '6 days before' },
+  { value: 7, label: '1 week before' },
 ];
 
 export function BirthdayForm({
@@ -69,6 +81,10 @@ export function BirthdayForm({
   const [contactId, setContactId] = useState<string | null>(
     initialValues?.contact_id ?? null
   );
+  const [reminderDays, setReminderDays] = useState<number[]>(
+    initialValues?.reminder_days ?? [0]
+  );
+  const [showReminderPicker, setShowReminderPicker] = useState(false);
   const [showNewGroup, setShowNewGroup] = useState(false);
   const [newGroupName, setNewGroupName] = useState('');
   const [newGroupColor, setNewGroupColor] = useState('#E07A5F');
@@ -121,6 +137,22 @@ export function BirthdayForm({
     }
   };
 
+  const toggleReminderDay = (day: number) => {
+    setReminderDays((prev) =>
+      prev.includes(day)
+        ? prev.filter((d) => d !== day)
+        : [...prev, day].sort((a, b) => a - b)
+    );
+  };
+
+  const reminderSummary = reminderDays.length === 0
+    ? 'None'
+    : reminderDays
+      .slice()
+      .sort((a, b) => a - b)
+      .map((d) => REMINDER_OPTIONS.find((o) => o.value === d)?.label ?? `${d}d`)
+      .join(', ');
+
   const handleSubmit = () => {
     if (!name.trim()) {
       alert('Please enter a name');
@@ -142,6 +174,7 @@ export function BirthdayForm({
       notes: notes.trim(),
       group_ids: selectedGroups,
       contact_id: contactId,
+      reminder_days: reminderDays,
     });
   };
 
@@ -482,11 +515,91 @@ export function BirthdayForm({
 
         <View style={styles.inputGroup}>
           <Text style={[styles.label, { color: colors.textSecondary }]}>
+            Remind me
+          </Text>
+          <Pressable
+            onPress={() => setShowReminderPicker(true)}
+            style={[
+              styles.reminderDropdown,
+              {
+                backgroundColor: colors.surface,
+                borderColor: colors.bottomBarBorder,
+              },
+            ]}
+          >
+            <Ionicons name="notifications-outline" size={18} color={colors.primary} />
+            <Text
+              style={[styles.reminderDropdownText, { color: colors.textPrimary }]}
+              numberOfLines={1}
+            >
+              {reminderSummary}
+            </Text>
+            <Text style={{ color: colors.textSecondary }}>▼</Text>
+          </Pressable>
+
+          <Modal
+            visible={showReminderPicker}
+            transparent
+            animationType="fade"
+            onRequestClose={() => setShowReminderPicker(false)}
+          >
+            <Pressable
+              style={styles.reminderModalOverlay}
+              onPress={() => setShowReminderPicker(false)}
+            >
+              <Pressable
+                style={[styles.reminderModalContent, { backgroundColor: colors.surface }]}
+                onPress={(e) => e.stopPropagation()}
+              >
+                <Text style={[styles.reminderModalTitle, { color: colors.textPrimary }]}>
+                  Remind me
+                </Text>
+                {REMINDER_OPTIONS.map((option) => {
+                  const isSelected = reminderDays.includes(option.value);
+                  return (
+                    <Pressable
+                      key={option.value}
+                      onPress={() => toggleReminderDay(option.value)}
+                      style={[
+                        styles.reminderOption,
+                        {
+                          backgroundColor: isSelected
+                            ? colors.primary + '10'
+                            : 'transparent',
+                        },
+                      ]}
+                    >
+                      <Ionicons
+                        name={isSelected ? 'checkbox' : 'square-outline'}
+                        size={22}
+                        color={isSelected ? colors.primary : colors.textSecondary}
+                      />
+                      <Text
+                        style={[
+                          styles.reminderOptionText,
+                          {
+                            color: isSelected ? colors.primary : colors.textPrimary,
+                            fontWeight: isSelected ? '600' : '400',
+                          },
+                        ]}
+                      >
+                        {option.label}
+                      </Text>
+                    </Pressable>
+                  );
+                })}
+              </Pressable>
+            </Pressable>
+          </Modal>
+        </View>
+
+        <View style={styles.inputGroup}>
+          <Text style={[styles.label, { color: colors.textSecondary }]}>
             Linked Contact
           </Text>
           <ContactLinkButton
             contactId={contactId}
-            onContactLinked={(id) => setContactId(id)}
+            onContactLinked={(id: string) => setContactId(id)}
             onContactUnlinked={() => setContactId(null)}
           />
         </View>
@@ -728,5 +841,51 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     fontFamily: 'DMSans_700Bold',
+  },
+  reminderDropdown: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderRadius: 12,
+    borderWidth: 1,
+  },
+  reminderDropdownText: {
+    flex: 1,
+    fontSize: 15,
+    fontFamily: 'DMSans_400Regular',
+  },
+  reminderModalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  reminderModalContent: {
+    width: '80%',
+    maxHeight: '70%',
+    borderRadius: 16,
+    padding: 16,
+  },
+  reminderModalTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    fontFamily: 'DMSans_700Bold',
+    marginBottom: 12,
+    textAlign: 'center',
+  },
+  reminderOption: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    marginBottom: 4,
+  },
+  reminderOptionText: {
+    fontSize: 16,
+    fontFamily: 'DMSans_500Medium',
   },
 });

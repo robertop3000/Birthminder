@@ -1,13 +1,14 @@
 import React from 'react';
-import { renderHook, waitFor } from '@testing-library/react-native';
+import { renderHook, act } from '@testing-library/react-native';
 import { useBirthdays } from '../useBirthdays';
 import { BirthdaysProvider } from '../../contexts/BirthdaysContext';
 
-// useBirthdays depends on useAuth, mock it
+// Stable reference so useCallback([user]) doesn't loop
+const mockUser = { id: 'test-user-id' };
 jest.mock('../useAuth', () => ({
   useAuth: () => ({
-    user: { id: 'test-user-id' },
-    session: { user: { id: 'test-user-id' } },
+    user: mockUser,
+    session: { user: mockUser },
     loading: false,
     signUp: jest.fn(),
     signIn: jest.fn(),
@@ -47,17 +48,15 @@ describe('useBirthdays', () => {
 
   it('returns birthdays array', async () => {
     const { result } = renderHook(() => useBirthdays(), { wrapper });
-    await waitFor(() => {
-      expect(result.current.loading).toBe(false);
-    });
+    await act(async () => {});
+    expect(result.current.loading).toBe(false);
     expect(Array.isArray(result.current.birthdays)).toBe(true);
   });
 
   it('returns expected hook API', async () => {
     const { result } = renderHook(() => useBirthdays(), { wrapper });
-    await waitFor(() => {
-      expect(result.current.loading).toBe(false);
-    });
+    await act(async () => {});
+    expect(result.current.loading).toBe(false);
 
     expect(result.current).toHaveProperty('birthdays');
     expect(result.current).toHaveProperty('loading');
@@ -70,25 +69,22 @@ describe('useBirthdays', () => {
 
   it('addBirthday is a function', async () => {
     const { result } = renderHook(() => useBirthdays(), { wrapper });
-    await waitFor(() => {
-      expect(result.current.loading).toBe(false);
-    });
+    await act(async () => {});
+    expect(result.current.loading).toBe(false);
     expect(typeof result.current.addBirthday).toBe('function');
   });
 
   it('updateBirthday is a function', async () => {
     const { result } = renderHook(() => useBirthdays(), { wrapper });
-    await waitFor(() => {
-      expect(result.current.loading).toBe(false);
-    });
+    await act(async () => {});
+    expect(result.current.loading).toBe(false);
     expect(typeof result.current.updateBirthday).toBe('function');
   });
 
   it('deleteBirthday is a function', async () => {
     const { result } = renderHook(() => useBirthdays(), { wrapper });
-    await waitFor(() => {
-      expect(result.current.loading).toBe(false);
-    });
+    await act(async () => {});
+    expect(result.current.loading).toBe(false);
     expect(typeof result.current.deleteBirthday).toBe('function');
   });
 });

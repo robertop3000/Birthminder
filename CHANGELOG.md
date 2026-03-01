@@ -4,6 +4,25 @@ All notable changes to Birthminder will be documented in this file.
 
 ---
  
+## v1.5.2 - 2026-03-01
+*Developed using Gemini / Claude Opus. Branch: 1.5.2 (Expo Version: 1.4.0, Build: 6).*
+
+### Added
+- **Per-Birthday Custom Reminders**: Each birthday now supports multiple reminder notifications (0–7 days before).
+    - Default reminder is "Same day" for all existing and new birthdays.
+    - Users can select any combination from "Same day" to "1 week before".
+- **Remind Me Dropdown UI**: Replaced the 8-chip layout with a compact dropdown button + modal with checkboxes on both the person detail screen and the birthday creation/edit form.
+
+### Fixed
+- **Recovered Missing Components**: Restored `CalendarImportModal.tsx` and `ContactLinkButton.tsx` from git history — these were lost during a prior stash/merge operation.
+- **Default Reminder Normalization**: Ensured `reminder_days` defaults to `[0]` at the data fetch layer for birthdays that have `null` in the database.
+
+### Tests
+- Added 2 new notification tests (null fallback + multi-day scheduling). Total: 8/8 passing.
+
+### Known Issues
+- **Change Password screen**: Has issues to be addressed in v1.5.3.
+
 ## v1.5.1 - 2026-02-28
 *Developed using Gemini 3.5 Sonnet. Branch: 1.5.1 (Expo Version: 1.4.0, Build: 6).*
 
