@@ -4,6 +4,12 @@ All notable changes to Birthminder will be documented in this file.
 
 ---
  
+## v1.5.3 - 2026-03-01
+*Developed using Gemini / Claude Opus. Branch: 1.5.3 (Expo Version: 1.4.0, Build: 6).*
+
+### Fixed
+- **Change Password / Reset Password screen**: Fixed issue where the screen was not showing properly. Screen now displays and functions correctly.
+
 ## v1.5.2 - 2026-03-01
 *Developed using Gemini / Claude Opus. Branch: 1.5.2 (Expo Version: 1.4.0, Build: 6).*
 
