@@ -1,4 +1,49 @@
-# Changelog
+## v1.6.1 - 2026-03-03
+*Developed using Claude Opus 4.6 + Haiku 4.5. Branch: 1.6.1 (Expo Version: 1.4.0, Build: 6).*
+
+### Critical Bug Fixes
+
+#### BUG-01: Invalid Dates Accepted (Feb 31, Apr 31, etc.)
+**File:** `components/birthday/BirthdayForm.tsx:162-181`
+**Severity:** CRITICAL
+**Fix:** Implemented month-specific day limits. February max 29 (with leap year detection), April/June/Sept/Nov max 30, others max 31. Validation now rejects Feb 31, Apr 31, etc. with proper error messages.
+
+#### BUG-02: getAge() Returns Wrong Age (Off by +1)
+**File:** `lib/dateHelpers.ts:47-60`
+**Severity:** CRITICAL
+**Fix:** Changed from computing "turning" age to actual current age. Now checks if birthday has passed this calendar year and subtracts 1 if not yet occurred.
+
+#### BUG-03: Feb 29 Birthdays Never Show Celebration Banner (3 of 4 Years)
+**File:** `lib/dateHelpers.ts:62-75`
+**Severity:** CRITICAL
+**Fix:** Added special case handling in `isBirthdayToday()`. Feb 29 birthdays now match Feb 28 in non-leap years, allowing the celebration banner to display correctly.
+
+#### BUG-04: Group Assignment Lost When Editing Birthday via Group Screen
+**File:** `components/birthday/BirthdayForm.tsx:79`
+**Severity:** CRITICAL
+**Fix:** Changed state initialization from if/else (one wins, other discarded) to preserving existing groups and adding preselected group if not already present.
+
+#### BUG-05: Avatar Image Retry Timer Causes Memory Leak
+**File:** `components/ui/Avatar.tsx:23-50`
+**Severity:** HIGH
+**Fix:** Implemented `useRef` to track timeout, cleared on unmount. Prevents setState on unmounted component and React warnings during fast navigation.
+
+#### BUG-06: Notification Reminders Fire on Wrong Day for Feb 29 (Leap Year Issue)
+**File:** `hooks/useNotifications.ts:84-107`
+**Severity:** HIGH
+**Fix:** Removed `repeats: true` from notification trigger for Feb 29 birthdays. Now uses `getNextBirthday()` to compute correct date for each year, handling leap year edge case properly.
+
+### Tests
+- All 115 tests passing (18 suites).
+- No regressions from bug fixes.
+
+### Verification
+- TypeScript: 0 errors
+- Jest: 115/115 tests passing
+- Manual testing: All 6 bugs verified fixed on iOS device
+
+---
+
 
 All notable changes to Birthminder will be documented in this file.
 

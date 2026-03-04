@@ -53,15 +53,35 @@ export function getAge(
 
   const today = new Date();
   const currentYear = today.getFullYear();
-  const nextBirthday = getNextBirthday(month, day);
-  const birthdayYear = nextBirthday.getFullYear();
+  const age = currentYear - year;
 
-  return birthdayYear - year;
+  // Check if birthday has already occurred this year
+  const hasBirthdayPassedThisYear =
+    today.getMonth() + 1 > month ||
+    (today.getMonth() + 1 === month && today.getDate() >= day);
+
+  return hasBirthdayPassedThisYear ? age : age - 1;
 }
 
 export function isBirthdayToday(month: number, day: number): boolean {
   const today = new Date();
-  return today.getMonth() + 1 === month && today.getDate() === day;
+  const todayMonth = today.getMonth() + 1;
+  const todayDay = today.getDate();
+
+  // Exact match for normal dates
+  if (todayMonth === month && todayDay === day) {
+    return true;
+  }
+
+  // Special case: Feb 29 birthday observed on Feb 28 in non-leap years
+  if (month === 2 && day === 29) {
+    const isLeapYear = new Date(today.getFullYear(), 2, 0).getDate() === 29;
+    if (!isLeapYear && todayMonth === 2 && todayDay === 28) {
+      return true;
+    }
+  }
+
+  return false;
 }
 
 export function formatBirthdayDate(

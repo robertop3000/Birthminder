@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { View, StyleSheet, Pressable } from 'react-native';
 import { Image } from 'expo-image';
 import { Ionicons } from '@expo/vector-icons';
@@ -13,16 +13,28 @@ interface AvatarProps {
 export function Avatar({ uri, size = 36, onPress }: AvatarProps) {
   const { colors } = useTheme();
   const [retryCount, setRetryCount] = useState(0);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     setRetryCount(0);
   }, [uri]);
 
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+  }, []);
+
   const hasImage = !!uri;
 
   const handleError = () => {
-    if (retryCount < 2) {
-      setTimeout(() => setRetryCount((c) => c + 1), 2000);
+    if (retryCount < 2 && !timeoutRef.current) {
+      timeoutRef.current = setTimeout(() => {
+        setRetryCount((c) => c + 1);
+        timeoutRef.current = null;
+      }, 2000);
     }
   };
 

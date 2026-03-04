@@ -223,11 +223,11 @@ When bumping to version X.Y.Z:
 
 # PART 4: CURRENT PROJECT STATE
 
-**Last Updated:** 2026-03-01
-**Current Version:** v1.4.0 (Branch: main)
+**Last Updated:** 2026-03-03
+**Current Version:** v1.6.1 (Branch: 1.6.1)
 **Build Number:** 6
 **Test Status:** 18 suites, 115 tests — all passing
-**Build Status:** v1.6.0 production readiness fixes applied. All features merged to main.
+**Build Status:** v1.6.1 critical bug fixes applied. All 6 bugs resolved. All features merged to main.
 **Pre-Flight Audit:** PASSED
 **EAS Secrets:** EXPO_PUBLIC_SUPABASE_URL and EXPO_PUBLIC_SUPABASE_ANON_KEY configured
 **GitHub Pages:** Enabled — serves OG landing page at https://robertop3000.github.io/Birthminder/
@@ -352,6 +352,20 @@ Canonical reference: `supabase-schema.sql` in project root.
 | people | Birthday entries | id, user_id (FK), name, birthday_day, birthday_month, birthday_year?, photo_url, notes, share_code |
 | groups | Organizing people | id, user_id (FK), name, color, photo_url, share_code, source_share_code |
 | person_groups | Junction (many-to-many) | person_id (FK), group_id (FK), user_id (FK — denormalized for O(1) RLS) |
+
+---
+
+## v1.6.1 Changes (Current)
+
+**Critical Bug Fixes (2026-03-03):**
+- BUG-01: Invalid dates (Feb 31, Apr 31, etc.) now rejected with month-specific day limits
+- BUG-02: getAge() fixed to return current age, not "turning" age
+- BUG-03: Feb 29 birthdays show celebration banner on Feb 28 in non-leap years
+- BUG-04: All group assignments preserved when editing from group screen
+- BUG-05: Avatar retry timeout cleaned up on unmount to prevent memory leak
+- BUG-06: Notification leap year handling fixed for Feb 29 (removed repeats:true, use getNextBirthday())
+
+All 115 tests passing. Ready for production.
 
 ---
 

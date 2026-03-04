@@ -61,7 +61,8 @@ export function useNotifications() {
 
         for (const daysBefore of days) {
           if (daysBefore === 0) {
-            // Same-day notification
+            // Same-day notification — use getNextBirthday to handle Feb 29 in leap years
+            const nextBday = getNextBirthday(person.birthday_month, person.birthday_day);
             schedulingPromises.push(
               Notifications.scheduleNotificationAsync({
                 identifier: `${person.id}-0`,
@@ -73,11 +74,11 @@ export function useNotifications() {
                 },
                 trigger: {
                   type: Notifications.SchedulableTriggerInputTypes.CALENDAR,
-                  month: person.birthday_month,
-                  day: person.birthday_day,
+                  month: nextBday.getMonth() + 1,
+                  day: nextBday.getDate(),
                   hour: 8,
                   minute: 0,
-                  repeats: true,
+                  repeats: false,
                 },
               })
             );
@@ -101,7 +102,7 @@ export function useNotifications() {
                   day: reminderDate.getDate(),
                   hour: 8,
                   minute: 0,
-                  repeats: true,
+                  repeats: false,
                 },
               })
             );

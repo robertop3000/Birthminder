@@ -75,9 +75,13 @@ export function BirthdayForm({
   );
   const [photoUri, setPhotoUri] = useState(initialValues?.photo_uri ?? null);
   const [notes, setNotes] = useState(initialValues?.notes ?? '');
-  const [selectedGroups, setSelectedGroups] = useState<string[]>(
-    preselectedGroupId ? [preselectedGroupId] : (initialValues?.group_ids ?? [])
-  );
+  const [selectedGroups, setSelectedGroups] = useState<string[]>(() => {
+    const existing = initialValues?.group_ids ?? [];
+    if (preselectedGroupId && !existing.includes(preselectedGroupId)) {
+      return [...existing, preselectedGroupId];
+    }
+    return existing;
+  });
   const [contactId, setContactId] = useState<string | null>(
     initialValues?.contact_id ?? null
   );
@@ -160,8 +164,10 @@ export function BirthdayForm({
     }
 
     const day = dayStr ? parseInt(dayStr, 10) : null;
-    if (!day || day < 1 || day > 31) {
-      alert('Please enter a valid day (1-31)');
+    const maxDays = new Date(2000, month, 0).getDate();
+
+    if (!day || day < 1 || day > maxDays) {
+      alert(`Please enter a valid day (1-${maxDays})`);
       return;
     }
 
@@ -177,8 +183,6 @@ export function BirthdayForm({
       reminder_days: reminderDays,
     });
   };
-
-  const maxDays = new Date(2000, month, 0).getDate();
 
   return (
     <KeyboardAvoidingView
