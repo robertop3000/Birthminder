@@ -332,9 +332,9 @@ const styles = StyleSheet.create({
         fontFamily: 'DMSans_500Medium',
     },
     primaryRow: {
-        backgroundColor: '#E07A5F10',
+        backgroundColor: '#4CAF5010',
         borderWidth: 1,
-        borderColor: '#E07A5F30',
+        borderColor: '#4CAF5030',
     },
     dangerRow: {
         backgroundColor: '#DC354510',

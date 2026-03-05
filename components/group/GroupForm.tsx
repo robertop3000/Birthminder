@@ -5,11 +5,11 @@ import { useTheme } from '../../hooks/useTheme';
 import { Avatar } from '../ui/Avatar';
 
 const GROUP_COLORS = [
-  '#E07A5F',
+  '#4CAF50',
   '#F2C94C',
   '#81B29A',
   '#3D405B',
-  '#F4845F',
+  '#FF7043',
   '#7EC8E3',
   '#C77DFF',
   '#FF6B6B',

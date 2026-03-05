@@ -40,7 +40,7 @@ export class ErrorBoundary extends Component<Props, State> {
             const bg = isDark ? '#1A1A2E' : '#FAF8F5';
             const textColor = isDark ? '#F4F1DE' : '#3D405B';
             const subColor = isDark ? '#A8A8B3' : '#6B6B7B';
-            const primary = '#E07A5F';
+            const primary = '#4CAF50';
 
             return (
                 <View style={[styles.container, { backgroundColor: bg }]}>

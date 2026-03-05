@@ -6,7 +6,7 @@ import { BirthdayForm, BirthdayFormData } from '../BirthdayForm';
 jest.mock('../../../hooks/useGroups', () => ({
   useGroups: () => ({
     groups: [
-      { id: 'g1', name: 'Family', color: '#E07A5F', member_count: 3 },
+      { id: 'g1', name: 'Family', color: '#4CAF50', member_count: 3 },
       { id: 'g2', name: 'Friends', color: '#81B29A', member_count: 5 },
     ],
     loading: false,

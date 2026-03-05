@@ -50,7 +50,7 @@ export default function Index() {
     return (
         <View style={styles.container}>
             <Text style={styles.title}>Birthminder</Text>
-            <ActivityIndicator size="small" color="#E07A5F" style={styles.loader} />
+            <ActivityIndicator size="small" color="#4CAF50" style={styles.loader} />
         </View>
     );
 }
@@ -65,7 +65,7 @@ const styles = StyleSheet.create({
     title: {
         fontSize: 28,
         fontWeight: '700',
-        color: '#E07A5F',
+        color: '#4CAF50',
         marginBottom: 16,
     },
     loader: {
@@ -74,7 +74,7 @@ const styles = StyleSheet.create({
     errorTitle: {
         fontSize: 20,
         fontWeight: '700',
-        color: '#E07A5F',
+        color: '#4CAF50',
         marginBottom: 12,
     },
     errorText: {

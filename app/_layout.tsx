@@ -64,7 +64,7 @@ export default function RootLayout() {
   if (!fontsLoaded && !fontsError) {
     return (
       <View style={styles.loading}>
-        <ActivityIndicator size="large" color="#E07A5F" />
+        <ActivityIndicator size="large" color="#4CAF50" />
       </View>
     );
   }

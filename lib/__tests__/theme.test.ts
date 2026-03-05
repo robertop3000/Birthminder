@@ -22,8 +22,8 @@ describe('theme', () => {
       expect(lightColors.background).toBe('#FAF8F5');
     });
 
-    it('uses coral primary', () => {
-      expect(lightColors.primary).toBe('#E07A5F');
+    it('uses green primary', () => {
+      expect(lightColors.primary).toBe('#4CAF50');
     });
   });
 

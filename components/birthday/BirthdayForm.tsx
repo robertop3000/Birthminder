@@ -91,7 +91,7 @@ export function BirthdayForm({
   const [showReminderPicker, setShowReminderPicker] = useState(false);
   const [showNewGroup, setShowNewGroup] = useState(false);
   const [newGroupName, setNewGroupName] = useState('');
-  const [newGroupColor, setNewGroupColor] = useState('#E07A5F');
+  const [newGroupColor, setNewGroupColor] = useState('#4CAF50');
   const [creatingGroup, setCreatingGroup] = useState(false);
 
   const pickPhoto = async () => {
@@ -113,7 +113,7 @@ export function BirthdayForm({
   };
 
   const GROUP_COLORS = [
-    '#E07A5F', '#3D405B', '#81B29A', '#F2CC8F',
+    '#4CAF50', '#3D405B', '#81B29A', '#F2CC8F',
     '#6A8EAE', '#D4A5A5', '#9B72CF', '#4ECDC4',
   ];
 
@@ -132,7 +132,7 @@ export function BirthdayForm({
         setSelectedGroups((prev) => [...prev, newGroup.id]);
       }
       setNewGroupName('');
-      setNewGroupColor('#E07A5F');
+      setNewGroupColor('#4CAF50');
       setShowNewGroup(false);
     } catch {
       Alert.alert('Error', 'Failed to create group');
@@ -207,7 +207,7 @@ export function BirthdayForm({
             </Pressable>
             {photoUri && (
               <Pressable onPress={() => setPhotoUri(null)} style={styles.removePhotoButton}>
-                <Text style={[styles.photoLabel, { color: '#E07A5F' }]}>
+                <Text style={[styles.photoLabel, { color: '#DC3545' }]}>
                   Remove
                 </Text>
               </Pressable>
