@@ -1,3 +1,36 @@
+## v1.6.3 - 2026-03-04
+*Developed using Claude Opus 4.6 + Haiku 4.5. Branch: 1.6.3 (Expo Version: 1.4.0, Build: 6).*
+
+### UI/UX Improvements
+
+#### Shared Group Import Deduplication
+**File:** `app/shared/[code].tsx:239-254`
+**Improvement:** When a user receives a shared group they already own, the app now detects the duplicate and shows an alert with three options:
+- **Cancel** — dismiss and return to group list
+- **Update** — refresh the existing group with latest members from the share link
+- **Duplicate** — create a separate copy with a new group name
+
+**Detection:** Checks for existing imports by:
+1. `source_share_code` (groups imported from this exact share link before)
+2. Group name (as fallback, catches manually-created groups or pre-tracking imports)
+
+#### Brand Rebrand: Primary Color Orange → Green
+**Files:** 17 files across code, tests, HTML, and assets
+**Change:** Updated primary color from `#E07A5F` (orange) to `#4CAF50` (green)
+- **Theme:** `lib/theme.ts` (light & dark modes)
+- **Components:** `ErrorBoundary.tsx`, `BirthdayForm.tsx`, `GroupForm.tsx`, `Button`, `ThemeToggle`
+- **Screens:** `app/index.tsx`, `app/_layout.tsx`, `app/settings.tsx`
+- **Tests:** 4 test files
+- **Assets:** Icon recoloring (icon.png, adaptive-icon.png, splash-icon.png, og-image.png)
+- **Docs:** `docs/index.html`
+- **Error UI:** "Remove Photo" button changed to semantic red (`#DC3545`) for better UX
+
+### Tests
+- All 115 tests passing (18 suites).
+- TypeScript: 0 errors
+
+---
+
 ## v1.6.2 - 2026-03-04
 *Developed using Claude Opus 4.6. Branch: 1.6.2 (Expo Version: 1.4.0, Build: 6).*
 

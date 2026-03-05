@@ -88,7 +88,7 @@ export default function SharedGroupScreen() {
     }
   };
 
-  const performFreshImport = async () => {
+  const performFreshImport = async (linkShareCode = true) => {
     if (!user || !group) return;
 
     const { data: newGroup, error: groupError } = await supabase
@@ -98,7 +98,7 @@ export default function SharedGroupScreen() {
         name: group.name,
         color: group.color,
         photo_url: group.photo_url,
-        source_share_code: code,
+        ...(linkShareCode ? { source_share_code: code } : {}),
       })
       .select()
       .single();
@@ -236,19 +236,28 @@ export default function SharedGroupScreen() {
 
     setImporting(true);
     try {
-      // Check if already imported
-      const { data: existingGroup } = await supabase
+      // Check if already imported (by source_share_code or by name)
+      const { data: byShareCode } = await supabase
         .from('groups')
         .select('id')
         .eq('user_id', user.id)
         .eq('source_share_code', code)
         .maybeSingle();
 
+      const existingGroup = byShareCode
+        ?? (await supabase
+            .from('groups')
+            .select('id')
+            .eq('user_id', user.id)
+            .eq('name', group.name)
+            .maybeSingle()
+          ).data;
+
       if (existingGroup) {
         setImporting(false);
         Alert.alert(
           'Already Imported',
-          'You have already imported this group. Would you like to update it with the latest data?',
+          'You already have this group. Would you like to update it with the latest data or create a duplicate?',
           [
             { text: 'Cancel', style: 'cancel' },
             {
@@ -256,6 +265,19 @@ export default function SharedGroupScreen() {
               onPress: async () => {
                 setImporting(true);
                 await handleReimport(existingGroup.id);
+              },
+            },
+            {
+              text: 'Duplicate',
+              onPress: async () => {
+                setImporting(true);
+                try {
+                  await performFreshImport(false);
+                } catch {
+                  Alert.alert('Error', 'Failed to duplicate group.');
+                } finally {
+                  setImporting(false);
+                }
               },
             },
           ]

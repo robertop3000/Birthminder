@@ -223,11 +223,11 @@ When bumping to version X.Y.Z:
 
 # PART 4: CURRENT PROJECT STATE
 
-**Last Updated:** 2026-03-03
-**Current Version:** v1.6.1 (Branch: 1.6.1)
+**Last Updated:** 2026-03-04
+**Current Version:** v1.6.3 (Branch: 1.6.3)
 **Build Number:** 6
 **Test Status:** 18 suites, 115 tests — all passing
-**Build Status:** v1.6.1 critical bug fixes applied. All 6 bugs resolved. All features merged to main.
+**Build Status:** v1.6.3 UI/UX improvements applied. Shared group import deduplication fixed. Brand rebrand (orange → green) complete.
 **Pre-Flight Audit:** PASSED
 **EAS Secrets:** EXPO_PUBLIC_SUPABASE_URL and EXPO_PUBLIC_SUPABASE_ANON_KEY configured
 **GitHub Pages:** Enabled — serves OG landing page at https://robertop3000.github.io/Birthminder/
@@ -355,7 +355,25 @@ Canonical reference: `supabase-schema.sql` in project root.
 
 ---
 
-## v1.6.2 Changes (Current — Security)
+## v1.6.3 Changes (Current — UI/UX & Brand)
+
+**Shared Group Import Deduplication (2026-03-04):**
+- Fixed duplicate detection when user receives a shared group they already own
+- Detection now checks both `source_share_code` (exact import match) and group name (fallback for manually-created or pre-tracking imports)
+- Alert shows three options: Cancel, Update (refresh existing), or Duplicate (create new copy)
+- File: `app/shared/[code].tsx:239-254`
+
+**Brand Rebrand: Primary Color Orange → Green (2026-03-04):**
+- Primary color changed from `#E07A5F` (orange) to `#4CAF50` (green)
+- Updated in 17 files: theme.ts, components, screens, tests, HTML, and 4 PNG assets
+- Error/destructive actions use semantic red (`#DC3545`) instead of brand color
+- Files: `lib/theme.ts`, `ErrorBoundary.tsx`, `BirthdayForm.tsx`, `GroupForm.tsx`, `app/index.tsx`, `app/_layout.tsx`, `app/settings.tsx`, 4 test files, `docs/index.html`, 4 icon PNG assets
+
+**All tests passing:** 18 suites, 115 tests.
+
+---
+
+## v1.6.2 Changes (Security)
 
 **RLS Policy Hardening (2026-03-04):**
 - SEC-01: Fixed shared data over-exposure via blanket RLS policies
