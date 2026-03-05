@@ -28,7 +28,6 @@ interface SharedPerson {
   birthday_day: number;
   birthday_year: number | null;
   photo_url: string | null;
-  notes: string | null;
 }
 
 export default function SharedPersonScreen() {
@@ -50,13 +49,11 @@ export default function SharedPersonScreen() {
   const loadSharedPerson = async () => {
     try {
       const { data, error } = await supabase
-        .from('people')
-        .select('id, name, birthday_month, birthday_day, birthday_year, photo_url, notes')
-        .eq('share_code', code)
+        .rpc('get_shared_person', { p_share_code: code })
         .single();
 
       if (error) throw error;
-      setPerson(data);
+      setPerson(data as SharedPerson);
     } catch {
       setPerson(null);
     } finally {
@@ -100,7 +97,7 @@ export default function SharedPersonScreen() {
         birthday_day: person.birthday_day,
         birthday_year: person.birthday_year,
         photo_url: person.photo_url,
-        notes: person.notes,
+        // notes removed — private data not included in shared views
       });
 
       if (insertError) throw insertError;
@@ -189,15 +186,6 @@ export default function SharedPersonScreen() {
             {daysUntil === 0 ? 'Today!' : `${daysUntil} day${daysUntil === 1 ? '' : 's'} away`}
           </Text>
         </View>
-
-        {person.notes ? (
-          <View style={styles.detailRow}>
-            <Ionicons name="document-text-outline" size={20} color={colors.textSecondary} />
-            <Text style={[styles.detailText, { color: colors.textSecondary }]}>
-              {person.notes}
-            </Text>
-          </View>
-        ) : null}
       </View>
 
       <View style={styles.importSection}>

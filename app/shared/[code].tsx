@@ -29,7 +29,6 @@ interface SharedPerson {
   birthday_day: number;
   birthday_year: number | null;
   photo_url: string | null;
-  notes: string | null;
 }
 
 interface SharedGroup {
@@ -59,30 +58,27 @@ export default function SharedGroupScreen() {
 
   const loadSharedGroup = async () => {
     try {
-      const { data, error } = await supabase
-        .from('groups')
-        .select(
-          'id, name, color, photo_url, person_groups(people(id, name, birthday_month, birthday_day, birthday_year, photo_url, notes))'
-        )
-        .eq('share_code', code)
+      // Get group info
+      const { data: groupData, error: groupError } = await supabase
+        .rpc('get_shared_group', { p_share_code: code })
         .single();
 
-      if (error) throw error;
+      if (groupError) throw groupError;
 
-      const members: SharedPerson[] = [];
-      if (data.person_groups) {
-        for (const pg of data.person_groups as unknown as Array<{ people: SharedPerson }>) {
-          if (pg.people) {
-            members.push(pg.people);
-          }
-        }
-      }
+      // Get group members
+      const { data: membersData, error: membersError } = await supabase
+        .rpc('get_shared_group_members', { p_share_code: code });
+
+      if (membersError) throw membersError;
+
+      const group = groupData as { id: string; name: string; color: string | null; photo_url: string | null };
+      const members = (membersData as SharedPerson[]) || [];
 
       setGroup({
-        id: data.id,
-        name: data.name,
-        color: data.color,
-        photo_url: data.photo_url ?? null,
+        id: group.id,
+        name: group.name,
+        color: group.color,
+        photo_url: group.photo_url ?? null,
         members,
       });
     } catch {
@@ -138,7 +134,7 @@ export default function SharedGroupScreen() {
             birthday_day: member.birthday_day,
             birthday_year: member.birthday_year,
             photo_url: member.photo_url,
-            notes: member.notes,
+            // notes removed — not available from shared view
           })
           .select()
           .single();
@@ -195,7 +191,7 @@ export default function SharedGroupScreen() {
               birthday_day: member.birthday_day,
               birthday_year: member.birthday_year,
               photo_url: member.photo_url,
-              notes: member.notes,
+              // notes removed — not available from shared view
             })
             .select()
             .single();

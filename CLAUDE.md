@@ -355,7 +355,26 @@ Canonical reference: `supabase-schema.sql` in project root.
 
 ---
 
-## v1.6.1 Changes (Current)
+## v1.6.2 Changes (Current — Security)
+
+**RLS Policy Hardening (2026-03-04):**
+- SEC-01: Fixed shared data over-exposure via blanket RLS policies
+  - Dropped 4 insecure "Public can view..." RLS policies from people/person_groups
+  - Created 3 new SECURITY DEFINER RPC functions: `get_shared_person()`, `get_shared_group()`, `get_shared_group_members()`
+  - Updated app to use RPC calls instead of direct table queries for shared views
+  - Removed private notes from shared views (data security improvement)
+  - Shared data now requires exact share_code — no more enumeration
+
+**Code Changes:**
+- `app/shared/person/[code].tsx`: Uses `get_shared_person()` RPC instead of direct query
+- `app/shared/[code].tsx`: Uses two RPC calls (`get_shared_group()` + `get_shared_group_members()`) instead of nested join
+- Both files: Removed `notes` field and import logic
+
+All 115 tests passing.
+
+---
+
+## v1.6.1 Changes (Recent)
 
 **Critical Bug Fixes (2026-03-03):**
 - BUG-01: Invalid dates (Feb 31, Apr 31, etc.) now rejected with month-specific day limits
@@ -365,7 +384,7 @@ Canonical reference: `supabase-schema.sql` in project root.
 - BUG-05: Avatar retry timeout cleaned up on unmount to prevent memory leak
 - BUG-06: Notification leap year handling fixed for Feb 29 (removed repeats:true, use getNextBirthday())
 
-All 115 tests passing. Ready for production.
+All 115 tests passing.
 
 ---
 

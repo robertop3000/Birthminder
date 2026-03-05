@@ -1,3 +1,34 @@
+## v1.6.2 - 2026-03-04
+*Developed using Claude Opus 4.6. Branch: 1.6.2 (Expo Version: 1.4.0, Build: 6).*
+
+### Security — RLS Policy Hardening
+
+#### SEC-01: Shared Data Over-Exposure via Blanket RLS Policies
+**Severity:** HIGH
+**Issue:** The RLS policies "Public can view shared people" and "Public can view shared groups" granted SELECT access to ALL rows where `share_code IS NOT NULL`. Anyone with the Supabase anon key could enumerate every shared person and group in the database without knowing any share codes.
+
+**Fix — Database Changes:**
+- Dropped 4 insecure RLS policies: "Public can view shared people", "Public can view shared groups", "Public can view people in shared groups", "Public can view person_groups in shared groups"
+- Dropped 2 old helper functions: `is_person_in_shared_group()`, `is_person_group_in_shared_group()`
+- Created 3 new SECURITY DEFINER RPC functions:
+  - `get_shared_person(p_share_code)` — returns shared person only if share_code matches
+  - `get_shared_group(p_share_code)` — returns shared group only if share_code matches
+  - `get_shared_group_members(p_share_code)` — returns group members only if share_code matches
+
+**Fix — App Code Changes:**
+- `app/shared/person/[code].tsx`: Replaced direct `.from('people').select().eq('share_code', code)` with `supabase.rpc('get_shared_person', { p_share_code: code })`
+- `app/shared/[code].tsx`: Replaced nested join query with two RPC calls: `get_shared_group()` + `get_shared_group_members()`
+- Removed `notes` from `SharedPerson` interface in both shared view files (private data never exposed to unaware callers)
+- Removed `notes` from import logic in both files (not available from RPC functions)
+
+**Security Improvement:** Shared data can now only be accessed by providing the exact share code. No more blanket enumeration of all shared records.
+
+### Tests
+- All 115 tests passing (18 suites).
+- TypeScript: 0 errors
+
+---
+
 ## v1.6.1 - 2026-03-03
 *Developed using Claude Opus 4.6 + Haiku 4.5. Branch: 1.6.1 (Expo Version: 1.4.0, Build: 6).*
 
