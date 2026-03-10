@@ -84,5 +84,6 @@ const styles = StyleSheet.create({
   text: {
     fontSize: 16,
     fontWeight: '600',
+    fontFamily: 'DMSans_700Bold',
   },
 });

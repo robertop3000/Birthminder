@@ -13,7 +13,7 @@ import { useTheme } from '../hooks/useTheme';
 
 type Tab = 'privacy' | 'terms';
 
-const PRIVACY_POLICY = `Last updated: February 2025
+const PRIVACY_POLICY = `Last updated: March 8, 2026
 
 Birthminder ("we", "our", or "us") respects your privacy. This Privacy Policy explains how we collect, use, and protect your information.
 
@@ -41,7 +41,7 @@ Birthminder is not directed at children under 13. We do not knowingly collect in
 **Changes to This Policy**
 We may update this Privacy Policy from time to time. We will notify you of any material changes through the app.`;
 
-const TERMS_OF_SERVICE = `Last updated: February 2025
+const TERMS_OF_SERVICE = `Last updated: March 8, 2026
 
 By using Birthminder ("the App"), you agree to these Terms of Service.
 

@@ -235,7 +235,7 @@ export default function PersonDetailScreen() {
             <Text
               style={[styles.statLabel, { color: colors.textSecondary }]}
             >
-              turning
+              years old
             </Text>
           </View>
         )}

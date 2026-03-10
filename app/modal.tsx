@@ -106,13 +106,13 @@ export default function AddEditBirthdayModal() {
 
       if (err instanceof Error) {
         errorMessage = err.message;
-      } else if (typeof err === 'object' && err !== null) {
-        const supabaseError = err as any;
-        if (supabaseError.message) {
-          errorMessage = supabaseError.message;
-        } else if (supabaseError.error) {
-          errorMessage = supabaseError.error;
-        }
+      } else if (
+        typeof err === 'object' &&
+        err !== null &&
+        'message' in err &&
+        typeof (err as Record<string, unknown>).message === 'string'
+      ) {
+        errorMessage = (err as Record<string, unknown>).message as string;
       }
 
       Alert.alert('Error', errorMessage);

@@ -17,10 +17,10 @@ export function useNotifications() {
     if (status === 'undetermined') {
       const granted = await requestPermission();
       if (!granted) {
-        console.warn('[Notifications] Permission denied after request');
+        if (__DEV__) console.warn('[Notifications] Permission denied after request');
       }
     } else if (status === 'denied') {
-      console.warn('[Notifications] Permission is currently denied. Users must enable it in system settings.');
+      if (__DEV__) console.warn('[Notifications] Permission is currently denied. Users must enable it in system settings.');
     }
 
     setPermissionStatus(status);
@@ -39,7 +39,6 @@ export function useNotifications() {
       Notifications.cancelScheduledNotificationAsync(`${personId}-${daysBefore}`)
     );
     await Promise.all(cancelPromises);
-    console.log(`[Notifications] Cancelled all notifications for person ${personId}`);
   }, []);
 
   const scheduleAllNotifications = useCallback(
@@ -49,7 +48,7 @@ export function useNotifications() {
       if (permissionStatus === null) return;
 
       if (permissionStatus !== 'granted') {
-        console.warn(`[Notifications] Skipping scheduling: permission is ${permissionStatus}`);
+        if (__DEV__) console.warn(`[Notifications] Skipping scheduling: permission is ${permissionStatus}`);
         return;
       }
 
@@ -120,7 +119,7 @@ export function useNotifications() {
         totalScheduled += chunk.length;
       }
 
-      console.log(`[Notifications] Successfully scheduled ${totalScheduled} notifications for ${birthdays.length} birthdays (at 8:00 AM)`);
+      if (__DEV__) console.log(`[Notifications] Scheduled ${totalScheduled} notifications for ${birthdays.length} birthdays`);
     },
     [permissionStatus]
   );

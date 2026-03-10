@@ -300,6 +300,18 @@ jest.mock('expo-linking', () => ({
   createURL: jest.fn((path) => `exp://localhost/${path}`),
 }));
 
+// Mock expo-constants
+jest.mock('expo-constants', () => ({
+  __esModule: true,
+  default: {
+    expoConfig: {
+      version: '1.6.3',
+      name: 'Birthminder',
+      slug: 'birthminder',
+    },
+  },
+}));
+
 // Mock expo-splash-screen
 jest.mock('expo-splash-screen', () => ({
   preventAutoHideAsync: jest.fn().mockResolvedValue(undefined),

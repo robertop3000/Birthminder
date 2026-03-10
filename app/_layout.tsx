@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import { View, ActivityIndicator, StyleSheet } from 'react-native';
+import { View, ActivityIndicator, StyleSheet, Appearance } from 'react-native';
 import { Stack, useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import {
@@ -52,18 +52,19 @@ export default function RootLayout() {
       if (status === 'undetermined') {
         const { status: newStatus } = await Notifications.requestPermissionsAsync();
         if (newStatus !== 'granted') {
-          console.warn('[Notifications] Permission denied during bootstrap');
+          if (__DEV__) console.warn('[Notifications] Permission denied during bootstrap');
         }
       } else if (status === 'denied') {
-        console.warn('[Notifications] Permission is denied. Notifications will not be received.');
+        if (__DEV__) console.warn('[Notifications] Permission is denied. Notifications will not be received.');
       }
     }
     setupNotifications();
   }, []);
 
   if (!fontsLoaded && !fontsError) {
+    const isDark = Appearance.getColorScheme() === 'dark';
     return (
-      <View style={styles.loading}>
+      <View style={[styles.loading, { backgroundColor: isDark ? '#000000' : '#FAF8F5' }]}>
         <ActivityIndicator size="large" color="#4CAF50" />
       </View>
     );
@@ -183,6 +184,5 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#FAF8F5',
   },
 });

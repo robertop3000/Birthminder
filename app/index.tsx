@@ -7,9 +7,11 @@ import {
     DMSans_500Medium,
     DMSans_700Bold,
 } from '@expo-google-fonts/dm-sans';
+import { useTheme } from '../hooks/useTheme';
 
 export default function Index() {
     const router = useRouter();
+    const { colors } = useTheme();
     const [error, setError] = useState<string | null>(null);
 
     const [fontsLoaded, fontsError] = useFonts({
@@ -39,18 +41,18 @@ export default function Index() {
     // Show error state if something went wrong
     if (error) {
         return (
-            <View style={styles.container}>
-                <Text style={styles.errorTitle}>⚠️ App Error</Text>
-                <Text style={styles.errorText}>{error}</Text>
+            <View style={[styles.container, { backgroundColor: colors.background }]}>
+                <Text style={[styles.errorTitle, { color: colors.primary }]}>App Error</Text>
+                <Text style={[styles.errorText, { color: colors.textPrimary }]}>{error}</Text>
             </View>
         );
     }
 
     // Show loading state while fonts load
     return (
-        <View style={styles.container}>
-            <Text style={styles.title}>Birthminder</Text>
-            <ActivityIndicator size="small" color="#4CAF50" style={styles.loader} />
+        <View style={[styles.container, { backgroundColor: colors.background }]}>
+            <Text style={[styles.title, { color: colors.primary }]}>Birthminder</Text>
+            <ActivityIndicator size="small" color={colors.primary} style={styles.loader} />
         </View>
     );
 }
@@ -60,12 +62,11 @@ const styles = StyleSheet.create({
         flex: 1,
         alignItems: 'center',
         justifyContent: 'center',
-        backgroundColor: '#FAF8F5',
     },
     title: {
         fontSize: 28,
         fontWeight: '700',
-        color: '#4CAF50',
+        fontFamily: 'DMSans_700Bold',
         marginBottom: 16,
     },
     loader: {
@@ -74,12 +75,12 @@ const styles = StyleSheet.create({
     errorTitle: {
         fontSize: 20,
         fontWeight: '700',
-        color: '#4CAF50',
+        fontFamily: 'DMSans_700Bold',
         marginBottom: 12,
     },
     errorText: {
         fontSize: 14,
-        color: '#2D2D2D',
+        fontFamily: 'DMSans_400Regular',
         textAlign: 'center',
         paddingHorizontal: 32,
     },

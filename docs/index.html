@@ -98,6 +98,13 @@
                 setTimeout(function() {
                     window.location.href = deepLink;
                 }, 300);
+
+                // If deep link didn't open the app, redirect to App Store after 1.5s
+                setTimeout(function() {
+                    if (!document.hidden) {
+                        window.location.href = 'https://apps.apple.com/app/birthminder/id6742752905';
+                    }
+                }, 1500);
             }
         })();
     </script>

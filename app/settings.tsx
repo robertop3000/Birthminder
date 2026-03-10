@@ -73,7 +73,28 @@ export default function SettingsScreen() {
             // 4. Delete profile
             await supabase.from('profiles').delete().eq('id', user.id);
 
-            // 5. Sign out (auth user deletion requires server-side admin key)
+            // 5. Delete auth user via Edge Function
+            const { data: sessionData } = await supabase.auth.getSession();
+            const accessToken = sessionData?.session?.access_token;
+            if (accessToken) {
+                const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL;
+                const response = await fetch(
+                    `${supabaseUrl}/functions/v1/delete-user`,
+                    {
+                        method: 'POST',
+                        headers: {
+                            Authorization: `Bearer ${accessToken}`,
+                            'Content-Type': 'application/json',
+                        },
+                    }
+                );
+                if (!response.ok) {
+                    const body = await response.json();
+                    throw new Error(body.error || 'Failed to delete auth account');
+                }
+            }
+
+            // 6. Sign out
             await signOut();
 
             setShowDeleteConfirm(false);
@@ -162,7 +183,14 @@ export default function SettingsScreen() {
                 </Text>
                 <Pressable
                     onPress={() => router.push('/(auth)/reset-password')}
-                    style={[styles.settingsRow, styles.primaryRow]}
+                    style={[
+                        styles.settingsRow,
+                        {
+                            backgroundColor: colors.primary + '10',
+                            borderWidth: 1,
+                            borderColor: colors.primary + '30',
+                        },
+                    ]}
                 >
                     <Ionicons name="lock-closed-outline" size={20} color={colors.primary} />
                     <Text style={[styles.settingsRowText, { color: colors.primary }]}>
@@ -182,7 +210,14 @@ export default function SettingsScreen() {
                 </Text>
                 <Pressable
                     onPress={() => setShowDeleteConfirm(true)}
-                    style={[styles.settingsRow, styles.dangerRow]}
+                    style={[
+                        styles.settingsRow,
+                        {
+                            backgroundColor: '#DC354510',
+                            borderWidth: 1,
+                            borderColor: '#DC354530',
+                        },
+                    ]}
                 >
                     <Ionicons name="trash-outline" size={20} color="#DC3545" />
                     <Text style={[styles.settingsRowText, { color: '#DC3545' }]}>
@@ -330,16 +365,6 @@ const styles = StyleSheet.create({
         flex: 1,
         fontSize: 15,
         fontFamily: 'DMSans_500Medium',
-    },
-    primaryRow: {
-        backgroundColor: '#4CAF5010',
-        borderWidth: 1,
-        borderColor: '#4CAF5030',
-    },
-    dangerRow: {
-        backgroundColor: '#DC354510',
-        borderWidth: 1,
-        borderColor: '#DC354530',
     },
     dangerHint: {
         fontSize: 13,
