@@ -223,11 +223,11 @@ When bumping to version X.Y.Z:
 
 # PART 4: CURRENT PROJECT STATE
 
-**Last Updated:** 2026-03-04
-**Current Version:** v1.6.3 (Branch: 1.6.3)
-**Build Number:** 6
+**Last Updated:** 2026-03-09
+**Current Version:** v1.6.4 (Branch: 1.6.4)
+**Build Number:** 9
 **Test Status:** 18 suites, 115 tests — all passing
-**Build Status:** v1.6.3 UI/UX improvements applied. Shared group import deduplication fixed. Brand rebrand (orange → green) complete.
+**Build Status:** v1.6.4 QA audit fixes applied. Edge Function account deletion. Production polish complete.
 **Pre-Flight Audit:** PASSED
 **EAS Secrets:** EXPO_PUBLIC_SUPABASE_URL and EXPO_PUBLIC_SUPABASE_ANON_KEY configured
 **GitHub Pages:** Enabled — serves OG landing page at https://robertop3000.github.io/Birthminder/
@@ -247,6 +247,10 @@ Birthminder/                          # Outer folder
     ├── tsconfig.json                 # Strict TS, extends expo/tsconfig.base
     ├── jest.setup.js                 # Comprehensive mocks (RN, Expo, Supabase)
     ├── supabase-schema.sql           # Complete DB schema (canonical reference)
+    ├── supabase/
+    │   └── functions/
+    │       └── delete-user/
+    │           └── index.ts          # Edge Function for Apple-compliant account deletion
     ├── CHANGELOG.md                  # Detailed version history
     ├── .env                          # Supabase credentials (NOT committed)
     ├── docs/
@@ -355,7 +359,35 @@ Canonical reference: `supabase-schema.sql` in project root.
 
 ---
 
-## v1.6.3 Changes (Current — UI/UX & Brand)
+## v1.6.4 Changes (Current — QA Audit & Production Polish)
+
+**Account Deletion Overhaul (2026-03-09):**
+- Reworked deletion flow to use Edge Function + CASCADE instead of manual client-side data deletion
+- Added Supabase Edge Function `delete-user` for Apple-compliant `auth.users` deletion
+- Added storage photo cleanup (profiles, people, groups) before account deletion
+- Added notification cancellation before account deletion
+- Wrapped `signOut()` in try/catch for graceful post-deletion handling
+- Added HTTP 405 method guard to Edge Function
+
+**Code Quality & Production Polish (2026-03-09):**
+- Guarded all `console.log`/`console.warn` with `__DEV__` in production paths
+- Fixed dark mode flash on loading/splash screens using `Appearance.getColorScheme()`
+- Replaced all hardcoded colors in `app/index.tsx` and `app/settings.tsx` with `useTheme()`
+- Removed `as any` cast in `modal.tsx` error handling -- uses proper type narrowing
+- `APP_VERSION` now reads dynamically from `expo-constants`
+- Updated Privacy Policy and Terms of Service dates to March 8, 2026
+- Fixed person detail label from "turning" to "years old"
+- Added `fontFamily: 'DMSans_700Bold'` to Button component
+- Added App Store fallback redirect in deep link handler
+- Removed dead FAB import and unused `showFAB` property from tabs layout
+- Excluded `supabase/` from TypeScript compilation
+- Bumped version to 1.6.4, build number to 9
+
+**All tests passing:** 18 suites, 115 tests.
+
+---
+
+## v1.6.3 Changes (UI/UX & Brand)
 
 **Shared Group Import Deduplication (2026-03-04):**
 - Fixed duplicate detection when user receives a shared group they already own

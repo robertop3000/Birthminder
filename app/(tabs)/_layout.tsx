@@ -1,9 +1,8 @@
 import React from 'react';
-import { View, Pressable, StyleSheet } from 'react-native';
+import { View, StyleSheet } from 'react-native';
 import { Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../hooks/useTheme';
-import { FAB } from '../../components/ui/FAB';
 
 type TabIconName = React.ComponentProps<typeof Ionicons>['name'];
 
@@ -11,12 +10,11 @@ const TAB_ITEMS: {
   name: string;
   icon: TabIconName;
   iconFocused: TabIconName;
-  showFAB: boolean;
 }[] = [
-  { name: 'index', icon: 'home-outline', iconFocused: 'home', showFAB: true },
-  { name: 'search', icon: 'search-outline', iconFocused: 'search', showFAB: true },
-  { name: 'groups', icon: 'people-outline', iconFocused: 'people', showFAB: true },
-  { name: 'profile', icon: 'person-outline', iconFocused: 'person', showFAB: false },
+  { name: 'index', icon: 'home-outline', iconFocused: 'home' },
+  { name: 'search', icon: 'search-outline', iconFocused: 'search' },
+  { name: 'groups', icon: 'people-outline', iconFocused: 'people' },
+  { name: 'profile', icon: 'person-outline', iconFocused: 'person' },
 ];
 
 export default function TabLayout() {

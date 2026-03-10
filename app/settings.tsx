@@ -50,57 +50,87 @@ export default function SettingsScreen() {
         if (!user) return;
         setDeleting(true);
         try {
-            // 1. Delete all person_groups for user's people
-            const { data: people } = await supabase
-                .from('people')
-                .select('id')
-                .eq('user_id', user.id);
+            // 1. Cancel all scheduled notifications
+            await Notifications.cancelAllScheduledNotificationsAsync();
 
-            if (people && people.length > 0) {
-                const personIds = people.map((p) => p.id);
-                await supabase
-                    .from('person_groups')
-                    .delete()
-                    .in('person_id', personIds);
+            // 2. Clean up storage photos (best-effort, don't block deletion)
+            try {
+                const storagePaths: string[] = [];
+
+                const { data: profile } = await supabase
+                    .from('profiles')
+                    .select('avatar_url')
+                    .eq('id', user.id)
+                    .single();
+                if (profile?.avatar_url) {
+                    const avatarPath = extractStoragePath(profile.avatar_url);
+                    if (avatarPath) storagePaths.push(avatarPath);
+                }
+
+                const { data: people } = await supabase
+                    .from('people')
+                    .select('photo_url')
+                    .eq('user_id', user.id);
+                if (people) {
+                    for (const p of people) {
+                        const path = extractStoragePath(p.photo_url);
+                        if (path) storagePaths.push(path);
+                    }
+                }
+
+                const { data: groups } = await supabase
+                    .from('groups')
+                    .select('photo_url')
+                    .eq('user_id', user.id);
+                if (groups) {
+                    for (const g of groups) {
+                        const path = extractStoragePath(g.photo_url);
+                        if (path) storagePaths.push(path);
+                    }
+                }
+
+                if (storagePaths.length > 0) {
+                    await supabase.storage.from('avatars').remove(storagePaths);
+                }
+            } catch {
+                // Storage cleanup failure should not block account deletion
             }
 
-            // 2. Delete all people
-            await supabase.from('people').delete().eq('user_id', user.id);
-
-            // 3. Delete all groups
-            await supabase.from('groups').delete().eq('user_id', user.id);
-
-            // 4. Delete profile
-            await supabase.from('profiles').delete().eq('id', user.id);
-
-            // 5. Delete auth user via Edge Function
+            // 3. Get session + access token
             const { data: sessionData } = await supabase.auth.getSession();
             const accessToken = sessionData?.session?.access_token;
-            if (accessToken) {
-                const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL;
-                const response = await fetch(
-                    `${supabaseUrl}/functions/v1/delete-user`,
-                    {
-                        method: 'POST',
-                        headers: {
-                            Authorization: `Bearer ${accessToken}`,
-                            'Content-Type': 'application/json',
-                        },
-                    }
-                );
-                if (!response.ok) {
-                    const body = await response.json();
-                    throw new Error(body.error || 'Failed to delete auth account');
-                }
+            if (!accessToken) {
+                throw new Error('No active session. Please sign in and try again.');
             }
 
-            // 6. Sign out
-            await signOut();
+            // 4. Call Edge Function to delete auth user (CASCADE deletes all data)
+            const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL;
+            const response = await fetch(
+                `${supabaseUrl}/functions/v1/delete-user`,
+                {
+                    method: 'POST',
+                    headers: {
+                        Authorization: `Bearer ${accessToken}`,
+                        'Content-Type': 'application/json',
+                    },
+                }
+            );
+            if (!response.ok) {
+                const body = await response.json();
+                throw new Error(body.error || 'Failed to delete auth account');
+            }
 
+            // 5. Sign out (wrapped separately — auth user is already deleted server-side)
+            try {
+                await signOut();
+            } catch {
+                // Sign out may fail since auth user is already deleted; that's fine
+            }
+
+            // 6. Navigate to login and show success alert
             setShowDeleteConfirm(false);
             router.replace('/(auth)/login');
 
-            // Show final message after navigation
             setTimeout(() => {
                 Alert.alert(
                     'Account Deleted',
@@ -108,11 +138,22 @@ export default function SettingsScreen() {
                 );
             }, 500);
         } catch (err) {
-            if (__DEV__) console.error('Delete account error:', err);
-            Alert.alert('Error', 'Failed to delete account. Please try again.');
+            const message =
+                err instanceof Error ? err.message : 'Failed to delete account. Please try again.';
+            Alert.alert('Error', message);
         } finally {
             setDeleting(false);
         }
+    };
+
+    /** Extract the storage path from a Supabase public URL (the part after /avatars/) */
+    const extractStoragePath = (url: string | null | undefined): string | null => {
+        if (!url) return null;
+        const marker = '/avatars/';
+        const idx = url.indexOf(marker);
+        if (idx === -1) return null;
+        const path = url.substring(idx + marker.length);
+        return path || null;
     };
 
     return (

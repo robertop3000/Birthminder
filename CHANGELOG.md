@@ -1,3 +1,35 @@
+## v1.6.4 - 2026-03-09
+*Developed using Claude Opus 4.6. Branch: 1.6.4 (Expo Version: 1.6.4, Build: 9).*
+
+### QA Production-Readiness Audit & Fixes
+
+#### Account Deletion Overhaul
+- **Edge Function**: Reworked account deletion flow to use Supabase Edge Function (`supabase/functions/delete-user/index.ts`) + CASCADE instead of manual client-side data deletion, eliminating partial-deletion risk
+- **Storage Cleanup**: Added photo cleanup (profiles, people, groups) before account deletion (`app/settings.tsx`)
+- **Notification Cleanup**: Added `cancelAllScheduledNotificationsAsync` before account deletion (`app/settings.tsx`)
+- **Graceful Sign-Out**: Wrapped `signOut()` in try/catch to handle post-deletion sign-out failures (`app/settings.tsx`)
+- **HTTP 405 Guard**: Added method guard to Edge Function, rejecting non-POST requests (`supabase/functions/delete-user/index.ts`)
+
+#### Code Quality & Production Polish
+- **DEV Guards**: Guarded all `console.log`/`console.warn` with `__DEV__` in production paths (`app/_layout.tsx`, `hooks/useNotifications.ts`)
+- **Dark Mode Flash Fix**: Fixed dark mode flash on loading/splash screens using `Appearance.getColorScheme()` (`app/_layout.tsx`, `app/index.tsx`)
+- **Theme Compliance**: Replaced all hardcoded colors in `app/index.tsx` and `app/settings.tsx` with `useTheme()`
+- **Type Safety**: Removed `as any` cast in `modal.tsx` error handling, uses proper type narrowing (`app/modal.tsx`)
+- **Dynamic Version**: `APP_VERSION` now reads dynamically from `expo-constants` instead of hardcoded string (`lib/constants.ts`)
+- **Legal Dates**: Updated Privacy Policy and Terms of Service dates to March 8, 2026 (`app/legal.tsx`)
+- **Label Fix**: Fixed person detail label from "turning" to "years old" (`app/person/[id].tsx`)
+- **Button Font**: Added `fontFamily: 'DMSans_700Bold'` to Button component (`components/ui/Button.tsx`)
+- **Deep Link Fallback**: Added App Store fallback redirect in deep link handler (`docs/index.html`)
+- **Dead Code Removal**: Removed dead FAB import and unused `showFAB` property from tabs layout (`app/(tabs)/_layout.tsx`)
+- **TypeScript Config**: Excluded `supabase/` from TypeScript compilation (`tsconfig.json`)
+- **Version Bump**: Bumped version to 1.6.4, build number to 9 (`app.json`, `package.json`)
+
+### Tests
+- All 115 tests passing (18 suites).
+- TypeScript: 0 errors
+
+---
+
 ## v1.6.3 - 2026-03-04
 *Developed using Claude Opus 4.6 + Haiku 4.5. Branch: 1.6.3 (Expo Version: 1.4.0, Build: 6).*
 

@@ -290,7 +290,7 @@ jest.mock('expo-notifications', () => ({
   requestPermissionsAsync: jest.fn().mockResolvedValue({ status: 'granted' }),
   scheduleNotificationAsync: jest.fn().mockResolvedValue('notification-id'),
   cancelAllScheduledNotificationsAsync: jest.fn().mockResolvedValue(undefined),
-  SchedulableTriggerInputTypes: { CALENDAR: 'calendar' },
+  SchedulableTriggerInputTypes: { CALENDAR: 'calendar', TIME_INTERVAL: 'timeInterval' },
 }));
 
 // Mock expo-linking
@@ -305,7 +305,7 @@ jest.mock('expo-constants', () => ({
   __esModule: true,
   default: {
     expoConfig: {
-      version: '1.6.3',
+      version: '1.6.4',
       name: 'Birthminder',
       slug: 'birthminder',
     },
@@ -403,6 +403,7 @@ const mockSupabase = {
       getPublicUrl: jest.fn().mockReturnValue({
         data: { publicUrl: 'https://example.com/photo.jpg' },
       }),
+      remove: jest.fn().mockResolvedValue({ data: [], error: null }),
     }),
   },
 };
