@@ -318,6 +318,19 @@ jest.mock('expo-splash-screen', () => ({
   hideAsync: jest.fn().mockResolvedValue(undefined),
 }));
 
+// Mock expo-av (used by CelebrationBanner for mascot animation)
+jest.mock('expo-av', () => {
+  const React = require('react');
+  const Video = React.forwardRef((props, ref) => {
+    return React.createElement('Video', { ...props, ref });
+  });
+  Video.displayName = 'Video';
+  return {
+    Video,
+    ResizeMode: { CONTAIN: 'contain', COVER: 'cover', STRETCH: 'stretch' },
+  };
+});
+
 // Mock expo-font
 jest.mock('expo-font', () => ({
   useFonts: jest.fn().mockReturnValue([true, null]),

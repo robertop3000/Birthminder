@@ -1,6 +1,6 @@
 {
   "name": "birthminder",
-  "version": "1.7.1",
+  "version": "1.7.2",
   "main": "expo-router/entry",
   "scripts": {
     "start": "expo start",
@@ -47,6 +47,7 @@
     "base64-arraybuffer": "^1.0.2",
     "date-fns": "^4.1.0",
     "expo": "~54.0.33",
+    "expo-av": "~16.0.8",
     "expo-calendar": "~15.0.8",
     "expo-constants": "~18.0.13",
     "expo-contacts": "~15.0.11",

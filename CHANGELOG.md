@@ -1,3 +1,34 @@
+ ## v1.7.2 - 2026-03-13
+*Developed using Gemini. Branch: 1.7.2 (Expo Version: 1.7.2, Build: 12).*
+
+### CelebrationBanner — Animated Mascot Redesign
+
+#### Animated Mascot GIF with Transparent Background
+**Files:** `components/birthday/CelebrationBanner.tsx`, `assets/mascot-jumping.gif`
+- Converted `mascot-jumping.mp4` → `mascot-jumping.gif` using pixel-level flood-fill BFS background removal (120 frames processed individually)
+- Only edge-connected white pixels removed → frosting, candle, hat details preserved
+- Installed `expo-av` for video playback; switched to `expo-image` for GIF rendering
+- GIF plays once on tab focus (`useFocusEffect` + key-based remount), replays on mascot tap
+- Animation is muted, non-looping
+
+#### Banner Layout
+**File:** `components/birthday/CelebrationBanner.tsx`
+- Side-by-side layout: animated mascot left, person info right
+- Two 🎉 emojis flanking person avatar on each side
+- Banner height tightened to match animation height (`paddingVertical: 0`)
+- Mascot display area: 172×172px
+
+#### Assets
+- `assets/mascot-jumping.gif` — 2.9MB, 325px wide, 15fps, transparent background
+
+### Version Bump
+- Bumped version to 1.7.2, build number to 12 (`app.json`, `package.json`)
+
+### Tests
+- All 112 tests passing (17 suites). TypeScript: 0 errors.
+
+---
+
  ## v1.7.1 - 2026-03-13
 *Developed using Gemini. Branch: 1.7.1 (Expo Version: 1.7.1, Build: 11).*
 
