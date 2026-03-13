@@ -37,10 +37,10 @@ export class ErrorBoundary extends Component<Props, State> {
     render() {
         if (this.state.hasError) {
             const isDark = Appearance.getColorScheme() === 'dark';
-            const bg = isDark ? '#1A1A2E' : '#FAF8F5';
-            const textColor = isDark ? '#F4F1DE' : '#3D405B';
-            const subColor = isDark ? '#A8A8B3' : '#6B6B7B';
-            const primary = '#4CAF50';
+            const bg = isDark ? '#0E0620' : '#FFF8FE';
+            const textColor = isDark ? '#F5F0FF' : '#1E0A35';
+            const subColor = isDark ? '#9B88C0' : '#9480B8';
+            const primary = '#7145B5';
 
             return (
                 <View style={[styles.container, { backgroundColor: bg }]}>

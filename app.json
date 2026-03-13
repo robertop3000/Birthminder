@@ -2,7 +2,7 @@
   "expo": {
     "name": "Birthminder",
     "slug": "birthminder",
-    "version": "1.7.0",
+    "version": "1.7.1",
     "orientation": "portrait",
     "scheme": "birthminder",
     "icon": "./assets/icon.png",
@@ -14,12 +14,12 @@
     "splash": {
       "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
-      "backgroundColor": "#FAF8F5"
+      "backgroundColor": "#512D85"
     },
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.birthminder.app",
-      "buildNumber": "10",
+      "buildNumber": "11",
       "jsEngine": "hermes",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,

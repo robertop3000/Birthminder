@@ -3,9 +3,10 @@ import {
   View,
   Text,
   StyleSheet,
-  ScrollView,
   Alert,
   Pressable,
+  Image,
+  useWindowDimensions,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
@@ -13,7 +14,6 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../../hooks/useTheme';
 import { useAuth } from '../../hooks/useAuth';
 import { supabase } from '../../lib/supabase';
-import { Avatar } from '../../components/ui/Avatar';
 import { Button } from '../../components/ui/Button';
 import { ThemeToggle } from '../../components/ui/ThemeToggle';
 import { APP_VERSION } from '../../lib/constants';
@@ -23,21 +23,24 @@ export default function ProfileScreen() {
   const { user, signOut } = useAuth();
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const { height: screenHeight } = useWindowDimensions();
 
   const [displayName, setDisplayName] = useState('');
-  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+
+  // Mascot = ~1/4 of the screen height + 10% increase, proportional width
+  const mascotHeight = (screenHeight / 4) * 1.2;
+  const mascotWidth = mascotHeight * (600 / 542);
 
   useEffect(() => {
     if (user) {
       supabase
         .from('profiles')
-        .select('display_name, avatar_url')
+        .select('display_name')
         .eq('id', user.id)
         .single()
         .then(({ data }) => {
           if (data) {
             setDisplayName(data.display_name ?? '');
-            setAvatarUrl(data.avatar_url ?? null);
           }
         });
     }
@@ -53,14 +56,17 @@ export default function ProfileScreen() {
   };
 
   return (
-    <ScrollView
-      style={[styles.container, { backgroundColor: colors.background }]}
-      contentContainerStyle={[
-        styles.content,
-        { paddingTop: insets.top + 12, paddingBottom: insets.bottom + 40 },
+    <View
+      style={[
+        styles.container,
+        {
+          backgroundColor: colors.background,
+          paddingTop: insets.top + 12,
+          paddingBottom: insets.bottom + 16,
+        },
       ]}
     >
-      {/* Gear icon */}
+      {/* Gear icon pinned to top */}
       <View style={styles.topBar}>
         <View style={{ width: 32 }} />
         <Pressable
@@ -76,72 +82,102 @@ export default function ProfileScreen() {
         </Pressable>
       </View>
 
-      <View style={styles.header}>
-        <Avatar uri={avatarUrl} size={120} />
-        <Text style={[styles.name, { color: colors.textPrimary }]}>
-          {displayName || 'User'}
-        </Text>
-        <Text style={[styles.email, { color: colors.textSecondary }]}>
-          {user?.email ?? ''}
-        </Text>
-      </View>
+      {/* Body: mascot top, sections bottom, space distributed evenly */}
+      <View style={styles.body}>
+        <View style={styles.header}>
+          <View
+            style={{
+              width: mascotHeight,
+              height: mascotHeight,
+              borderRadius: mascotHeight / 2,
+              borderWidth: 3,
+              borderColor: '#512D85',
+              backgroundColor: '#FAF8F5',
+              alignItems: 'center',
+              justifyContent: 'center',
+              overflow: 'hidden',
+            }}
+          >
+            <Image
+              // eslint-disable-next-line @typescript-eslint/no-require-imports
+              source={require('../../assets/profile-mascot.png')}
+              style={{ width: mascotWidth * 1.22, height: mascotHeight * 1.22 }}
+              resizeMode="contain"
+            />
+          </View>
+          <Text style={[styles.name, { color: colors.textPrimary }]}>
+            {displayName || 'User'}
+          </Text>
+          <Text style={[styles.email, { color: colors.textSecondary }]}>
+            {user?.email ?? ''}
+          </Text>
+        </View>
 
-      <View style={styles.section}>
-        <Text style={[styles.sectionLabel, { color: colors.textSecondary }]}>
-          Appearance
-        </Text>
-        <ThemeToggle />
-      </View>
+        <View style={styles.sections}>
+          <View style={styles.section}>
+            <Text style={[styles.sectionLabel, { color: colors.textSecondary }]}>
+              Appearance
+            </Text>
+            <ThemeToggle />
+          </View>
 
-      <View style={styles.section}>
-        <Button
-          title="Sign Out"
-          variant="secondary"
-          onPress={handleSignOut}
-          textStyle={{ color: colors.primary }}
-        />
-      </View>
+          <View style={styles.section}>
+            <Button
+              title="Sign Out"
+              variant="secondary"
+              onPress={handleSignOut}
+              textStyle={{ color: colors.primary }}
+            />
+          </View>
 
-      <Text style={[styles.version, { color: colors.textSecondary }]}>
-        v{APP_VERSION}
-      </Text>
-    </ScrollView>
+          <Text style={[styles.version, { color: colors.textSecondary }]}>
+            v{APP_VERSION}
+          </Text>
+        </View>
+      </View>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-  },
-  content: {
     paddingHorizontal: 24,
   },
   topBar: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 8,
+    marginBottom: 4,
   },
   gearButton: {
     padding: 4,
   },
+  body: {
+    flex: 1,
+    justifyContent: 'flex-start',
+  },
   header: {
     alignItems: 'center',
-    marginBottom: 32,
+    justifyContent: 'center',
+    marginBottom: 40,
   },
   name: {
-    fontSize: 24,
+    fontSize: 22,
     fontWeight: '700',
     fontFamily: 'DMSans_700Bold',
-    marginTop: 16,
+    marginTop: 10,
   },
   email: {
-    fontSize: 15,
+    fontSize: 14,
     fontFamily: 'DMSans_400Regular',
-    marginTop: 4,
+    marginTop: 3,
+  },
+  sections: {
+    paddingBottom: 4,
   },
   section: {
-    marginBottom: 24,
+    marginBottom: 28,
   },
   sectionLabel: {
     fontSize: 13,
@@ -154,7 +190,6 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontSize: 12,
     fontFamily: 'DMSans_400Regular',
-    marginTop: 20,
+    marginTop: 16,
   },
 });
-

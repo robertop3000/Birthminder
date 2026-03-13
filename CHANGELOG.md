@@ -1,3 +1,29 @@
+ ## v1.7.1 - 2026-03-13
+*Developed using Gemini. Branch: 1.7.1 (Expo Version: 1.7.1, Build: 11).*
+
+### Profile Tab — Layout & Mascot Polish
+
+#### 1. Mascot Circular Frame
+**File:** `app/(tabs)/profile.tsx`
+- Added circular container around profile mascot with purple (`#512D85`) border
+- Fixed light background (`#FAF8F5`) inside circle — consistent in both light and dark mode
+- Mascot enlarged by 20% over original base size
+
+#### 2. Layout Spacing Improvements
+**File:** `app/(tabs)/profile.tsx`
+- Moved all content up — removed flex stretch on header section
+- Increased spacing between Appearance toggle, Sign Out button, and version label
+- Section gaps increased (16→28px), version margin (8→16px), header bottom gap set to 40px
+
+### Version Bump
+- Bumped version to 1.7.1, build number to 11 (`app.json`, `package.json`)
+
+### Tests
+- All 112 tests passing (17 suites).
+- TypeScript: 0 errors
+
+---
+
  ## v1.7.0 - 2026-03-13
 *Developed using Claude Haiku 4.5. Branch: 1.7.0 (Expo Version: 1.7.0, Build: 10).*
 

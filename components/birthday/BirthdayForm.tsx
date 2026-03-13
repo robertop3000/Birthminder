@@ -91,7 +91,7 @@ export function BirthdayForm({
   const [showReminderPicker, setShowReminderPicker] = useState(false);
   const [showNewGroup, setShowNewGroup] = useState(false);
   const [newGroupName, setNewGroupName] = useState('');
-  const [newGroupColor, setNewGroupColor] = useState('#4CAF50');
+  const [newGroupColor, setNewGroupColor] = useState('#7145B5');
   const [creatingGroup, setCreatingGroup] = useState(false);
 
   const pickPhoto = async () => {
@@ -113,7 +113,7 @@ export function BirthdayForm({
   };
 
   const GROUP_COLORS = [
-    '#4CAF50', '#3D405B', '#81B29A', '#F2CC8F',
+    '#7145B5', '#3D405B', '#81B29A', '#F2CC8F',
     '#6A8EAE', '#D4A5A5', '#9B72CF', '#4ECDC4',
   ];
 
@@ -132,7 +132,7 @@ export function BirthdayForm({
         setSelectedGroups((prev) => [...prev, newGroup.id]);
       }
       setNewGroupName('');
-      setNewGroupColor('#4CAF50');
+      setNewGroupColor('#7145B5');
       setShowNewGroup(false);
     } catch {
       Alert.alert('Error', 'Failed to create group');

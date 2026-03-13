@@ -5,8 +5,8 @@ import { useTheme } from '../../hooks/useTheme';
 import { Avatar } from '../ui/Avatar';
 
 const GROUP_COLORS = [
-  '#4CAF50',
-  '#F2C94C',
+  '#7145B5',
+  '#F5A0B0',
   '#81B29A',
   '#3D405B',
   '#FF7043',

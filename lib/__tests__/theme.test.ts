@@ -19,11 +19,11 @@ describe('theme', () => {
     });
 
     it('uses warm background', () => {
-      expect(lightColors.background).toBe('#FAF8F5');
+      expect(lightColors.background).toBe('#FFF8FE');
     });
 
-    it('uses green primary', () => {
-      expect(lightColors.primary).toBe('#4CAF50');
+    it('uses purple primary', () => {
+      expect(lightColors.primary).toBe('#7145B5');
     });
   });
 
@@ -33,12 +33,12 @@ describe('theme', () => {
       expect(typeof darkColors[key as keyof typeof darkColors]).toBe('string');
     });
 
-    it('uses black background', () => {
-      expect(darkColors.background).toBe('#000000');
+    it('uses dark purple background', () => {
+      expect(darkColors.background).toBe('#0E0620');
     });
 
-    it('shares same primary as light mode', () => {
-      expect(darkColors.primary).toBe(lightColors.primary);
+    it('uses lighter purple primary for dark mode visibility', () => {
+      expect(darkColors.primary).toBe('#A87EE0');
     });
   });
 });

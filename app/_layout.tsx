@@ -64,8 +64,8 @@ export default function RootLayout() {
   if (!fontsLoaded && !fontsError) {
     const isDark = Appearance.getColorScheme() === 'dark';
     return (
-      <View style={[styles.loading, { backgroundColor: isDark ? '#000000' : '#FAF8F5' }]}>
-        <ActivityIndicator size="large" color="#4CAF50" />
+      <View style={[styles.loading, { backgroundColor: isDark ? '#0E0620' : '#FFF8FE' }]}>
+        <ActivityIndicator size="large" color="#7145B5" />
       </View>
     );
   }

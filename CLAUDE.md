@@ -224,10 +224,10 @@ When bumping to version X.Y.Z:
 # PART 4: CURRENT PROJECT STATE
 
 **Last Updated:** 2026-03-13
-**Current Version:** v1.7.0 (Branch: 1.7.0)
-**Build Number:** 10
+**Current Version:** v1.7.1 (Branch: 1.7.1)
+**Build Number:** 11
 **Test Status:** 17 suites, 112 tests — all passing
-**Build Status:** UI Polish & Tester Feedback Batch 1 complete. 5 improvements from TestFlight testers implemented.
+**Build Status:** Profile tab mascot circle + layout polish (v1.7.1).
 **Pre-Flight Audit:** PASSED (v1.6.4)
 **EAS Secrets:** EXPO_PUBLIC_SUPABASE_URL and EXPO_PUBLIC_SUPABASE_ANON_KEY configured
 **GitHub Pages:** Enabled — serves OG landing page at https://robertop3000.github.io/Birthminder/
