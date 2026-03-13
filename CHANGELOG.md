@@ -1,4 +1,4 @@
-## v1.6.4 - 2026-03-09
+ ## v1.6.4 - 2026-03-09
 *Developed using Claude Opus 4.6. Branch: 1.6.4 (Expo Version: 1.6.4, Build: 9).*
 
 ### QA Production-Readiness Audit & Fixes
