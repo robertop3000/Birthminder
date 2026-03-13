@@ -58,6 +58,7 @@ export default function GroupsScreen() {
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       <TopBar
         title="Groups"
+        showAvatar={false}
         rightAction={
           <Pressable onPress={() => setShowModal(true)}>
             <Ionicons name="add-circle-outline" size={26} color={colors.primary} />

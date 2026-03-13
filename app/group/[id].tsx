@@ -173,23 +173,18 @@ export default function GroupDetailScreen() {
           <Pressable onPress={() => router.back()} style={styles.backButton}>
             <Ionicons name="arrow-back" size={24} color={colors.textPrimary} />
           </Pressable>
-          <Text
-            style={[styles.headerTitle, { color: colors.textPrimary }]}
-            numberOfLines={1}
-          >
-            {group.name}
-          </Text>
+          <View style={styles.headerSpacer} />
           <View style={styles.headerActions}>
-            <Pressable onPress={() => setShowEditModal(true)}>
+            <Pressable onPress={handleShare}>
               <Ionicons
-                name="pencil-outline"
+                name="share-outline"
                 size={22}
                 color={colors.primary}
               />
             </Pressable>
-            <Pressable onPress={handleShare}>
+            <Pressable onPress={() => setShowEditModal(true)}>
               <Ionicons
-                name="share-outline"
+                name="pencil-outline"
                 size={22}
                 color={colors.primary}
               />
@@ -208,12 +203,9 @@ export default function GroupDetailScreen() {
           {group.photo_url ? (
             <Avatar uri={group.photo_url} size={64} />
           ) : (
-            <View
-              style={[
-                styles.colorStrip,
-                { backgroundColor: group.color || colors.primary },
-              ]}
-            />
+            <View style={[styles.colorCircle, { borderColor: group.color || colors.primary }]}>
+              <Ionicons name="people-outline" size={30} color={group.color || colors.primary} />
+            </View>
           )}
           <Text style={[styles.groupName, { color: colors.textPrimary }]}>
             {group.name}
@@ -487,12 +479,8 @@ const styles = StyleSheet.create({
   backButton: {
     padding: 4,
   },
-  headerTitle: {
+  headerSpacer: {
     flex: 1,
-    fontSize: 18,
-    fontWeight: '700',
-    fontFamily: 'DMSans_700Bold',
-    textAlign: 'center',
   },
   headerActions: {
     flexDirection: 'row',
@@ -503,11 +491,13 @@ const styles = StyleSheet.create({
     paddingVertical: 20,
     gap: 6,
   },
-  colorStrip: {
-    width: 48,
-    height: 6,
-    borderRadius: 3,
-    marginBottom: 8,
+  colorCircle: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    borderWidth: 2,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   groupName: {
     fontSize: 24,

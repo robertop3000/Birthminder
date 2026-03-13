@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import {
   View,
   Text,
@@ -9,11 +9,10 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useTheme } from '../../hooks/useTheme';
-import { useAuth } from '../../hooks/useAuth';
 import { useBirthdays } from '../../hooks/useBirthdays';
 import { useNotifications } from '../../hooks/useNotifications';
+import { Ionicons } from '@expo/vector-icons';
 import { TopBar } from '../../components/ui/TopBar';
-import { FAB } from '../../components/ui/FAB';
 import { BirthdayCard } from '../../components/birthday/BirthdayCard';
 import { CelebrationBanner } from '../../components/birthday/CelebrationBanner';
 import {
@@ -21,28 +20,12 @@ import {
   getDaysUntilBirthday,
 } from '../../lib/dateHelpers';
 import { APP_NAME } from '../../lib/constants';
-import { supabase } from '../../lib/supabase';
 
 export default function HomeScreen() {
   const { colors } = useTheme();
   const router = useRouter();
-  const { user } = useAuth();
   const { birthdays, loading } = useBirthdays();
   const { scheduleAllNotifications, permissionStatus } = useNotifications();
-  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (user) {
-      supabase
-        .from('profiles')
-        .select('avatar_url')
-        .eq('id', user.id)
-        .single()
-        .then(({ data }) => {
-          if (data?.avatar_url) setAvatarUrl(data.avatar_url);
-        });
-    }
-  }, [user]);
 
   useEffect(() => {
     if (birthdays.length > 0 && permissionStatus === 'granted') {
@@ -79,7 +62,15 @@ export default function HomeScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
-      <TopBar title={APP_NAME} avatarUrl={avatarUrl} />
+      <TopBar
+        title={APP_NAME}
+        showAvatar={false}
+        rightAction={
+          <Pressable onPress={() => router.push('/modal')}>
+            <Ionicons name="add-circle-outline" size={26} color={colors.primary} />
+          </Pressable>
+        }
+      />
 
       {loading ? (
         <View style={styles.center}>
@@ -140,7 +131,6 @@ export default function HomeScreen() {
         />
       )}
 
-      <FAB />
     </View>
   );
 }

@@ -217,11 +217,11 @@ export default function PersonDetailScreen() {
         <View
           style={[styles.statCard, { backgroundColor: colors.surface }]}
         >
+          <Text style={[styles.statLabel, { color: colors.textSecondary }]}>
+            {daysUntil === 0 ? '' : 'Days left'}
+          </Text>
           <Text style={[styles.statValue, { color: colors.primary }]}>
             {daysUntil === 0 ? 'Today!' : `${daysUntil}`}
-          </Text>
-          <Text style={[styles.statLabel, { color: colors.textSecondary }]}>
-            {daysUntil === 0 ? '' : 'days left'}
           </Text>
         </View>
 
@@ -229,13 +229,13 @@ export default function PersonDetailScreen() {
           <View
             style={[styles.statCard, { backgroundColor: colors.surface }]}
           >
-            <Text style={[styles.statValue, { color: colors.primary }]}>
-              {age}
-            </Text>
             <Text
               style={[styles.statLabel, { color: colors.textSecondary }]}
             >
-              years old
+              Turning
+            </Text>
+            <Text style={[styles.statValue, { color: colors.primary }]}>
+              {age}
             </Text>
           </View>
         )}

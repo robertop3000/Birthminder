@@ -13,7 +13,6 @@ import { useTheme } from '../../hooks/useTheme';
 import { useBirthdays, Person } from '../../hooks/useBirthdays';
 import { useNotifications } from '../../hooks/useNotifications';
 import { TopBar } from '../../components/ui/TopBar';
-import { FAB } from '../../components/ui/FAB';
 import { Avatar } from '../../components/ui/Avatar';
 import { CalendarImportModal } from '../../components/birthday/CalendarImportModal';
 import {
@@ -121,7 +120,15 @@ export default function SearchScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
-      <TopBar title="Search" />
+      <TopBar
+        title="Search"
+        showAvatar={false}
+        rightAction={
+          <Pressable onPress={() => router.push('/modal')}>
+            <Ionicons name="add-circle-outline" size={26} color={colors.primary} />
+          </Pressable>
+        }
+      />
 
       <View
         style={[
@@ -199,7 +206,6 @@ export default function SearchScreen() {
         stickySectionHeadersEnabled={false}
       />
 
-      <FAB />
 
       <CalendarImportModal
         visible={showImportModal}

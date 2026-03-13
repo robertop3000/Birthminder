@@ -26,12 +26,9 @@ export function GroupCard({ group, onShare }: GroupCardProps) {
       {group.photo_url ? (
         <Avatar uri={group.photo_url} size={40} />
       ) : (
-        <View
-          style={[
-            styles.colorBar,
-            { backgroundColor: group.color || colors.primary },
-          ]}
-        />
+        <View style={[styles.colorCircle, { borderColor: group.color || colors.primary }]}>
+          <Ionicons name="people-outline" size={20} color={group.color || colors.primary} />
+        </View>
       )}
       <View style={styles.info}>
         <Text style={[styles.name, { color: colors.textPrimary }]}>
@@ -65,10 +62,13 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     gap: 12,
   },
-  colorBar: {
-    width: 4,
+  colorCircle: {
+    width: 40,
     height: 40,
-    borderRadius: 2,
+    borderRadius: 20,
+    borderWidth: 2,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   info: {
     flex: 1,

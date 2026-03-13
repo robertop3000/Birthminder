@@ -1,4 +1,51 @@
- ## v1.6.4 - 2026-03-09
+ ## v1.7.0 - 2026-03-13
+*Developed using Claude Haiku 4.5. Branch: 1.7.0 (Expo Version: 1.7.0, Build: 10).*
+
+### UI Polish — Tester Feedback Batch 1 (5 Improvements)
+
+#### 1. Birthday Profile Stat Boxes Reorganized
+**File:** `app/person/[id].tsx` (lines 220-240)
+- Swapped stat card layout: label now appears on top, value below
+- "years old" label renamed to "Turning" for clarity
+- Stat boxes now show: "Days left" / "51" and "Turning" / "26" (instead of "51" / "days left")
+- Improved visual hierarchy and consistent labeling with person detail screen
+
+#### 2. Profile Avatar Removed from Tab TopBars
+**Files:** `app/(tabs)/index.tsx`, `app/(tabs)/search.tsx`, `app/(tabs)/groups.tsx`
+- Removed circular profile avatar from top-left of all main tab screens
+- Avatar appears only in Profile tab (bottom) to avoid redundancy
+- Added `showAvatar={false}` prop to TopBar components
+- Removed unused avatar fetch logic from Home tab
+
+#### 3. Birth Year 200-Year Validation
+**File:** `components/birthday/BirthdayForm.tsx` (lines 174-181)
+- Added validation: rejects birth years more than 200 years in the past
+- Also rejects future years (year > current year)
+- Error message: "Invalid Year"
+- Prevents invalid data entry in birthday form
+
+#### 4. Add Birthday Button Moved to TopBar
+**Files:** `app/(tabs)/index.tsx`, `app/(tabs)/search.tsx`
+- Replaced floating action button (FAB) at bottom-right with top-right "+" icon in TopBar
+- Matches Groups tab interaction pattern
+- `rightAction` prop on TopBar displays green `add-circle-outline` icon (size 26)
+- Deleted unused `components/ui/FAB.tsx` and `FAB.test.tsx` (3 tests removed)
+
+#### 5. Action Icon Order Consistency
+**File:** `app/group/[id].tsx` (lines 178-191)
+- Reordered action icons in group detail: Share → Edit → Delete
+- Matches person detail screen icon order
+- Both screens now use consistent size (22) and gap (18)
+- Person detail already had correct order; group detail updated
+
+### Tests
+- All 112 tests passing (17 suites).
+- TypeScript: 0 errors
+- Note: 3 tests removed with deleted FAB component (was 115 tests in v1.6.4)
+
+---
+
+## v1.6.4 - 2026-03-09
 *Developed using Claude Opus 4.6. Branch: 1.6.4 (Expo Version: 1.6.4, Build: 9).*
 
 ### QA Production-Readiness Audit & Fixes

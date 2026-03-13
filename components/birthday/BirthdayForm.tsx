@@ -171,11 +171,20 @@ export function BirthdayForm({
       return;
     }
 
+    const year = yearStr ? parseInt(yearStr, 10) : null;
+    if (year !== null) {
+      const currentYear = new Date().getFullYear();
+      if (year < currentYear - 200 || year > currentYear) {
+        alert('Invalid Year');
+        return;
+      }
+    }
+
     onSubmit({
       name: name.trim(),
       birthday_month: month,
       birthday_day: day,
-      birthday_year: yearStr ? parseInt(yearStr, 10) : null,
+      birthday_year: year,
       photo_uri: photoUri,
       notes: notes.trim(),
       group_ids: selectedGroups,

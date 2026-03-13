@@ -131,7 +131,7 @@ Source code must produce ZERO errors.
 
 STEP 2 — UNIT TESTS
 Run: npx jest --no-cache
-Must reach 100% pass rate. Current baseline: 17 suites, 100 tests.
+Must reach 100% pass rate. Current baseline: 17 suites, 112 tests (v1.7.0).
 Fix any failures before continuing.
 
 STEP 3 — CHECKLIST
@@ -167,7 +167,7 @@ For every new component, hook, or screen:
 1. Write a test file in a __tests__ folder next to the source
 2. Use @testing-library/react-native with fireEvent for interactions
 3. Run: npx jest --no-cache
-4. Must reach 100% pass rate — fix failures before continuing
+4. Must reach 100% pass rate (currently 112/112 tests) — fix failures before continuing
 5. Only tell the user "Ready for visual test" once headless tests pass
 
 ### Pillar 3 — Manual Feedback
@@ -223,12 +223,12 @@ When bumping to version X.Y.Z:
 
 # PART 4: CURRENT PROJECT STATE
 
-**Last Updated:** 2026-03-09
-**Current Version:** v1.6.4 (Branch: 1.6.4)
-**Build Number:** 9
-**Test Status:** 18 suites, 115 tests — all passing
-**Build Status:** v1.6.4 QA audit fixes applied. Edge Function account deletion. Production polish complete.
-**Pre-Flight Audit:** PASSED
+**Last Updated:** 2026-03-13
+**Current Version:** v1.7.0 (Branch: 1.7.0)
+**Build Number:** 10
+**Test Status:** 17 suites, 112 tests — all passing
+**Build Status:** UI Polish & Tester Feedback Batch 1 complete. 5 improvements from TestFlight testers implemented.
+**Pre-Flight Audit:** PASSED (v1.6.4)
 **EAS Secrets:** EXPO_PUBLIC_SUPABASE_URL and EXPO_PUBLIC_SUPABASE_ANON_KEY configured
 **GitHub Pages:** Enabled — serves OG landing page at https://robertop3000.github.io/Birthminder/
 
