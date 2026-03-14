@@ -27,10 +27,31 @@ export function useContactLink() {
           ? contact.phoneNumbers[0].number ?? null
           : null;
 
+      let imageUri: string | null = contact.image?.uri ?? null;
+
+      // iOS picker often doesn't include image data in the response.
+      // Refetch the contact with the Image field if we didn't get it.
+      if (!imageUri) {
+        try {
+          const { status } = await Contacts.requestPermissionsAsync();
+          if (status === 'granted') {
+            const { data } = await Contacts.getContactsAsync({
+              id: contact.id,
+              fields: [Contacts.Fields.Image],
+            });
+            if (data.length > 0) {
+              imageUri = data[0].image?.uri ?? null;
+            }
+          }
+        } catch {
+          // Permission denied or fetch failed — continue without image
+        }
+      }
+
       const result: LinkedContact = {
         id: contact.id,
         name: `${contact.firstName ?? ''} ${contact.lastName ?? ''}`.trim() || contact.name || 'Unknown',
-        imageUri: contact.image?.uri ?? null,
+        imageUri,
         phone,
       };
 

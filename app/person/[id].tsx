@@ -350,8 +350,8 @@ export default function PersonDetailScreen() {
               try {
                 const uploadedUrl = await uploadImage(contact.imageUri, 'people');
                 updates.photo_url = uploadedUrl;
-              } catch {
-                // Photo import failed silently
+              } catch (err) {
+                if (__DEV__) console.warn('Contact photo import failed:', err);
               }
             }
             await updateBirthday(person.id, updates);

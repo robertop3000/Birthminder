@@ -61,6 +61,10 @@ describe('useContactLink', () => {
       image: null,
       phoneNumbers: [{ number: '+1 555-0100' }, { number: '+1 555-0101' }],
     });
+    // Image refetch: permission denied → no image
+    (Contacts.requestPermissionsAsync as jest.Mock).mockResolvedValueOnce({
+      status: 'denied',
+    });
 
     const { result } = renderHook(() => useContactLink());
 
@@ -74,6 +78,37 @@ describe('useContactLink', () => {
       name: 'Bob Smith',
       imageUri: null,
       phone: '+1 555-0100',
+    });
+  });
+
+  it('pickContact refetches image when picker does not return it', async () => {
+    (Contacts.presentContactPickerAsync as jest.Mock).mockResolvedValueOnce({
+      id: 'contact-img',
+      firstName: 'Alice',
+      lastName: 'Wonder',
+      image: null,
+      phoneNumbers: [{ number: '+1 555-0200' }],
+    });
+    // Image refetch: permission granted, contact has image
+    (Contacts.requestPermissionsAsync as jest.Mock).mockResolvedValueOnce({
+      status: 'granted',
+    });
+    (Contacts.getContactsAsync as jest.Mock).mockResolvedValueOnce({
+      data: [{ image: { uri: 'file:///alice-photo.jpg' } }],
+    });
+
+    const { result } = renderHook(() => useContactLink());
+
+    let contact: unknown = undefined;
+    await act(async () => {
+      contact = await result.current.pickContact();
+    });
+
+    expect(contact).toEqual({
+      id: 'contact-img',
+      name: 'Alice Wonder',
+      imageUri: 'file:///alice-photo.jpg',
+      phone: '+1 555-0200',
     });
   });
 
