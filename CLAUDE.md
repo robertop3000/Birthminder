@@ -224,10 +224,10 @@ When bumping to version X.Y.Z:
 # PART 4: CURRENT PROJECT STATE
 
 **Last Updated:** 2026-03-14
-**Current Version:** v1.7.5 (Branch: 1.7.5)
+**Current Version:** v1.7.6 (Branch: main)
 **Build Number:** 12 (dev build, 1.7.2)
-**Test Status:** 17 suites, 114 tests — all passing
-**Build Status:** Contact linking fix + auto-import contact photo (v1.7.5). Expo version set to 1.7.2 for EAS update compatibility with dev build.
+**Test Status:** 17 suites, 115 tests — all passing
+**Build Status:** Contact photo refetch fallback (v1.7.6). Merged to main. Expo version set to 1.7.2 for EAS update compatibility with dev build.
 **Pre-Flight Audit:** PASSED (v1.6.4)
 **EAS Secrets:** EXPO_PUBLIC_SUPABASE_URL and EXPO_PUBLIC_SUPABASE_ANON_KEY configured
 **GitHub Pages:** Enabled — serves OG landing page at https://robertop3000.github.io/Birthminder/
@@ -359,7 +359,23 @@ Canonical reference: `supabase-schema.sql` in project root.
 
 ---
 
-## v1.7.5 Changes (Current — Contact Linking Fix)
+## v1.7.6 Changes (Current — Contact Photo Refetch)
+
+**Contact Photo Refetch — iOS Picker Image Fallback (2026-03-14):**
+- iOS `presentContactPickerAsync()` does not return image data; photos were not auto-importing
+- Added fallback refetch logic in `pickContact()`:
+  - If picker returns null for image, request contacts permission
+  - Refetch contact via `getContactsAsync()` with `Contacts.Fields.Image`
+  - Extract image URI from refetched data
+  - Works silently if permission denied or fetch fails
+- **Files:** `hooks/useContactLink.ts`, `app/person/[id].tsx`, `hooks/__tests__/useContactLink.test.tsx`
+- Added dev-mode logging for photo import failures
+
+**All tests passing:** 17 suites, 115 tests.
+
+---
+
+## v1.7.5 Changes (Contact Linking Fix)
 
 **Contact Linking iOS Compatibility (2026-03-14):**
 - Fixed "Contact not found" error by storing contact phone and name at link time (from `presentContactPickerAsync()`)

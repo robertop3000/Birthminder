@@ -1,3 +1,27 @@
+## v1.7.6 - 2026-03-14
+*Developed using Claude Haiku 4.5. Branch: 1.7.6 (Expo Version: 1.7.2, Build: 12).*
+
+### Contact Photo Refetch — iOS Picker Image Fallback
+
+#### Problem
+iOS `presentContactPickerAsync()` does not include image data in its response. When users linked a contact, the picker returned `null` for the image field, so auto-imported photos never arrived.
+
+#### Solution
+Added fallback refetch logic in `pickContact()`:
+- After picker returns, if `imageUri` is null, request contacts permission
+- Refetch the contact via `getContactsAsync()` with `Contacts.Fields.Image`
+- Extract the image URI from the refetched contact data
+- Works silently — if permission denied or fetch fails, continues without image
+- **Files:** `hooks/useContactLink.ts`, `app/person/[id].tsx`, `hooks/__tests__/useContactLink.test.tsx`
+
+#### Tests
+- Updated `pickContact extracts phone` test to mock permission denial for image refetch
+- Added new test: `pickContact refetches image when picker does not return it`
+- Added dev-mode logging in `person/[id].tsx` for photo import failures
+- All 115 tests passing (17 suites)
+
+---
+
 ## v1.7.5 - 2026-03-14
 *Developed using Claude Opus 4.6. Branch: 1.7.5 (Expo Version: 1.7.2, Build: 12).*
 
