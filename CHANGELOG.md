@@ -1,3 +1,23 @@
+## v1.7.3 - 2026-03-14
+*Developed using Claude Haiku 4.5. Branch: 1.7.3 (Expo Version: 1.7.3, Build: 13).*
+
+### CelebrationBanner — Mascot GIF Background Cleanup
+
+#### White Background Removal
+**File:** `assets/mascot-jumping.gif`
+- User manually cleaned up remaining white background pixels between mascot legs and around edges
+- Refined GIF with improved transparency in both light and dark mode
+- File size: 2.9MB → 2.0MB (30% reduction)
+- All 120 frames processed with better edge and pocket cleanup
+
+### Version Bump
+- Bumped version to 1.7.3, build number to 13 (`app.json`, `package.json`)
+
+### Tests
+- All 112 tests passing (17 suites). TypeScript: 0 errors.
+
+---
+
  ## v1.7.2 - 2026-03-13
 *Developed using Gemini. Branch: 1.7.2 (Expo Version: 1.7.2, Build: 12).*
 
