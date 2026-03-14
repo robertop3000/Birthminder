@@ -15,12 +15,18 @@ export interface CalendarBirthdayItem {
   isDuplicate: boolean;
 }
 
+export interface CalendarGroup {
+  calendarId: string;
+  calendarName: string;
+  items: CalendarBirthdayItem[];
+}
+
 export function useCalendarImport() {
   const { user } = useAuth();
   const { birthdays, refetch } = useBirthdays();
   const [loading, setLoading] = useState(false);
   const [importing, setImporting] = useState(false);
-  const [calendarBirthdays, setCalendarBirthdays] = useState<CalendarBirthdayItem[]>([]);
+  const [calendarGroups, setCalendarGroups] = useState<CalendarGroup[]>([]);
   const [error, setError] = useState<string | null>(null);
 
   const fetchCalendarBirthdays = useCallback(async (): Promise<boolean> => {
@@ -44,72 +50,96 @@ export function useCalendarImport() {
 
       const calendars = await Calendar.getCalendarsAsync(Calendar.EntityTypes.EVENT);
 
-      // Find the iOS Birthdays calendar
-      const birthdayCalendar = calendars.find(
-        (cal) =>
-          cal.type === Calendar.CalendarType.BIRTHDAYS ||
-          (cal.title === 'Birthdays' && cal.allowsModifications === false)
-      );
-
-      if (!birthdayCalendar) {
-        setError('No Birthdays calendar found on this device.');
-        setCalendarBirthdays([]);
+      if (calendars.length === 0) {
+        setError('No calendars found on this device.');
+        setCalendarGroups([]);
         setLoading(false);
         return false;
       }
 
-      // Fetch events across a wide range to capture all birthdays
-      const startDate = new Date(2000, 0, 1);
-      const endDate = new Date();
-      endDate.setFullYear(endDate.getFullYear() + 2);
+      // Wide range for birthday calendars, 1-year window for others
+      const birthdayStart = new Date(2000, 0, 1);
+      const birthdayEnd = new Date();
+      birthdayEnd.setFullYear(birthdayEnd.getFullYear() + 2);
 
-      const events = await Calendar.getEventsAsync(
-        [birthdayCalendar.id],
-        startDate,
-        endDate
-      );
+      const regularStart = new Date();
+      regularStart.setFullYear(regularStart.getFullYear() - 1);
+      const regularEnd = new Date();
+      regularEnd.setFullYear(regularEnd.getFullYear() + 1);
 
-      // Deduplicate by name (birthday calendar repeats events annually)
-      const seen = new Map<string, Omit<CalendarBirthdayItem, 'uid'>>();
+      const groups: CalendarGroup[] = [];
+      let totalItems = 0;
 
-      for (const event of events) {
-        if (!event.title) continue;
-        const name = event.title.trim();
-        if (seen.has(name.toLowerCase())) continue;
+      for (const cal of calendars) {
+        const isBirthdayCal =
+          cal.type === Calendar.CalendarType.BIRTHDAYS ||
+          (cal.title === 'Birthdays' && cal.allowsModifications === false);
 
-        const eventDate = new Date(event.startDate);
-        const month = eventDate.getMonth() + 1;
-        const day = eventDate.getDate();
-        const rawYear = eventDate.getFullYear();
+        const start = isBirthdayCal ? birthdayStart : regularStart;
+        const end = isBirthdayCal ? birthdayEnd : regularEnd;
 
-        // iOS uses year 1604 as sentinel for unknown year
-        const year = rawYear > 1900 && rawYear <= new Date().getFullYear() ? rawYear : null;
+        const events = await Calendar.getEventsAsync([cal.id], start, end);
 
-        // Check for duplicates against existing birthdays
-        const isDuplicate = birthdays.some(
-          (p: Person) =>
-            p.name.toLowerCase() === name.toLowerCase() &&
-            p.birthday_month === month &&
-            p.birthday_day === day
-        );
+        // Deduplicate by name within each calendar
+        const seen = new Map<string, Omit<CalendarBirthdayItem, 'uid'>>();
 
-        seen.set(name.toLowerCase(), {
-          eventId: event.id,
-          name,
-          birthday_month: month,
-          birthday_day: day,
-          birthday_year: year,
-          isDuplicate,
+        for (const event of events) {
+          if (!event.title) continue;
+          const name = event.title.trim();
+          if (!name) continue;
+          if (seen.has(name.toLowerCase())) continue;
+
+          const eventDate = new Date(event.startDate);
+          const month = eventDate.getMonth() + 1;
+          const day = eventDate.getDate();
+          const rawYear = eventDate.getFullYear();
+
+          // iOS uses year 1604 as sentinel for unknown year
+          const year = rawYear > 1900 && rawYear <= new Date().getFullYear() ? rawYear : null;
+
+          const isDuplicate = birthdays.some(
+            (p: Person) =>
+              p.name.toLowerCase() === name.toLowerCase() &&
+              p.birthday_month === month &&
+              p.birthday_day === day
+          );
+
+          seen.set(name.toLowerCase(), {
+            eventId: event.id,
+            name,
+            birthday_month: month,
+            birthday_day: day,
+            birthday_year: year,
+            isDuplicate,
+          });
+        }
+
+        if (seen.size === 0) continue;
+
+        const items: CalendarBirthdayItem[] = Array.from(seen.values())
+          .sort((a, b) => a.name.localeCompare(b.name))
+          .map((item, index) => ({ ...item, uid: `${cal.id}-${item.eventId}-${index}` }));
+
+        groups.push({
+          calendarId: cal.id,
+          calendarName: cal.title || 'Unnamed Calendar',
+          items,
         });
+        totalItems += items.length;
       }
 
-      const items: CalendarBirthdayItem[] = Array.from(seen.values())
-        .sort((a, b) => a.name.localeCompare(b.name))
-        .map((item, index) => ({ ...item, uid: `${item.eventId}-${index}` }));
+      // Sort: Birthdays calendar first, then alphabetically
+      groups.sort((a, b) => {
+        const aIsBirthday = a.calendarName.toLowerCase() === 'birthdays';
+        const bIsBirthday = b.calendarName.toLowerCase() === 'birthdays';
+        if (aIsBirthday && !bIsBirthday) return -1;
+        if (!aIsBirthday && bIsBirthday) return 1;
+        return a.calendarName.localeCompare(b.calendarName);
+      });
 
-      setCalendarBirthdays(items);
+      setCalendarGroups(groups);
       setLoading(false);
-      return items.length > 0;
+      return totalItems > 0;
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to read calendar';
       setError(message);
@@ -124,7 +154,6 @@ export function useCalendarImport() {
       setImporting(true);
 
       try {
-        // Batch insert directly to avoid N refetches
         const rows = selectedItems.map((item) => ({
           user_id: user.id,
           name: item.name,
@@ -153,14 +182,14 @@ export function useCalendarImport() {
   );
 
   const reset = useCallback(() => {
-    setCalendarBirthdays([]);
+    setCalendarGroups([]);
     setError(null);
   }, []);
 
   return {
     loading,
     importing,
-    calendarBirthdays,
+    calendarGroups,
     error,
     fetchCalendarBirthdays,
     importSelected,

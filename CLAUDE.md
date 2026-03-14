@@ -224,10 +224,10 @@ When bumping to version X.Y.Z:
 # PART 4: CURRENT PROJECT STATE
 
 **Last Updated:** 2026-03-14
-**Current Version:** v1.7.3 (Branch: 1.7.3)
-**Build Number:** 13
-**Test Status:** 17 suites, 112 tests — all passing
-**Build Status:** CelebrationBanner mascot GIF background cleanup complete (v1.7.3).
+**Current Version:** v1.7.4 (Branch: 1.7.4)
+**Build Number:** 14
+**Test Status:** 17 suites, 113 tests — all passing
+**Build Status:** Calendar import from all calendars with collapsible sections (v1.7.4).
 **Pre-Flight Audit:** PASSED (v1.6.4)
 **EAS Secrets:** EXPO_PUBLIC_SUPABASE_URL and EXPO_PUBLIC_SUPABASE_ANON_KEY configured
 **GitHub Pages:** Enabled — serves OG landing page at https://robertop3000.github.io/Birthminder/

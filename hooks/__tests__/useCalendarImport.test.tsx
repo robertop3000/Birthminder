@@ -48,7 +48,7 @@ describe('useCalendarImport', () => {
 
     expect(result.current).toHaveProperty('loading');
     expect(result.current).toHaveProperty('importing');
-    expect(result.current).toHaveProperty('calendarBirthdays');
+    expect(result.current).toHaveProperty('calendarGroups');
     expect(result.current).toHaveProperty('error');
     expect(typeof result.current.fetchCalendarBirthdays).toBe('function');
     expect(typeof result.current.importSelected).toBe('function');
@@ -75,13 +75,11 @@ describe('useCalendarImport', () => {
     );
   });
 
-  it('returns false when no birthday calendar is found', async () => {
+  it('returns false when no calendars are found', async () => {
     (Calendar.requestCalendarPermissionsAsync as jest.Mock).mockResolvedValueOnce({
       status: 'granted',
     });
-    (Calendar.getCalendarsAsync as jest.Mock).mockResolvedValueOnce([
-      { id: 'cal-1', title: 'Work', type: 'local', allowsModifications: true },
-    ]);
+    (Calendar.getCalendarsAsync as jest.Mock).mockResolvedValueOnce([]);
 
     const { result } = renderHook(() => useCalendarImport());
 
@@ -91,21 +89,27 @@ describe('useCalendarImport', () => {
     });
 
     expect(success).toBe(false);
-    expect(result.current.error).toBe('No Birthdays calendar found on this device.');
+    expect(result.current.error).toBe('No calendars found on this device.');
   });
 
-  it('parses calendar events correctly and detects duplicates', async () => {
+  it('groups events by calendar and detects duplicates', async () => {
     (Calendar.requestCalendarPermissionsAsync as jest.Mock).mockResolvedValueOnce({
       status: 'granted',
     });
     (Calendar.getCalendarsAsync as jest.Mock).mockResolvedValueOnce([
       { id: 'bday-cal', title: 'Birthdays', type: 'birthdays', allowsModifications: false },
+      { id: 'personal', title: 'Personal', type: 'local', allowsModifications: true },
     ]);
-    // Use noon UTC to avoid timezone day-shift issues
-    (Calendar.getEventsAsync as jest.Mock).mockResolvedValueOnce([
-      { id: 'evt-1', title: 'Alice', startDate: '1990-03-15T12:00:00Z' },
-      { id: 'evt-2', title: 'Bob', startDate: '1604-07-20T12:00:00Z' },
-    ]);
+    // Birthday calendar events
+    (Calendar.getEventsAsync as jest.Mock)
+      .mockResolvedValueOnce([
+        { id: 'evt-1', title: 'Alice', startDate: '1990-03-15T12:00:00Z' },
+        { id: 'evt-2', title: 'Bob', startDate: '1604-07-20T12:00:00Z' },
+      ])
+      // Personal calendar events
+      .mockResolvedValueOnce([
+        { id: 'evt-3', title: "Mom's Birthday", startDate: '2026-05-10T12:00:00Z' },
+      ]);
 
     const { result } = renderHook(() => useCalendarImport());
 
@@ -115,23 +119,57 @@ describe('useCalendarImport', () => {
     });
 
     expect(success).toBe(true);
-    expect(result.current.calendarBirthdays).toHaveLength(2);
+    expect(result.current.calendarGroups).toHaveLength(2);
 
-    // Alice should be a duplicate (matches existing birthday)
-    const alice = result.current.calendarBirthdays.find((b) => b.name === 'Alice');
+    // Birthdays calendar group should be first
+    const bdayGroup = result.current.calendarGroups[0];
+    expect(bdayGroup.calendarName).toBe('Birthdays');
+    expect(bdayGroup.items).toHaveLength(2);
+
+    // Alice should be a duplicate
+    const alice = bdayGroup.items.find((b) => b.name === 'Alice');
     expect(alice).toBeDefined();
     expect(alice!.birthday_month).toBe(3);
     expect(alice!.birthday_day).toBe(15);
     expect(alice!.birthday_year).toBe(1990);
     expect(alice!.isDuplicate).toBe(true);
 
-    // Bob has year 1604 (sentinel) — should be null
-    const bob = result.current.calendarBirthdays.find((b) => b.name === 'Bob');
+    // Bob has year 1604 → null
+    const bob = bdayGroup.items.find((b) => b.name === 'Bob');
     expect(bob).toBeDefined();
-    expect(bob!.birthday_month).toBe(7);
-    expect(bob!.birthday_day).toBe(20);
     expect(bob!.birthday_year).toBeNull();
     expect(bob!.isDuplicate).toBe(false);
+
+    // Personal calendar group
+    const personalGroup = result.current.calendarGroups[1];
+    expect(personalGroup.calendarName).toBe('Personal');
+    expect(personalGroup.items).toHaveLength(1);
+    expect(personalGroup.items[0].name).toBe("Mom's Birthday");
+  });
+
+  it('skips calendars with no events', async () => {
+    (Calendar.requestCalendarPermissionsAsync as jest.Mock).mockResolvedValueOnce({
+      status: 'granted',
+    });
+    (Calendar.getCalendarsAsync as jest.Mock).mockResolvedValueOnce([
+      { id: 'bday-cal', title: 'Birthdays', type: 'birthdays', allowsModifications: false },
+      { id: 'empty-cal', title: 'Work', type: 'local', allowsModifications: true },
+    ]);
+    (Calendar.getEventsAsync as jest.Mock)
+      .mockResolvedValueOnce([
+        { id: 'evt-1', title: 'Charlie', startDate: '1995-06-10T12:00:00Z' },
+      ])
+      .mockResolvedValueOnce([]); // empty work calendar
+
+    const { result } = renderHook(() => useCalendarImport());
+
+    await act(async () => {
+      await result.current.fetchCalendarBirthdays();
+    });
+
+    // Only Birthdays group should appear (Work has no events)
+    expect(result.current.calendarGroups).toHaveLength(1);
+    expect(result.current.calendarGroups[0].calendarName).toBe('Birthdays');
   });
 
   it('importSelected calls supabase insert and refetch', async () => {
@@ -139,7 +177,7 @@ describe('useCalendarImport', () => {
 
     const items = [
       {
-        uid: 'evt-2-0',
+        uid: 'bday-cal-evt-2-0',
         eventId: 'evt-2',
         name: 'Bob',
         birthday_month: 7,
@@ -183,13 +221,13 @@ describe('useCalendarImport', () => {
       await result.current.fetchCalendarBirthdays();
     });
 
-    expect(result.current.calendarBirthdays.length).toBeGreaterThan(0);
+    expect(result.current.calendarGroups.length).toBeGreaterThan(0);
 
     act(() => {
       result.current.reset();
     });
 
-    expect(result.current.calendarBirthdays).toHaveLength(0);
+    expect(result.current.calendarGroups).toHaveLength(0);
     expect(result.current.error).toBeNull();
   });
 });

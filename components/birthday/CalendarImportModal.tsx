@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import {
   View,
   Text,
@@ -11,12 +11,20 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../hooks/useTheme';
-import { useCalendarImport, CalendarBirthdayItem } from '../../hooks/useCalendarImport';
+import {
+  useCalendarImport,
+  CalendarBirthdayItem,
+  CalendarGroup,
+} from '../../hooks/useCalendarImport';
 
 const MONTH_NAMES = [
   '', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
   'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
 ];
+
+type ListRow =
+  | { type: 'header'; group: CalendarGroup; expanded: boolean }
+  | { type: 'event'; item: CalendarBirthdayItem };
 
 interface CalendarImportModalProps {
   visible: boolean;
@@ -33,7 +41,7 @@ export function CalendarImportModal({
   const {
     loading,
     importing,
-    calendarBirthdays,
+    calendarGroups,
     error,
     fetchCalendarBirthdays,
     importSelected,
@@ -41,44 +49,55 @@ export function CalendarImportModal({
   } = useCalendarImport();
 
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [expandedCalendars, setExpandedCalendars] = useState<Set<string>>(new Set());
 
-  // Fetch calendar birthdays when modal opens
+  // Flat list of all items across groups
+  const allItems = useMemo(
+    () => calendarGroups.flatMap((g) => g.items),
+    [calendarGroups]
+  );
+
+  // Fetch when modal opens
   useEffect(() => {
     if (visible) {
       fetchCalendarBirthdays();
     } else {
       reset();
       setSelectedIds(new Set());
+      setExpandedCalendars(new Set());
     }
   }, [visible]);
 
-  // Pre-select non-duplicate items when list loads
+  // Pre-select non-duplicates + auto-expand first calendar with items
   useEffect(() => {
     const nonDuplicateIds = new Set(
-      calendarBirthdays
-        .filter((item) => !item.isDuplicate)
-        .map((item) => item.uid)
+      allItems.filter((item) => !item.isDuplicate).map((item) => item.uid)
     );
     setSelectedIds(nonDuplicateIds);
-  }, [calendarBirthdays]);
+
+    // Auto-expand the first group (usually Birthdays)
+    if (calendarGroups.length > 0) {
+      setExpandedCalendars(new Set([calendarGroups[0].calendarId]));
+    }
+  }, [calendarGroups, allItems]);
 
   const duplicateCount = useMemo(
-    () => calendarBirthdays.filter((item) => item.isDuplicate).length,
-    [calendarBirthdays]
+    () => allItems.filter((item) => item.isDuplicate).length,
+    [allItems]
   );
 
   const allSelected = useMemo(
-    () => calendarBirthdays.length > 0 && selectedIds.size === calendarBirthdays.length,
-    [selectedIds.size, calendarBirthdays.length]
+    () => allItems.length > 0 && selectedIds.size === allItems.length,
+    [selectedIds.size, allItems.length]
   );
 
-  const toggleItem = useCallback((eventId: string) => {
+  const toggleItem = useCallback((uid: string) => {
     setSelectedIds((prev) => {
       const next = new Set(prev);
-      if (next.has(eventId)) {
-        next.delete(eventId);
+      if (next.has(uid)) {
+        next.delete(uid);
       } else {
-        next.add(eventId);
+        next.add(uid);
       }
       return next;
     });
@@ -86,17 +105,27 @@ export function CalendarImportModal({
 
   const toggleAll = useCallback(() => {
     setSelectedIds((prev) => {
-      if (prev.size === calendarBirthdays.length && calendarBirthdays.length > 0) {
+      if (prev.size === allItems.length && allItems.length > 0) {
         return new Set<string>();
       }
-      return new Set(calendarBirthdays.map((item) => item.uid));
+      return new Set(allItems.map((item) => item.uid));
     });
-  }, [calendarBirthdays]);
+  }, [allItems]);
+
+  const toggleCalendarExpanded = useCallback((calendarId: string) => {
+    setExpandedCalendars((prev) => {
+      const next = new Set(prev);
+      if (next.has(calendarId)) {
+        next.delete(calendarId);
+      } else {
+        next.add(calendarId);
+      }
+      return next;
+    });
+  }, []);
 
   const handleImport = async () => {
-    const selected = calendarBirthdays.filter((item) =>
-      selectedIds.has(item.uid)
-    );
+    const selected = allItems.filter((item) => selectedIds.has(item.uid));
     if (selected.length === 0) return;
 
     try {
@@ -111,7 +140,49 @@ export function CalendarImportModal({
     }
   };
 
-  const renderItem = ({ item }: { item: CalendarBirthdayItem }) => {
+  // Build flat list data with headers and (conditionally) items
+  const listData = useMemo((): ListRow[] => {
+    const rows: ListRow[] = [];
+    for (const group of calendarGroups) {
+      const expanded = expandedCalendars.has(group.calendarId);
+      rows.push({ type: 'header', group, expanded });
+      if (expanded) {
+        for (const item of group.items) {
+          rows.push({ type: 'event', item });
+        }
+      }
+    }
+    return rows;
+  }, [calendarGroups, expandedCalendars]);
+
+  const renderRow = ({ item: row }: { item: ListRow }) => {
+    if (row.type === 'header') {
+      const { group, expanded } = row;
+      const selectedInGroup = group.items.filter((i) => selectedIds.has(i.uid)).length;
+      return (
+        <Pressable
+          onPress={() => toggleCalendarExpanded(group.calendarId)}
+          style={[styles.sectionHeader, { backgroundColor: colors.surface }]}
+        >
+          <Ionicons
+            name={expanded ? 'chevron-down' : 'chevron-forward'}
+            size={18}
+            color={colors.textSecondary}
+          />
+          <View style={styles.sectionInfo}>
+            <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>
+              {group.calendarName}
+            </Text>
+            <Text style={[styles.sectionCount, { color: colors.textSecondary }]}>
+              {group.items.length} event{group.items.length !== 1 ? 's' : ''}
+              {selectedInGroup > 0 ? ` · ${selectedInGroup} selected` : ''}
+            </Text>
+          </View>
+        </Pressable>
+      );
+    }
+
+    const { item } = row;
     const isSelected = selectedIds.has(item.uid);
     const dateStr = `${MONTH_NAMES[item.birthday_month]} ${item.birthday_day}${item.birthday_year ? `, ${item.birthday_year}` : ''}`;
 
@@ -169,7 +240,7 @@ export function CalendarImportModal({
             <View style={styles.centered}>
               <ActivityIndicator size="large" color={colors.primary} />
               <Text style={[styles.loadingText, { color: colors.textSecondary }]}>
-                Reading calendar...
+                Reading calendars...
               </Text>
             </View>
           ) : error ? (
@@ -178,13 +249,13 @@ export function CalendarImportModal({
                 {error}
               </Text>
             </View>
-          ) : calendarBirthdays.length === 0 ? (
+          ) : allItems.length === 0 ? (
             <View style={styles.centered}>
               <Text style={[styles.emptyText, { color: colors.textSecondary }]}>
-                No birthdays found in your calendar.
+                No events found in your calendars.
               </Text>
               <Text style={[styles.emptyHint, { color: colors.textSecondary }]}>
-                Add birthdays to your contacts in the Contacts app, and they will appear here.
+                Add birthdays to your contacts or calendar, and they will appear here.
               </Text>
             </View>
           ) : (
@@ -192,10 +263,8 @@ export function CalendarImportModal({
               {/* Summary + Select All */}
               <View style={[styles.summaryRow, { borderBottomColor: colors.bottomBarBorder }]}>
                 <Text style={[styles.summaryText, { color: colors.textSecondary }]}>
-                  Found {calendarBirthdays.length} birthday{calendarBirthdays.length > 1 ? 's' : ''}
-                  {duplicateCount > 0
-                    ? ` (${duplicateCount} already added)`
-                    : ''}
+                  {allItems.length} event{allItems.length !== 1 ? 's' : ''} in {calendarGroups.length} calendar{calendarGroups.length !== 1 ? 's' : ''}
+                  {duplicateCount > 0 ? ` · ${duplicateCount} already added` : ''}
                 </Text>
                 <Pressable onPress={toggleAll}>
                   <Text style={[styles.selectAllText, { color: colors.primary }]}>
@@ -206,9 +275,13 @@ export function CalendarImportModal({
 
               {/* List */}
               <FlatList
-                data={calendarBirthdays}
-                keyExtractor={(item) => item.uid}
-                renderItem={renderItem}
+                data={listData}
+                keyExtractor={(row, index) =>
+                  row.type === 'header'
+                    ? `header-${row.group.calendarId}`
+                    : `event-${row.item.uid}-${index}`
+                }
+                renderItem={renderRow}
                 contentContainerStyle={styles.list}
                 showsVerticalScrollIndicator={false}
               />
@@ -311,6 +384,8 @@ const styles = StyleSheet.create({
   summaryText: {
     fontSize: 13,
     fontFamily: 'DMSans_400Regular',
+    flex: 1,
+    marginRight: 8,
   },
   selectAllText: {
     fontSize: 14,
@@ -319,11 +394,32 @@ const styles = StyleSheet.create({
   list: {
     paddingVertical: 4,
   },
+  sectionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingVertical: 14,
+    gap: 10,
+  },
+  sectionInfo: {
+    flex: 1,
+  },
+  sectionTitle: {
+    fontSize: 15,
+    fontWeight: '700',
+    fontFamily: 'DMSans_700Bold',
+  },
+  sectionCount: {
+    fontSize: 12,
+    fontFamily: 'DMSans_400Regular',
+    marginTop: 2,
+  },
   row: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 20,
     paddingVertical: 12,
+    paddingLeft: 48,
     gap: 12,
   },
   rowInfo: {

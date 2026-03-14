@@ -18,6 +18,38 @@
 
 ---
 
+## v1.7.4 - 2026-03-14
+*Developed using Claude Opus 4.6. Branch: 1.7.4 (Expo Version: 1.7.4, Build: 14).*
+
+### Calendar Import — Multi-Calendar Support with Collapsible UI
+
+#### Feature Enhancement
+**Files:** `hooks/useCalendarImport.ts`, `components/birthday/CalendarImportModal.tsx`
+- **Multi-calendar support**: Import from ALL calendars, not just iOS Birthdays calendar
+  - Users can now import birthdays saved in Personal, Work, or any custom calendar
+- **Grouped UI**: Collapsible calendar sections
+  - Birthdays calendar pinned first, others alphabetically
+  - Each section shows calendar name + event count
+  - Tap to expand/collapse; expanded by default for Birthdays calendar
+  - Selection count shown per section
+- **Smart date ranges**:
+  - Birthday calendar: 2000–current+2 years (catches all historical birthdays)
+  - Other calendars: ±1 year from today (captures recurring annual events without noise)
+- **Maintained deduplication**: Deduplicates by name within each calendar + detects duplicates against existing birthdays
+
+#### UI Improvements
+- Section headers with chevron icon indicating expand/collapse state
+- Events indented under their calendar for visual hierarchy
+- Summary shows total events and number of calendars
+- Select All / Deselect All works across all calendars
+
+### Tests
+- Added test for skipping calendars with 0 events
+- Updated all existing tests for new grouped structure
+- All 113 tests passing (17 suites). TypeScript: 0 errors.
+
+---
+
  ## v1.7.2 - 2026-03-13
 *Developed using Gemini. Branch: 1.7.2 (Expo Version: 1.7.2, Build: 12).*
 
