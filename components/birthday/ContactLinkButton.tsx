@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, Pressable, StyleSheet, ActivityIndicator } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../hooks/useTheme';
@@ -6,43 +6,52 @@ import { useContactLink, LinkedContact } from '../../hooks/useContactLink';
 
 interface ContactLinkButtonProps {
   contactId: string | null;
-  onContactLinked: (contactId: string) => void;
+  contactName: string | null;
+  onContactLinked: (contact: LinkedContact) => void;
   onContactUnlinked: () => void;
 }
 
 export function ContactLinkButton({
   contactId,
+  contactName,
   onContactLinked,
   onContactUnlinked,
 }: ContactLinkButtonProps) {
   const { colors } = useTheme();
   const { linking, pickContact, getContactInfo } = useContactLink();
-  const [linkedContact, setLinkedContact] = useState<LinkedContact | null>(null);
+  const [displayName, setDisplayName] = useState<string | null>(null);
   const [loadingInfo, setLoadingInfo] = useState(false);
 
-  // Load contact info when contactId is set
   useEffect(() => {
-    if (contactId) {
-      setLoadingInfo(true);
-      getContactInfo(contactId).then((info) => {
-        setLinkedContact(info);
-        setLoadingInfo(false);
-      });
-    } else {
-      setLinkedContact(null);
+    if (!contactId) {
+      setDisplayName(null);
+      return;
     }
-  }, [contactId, getContactInfo]);
+
+    if (contactName) {
+      // New-style: stored name available, no re-fetch needed
+      setDisplayName(contactName);
+      return;
+    }
+
+    // Legacy fallback: try to fetch from Contacts API
+    setLoadingInfo(true);
+    getContactInfo(contactId).then((info) => {
+      setDisplayName(info?.name ?? null);
+      setLoadingInfo(false);
+    });
+  }, [contactId, contactName, getContactInfo]);
 
   const handleLink = async () => {
     const contact = await pickContact();
     if (contact) {
-      setLinkedContact(contact);
-      onContactLinked(contact.id);
+      setDisplayName(contact.name);
+      onContactLinked(contact);
     }
   };
 
   const handleUnlink = () => {
-    setLinkedContact(null);
+    setDisplayName(null);
     onContactUnlinked();
   };
 
@@ -55,7 +64,7 @@ export function ContactLinkButton({
   }
 
   // Linked state
-  if (contactId && linkedContact) {
+  if (contactId) {
     return (
       <View style={[styles.container, { backgroundColor: colors.surface }]}>
         <View style={styles.linkedRow}>
@@ -64,7 +73,7 @@ export function ContactLinkButton({
             style={[styles.linkedName, { color: colors.textPrimary }]}
             numberOfLines={1}
           >
-            {linkedContact.name}
+            {displayName ?? 'Linked contact'}
           </Text>
           <Pressable onPress={handleUnlink} style={styles.unlinkButton}>
             <Text style={[styles.unlinkText, { color: colors.textSecondary }]}>
@@ -76,29 +85,7 @@ export function ContactLinkButton({
     );
   }
 
-  // Linked but contact not found
-  if (contactId && !linkedContact) {
-    return (
-      <View style={[styles.container, { backgroundColor: colors.surface }]}>
-        <View style={styles.linkedRow}>
-          <Ionicons name="alert-circle-outline" size={20} color={colors.textSecondary} />
-          <Text
-            style={[styles.notFoundText, { color: colors.textSecondary }]}
-            numberOfLines={1}
-          >
-            Contact not found
-          </Text>
-          <Pressable onPress={handleUnlink} style={styles.unlinkButton}>
-            <Text style={[styles.unlinkText, { color: colors.textSecondary }]}>
-              Unlink
-            </Text>
-          </Pressable>
-        </View>
-      </View>
-    );
-  }
-
-  // Unlinked state ΓÇö show link button
+  // Unlinked state — show link button
   return (
     <Pressable
       onPress={handleLink}
@@ -160,11 +147,6 @@ const styles = StyleSheet.create({
   },
   unlinkText: {
     fontSize: 13,
-    fontFamily: 'DMSans_400Regular',
-  },
-  notFoundText: {
-    flex: 1,
-    fontSize: 14,
     fontFamily: 'DMSans_400Regular',
   },
 });

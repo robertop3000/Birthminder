@@ -224,10 +224,10 @@ When bumping to version X.Y.Z:
 # PART 4: CURRENT PROJECT STATE
 
 **Last Updated:** 2026-03-14
-**Current Version:** v1.7.4 (Branch: 1.7.4)
-**Build Number:** 14
-**Test Status:** 17 suites, 113 tests — all passing
-**Build Status:** Calendar import from all calendars with collapsible sections (v1.7.4).
+**Current Version:** v1.7.5 (Branch: 1.7.5)
+**Build Number:** 12 (dev build, 1.7.2)
+**Test Status:** 17 suites, 114 tests — all passing
+**Build Status:** Contact linking fix + auto-import contact photo (v1.7.5). Expo version set to 1.7.2 for EAS update compatibility with dev build.
 **Pre-Flight Audit:** PASSED (v1.6.4)
 **EAS Secrets:** EXPO_PUBLIC_SUPABASE_URL and EXPO_PUBLIC_SUPABASE_ANON_KEY configured
 **GitHub Pages:** Enabled — serves OG landing page at https://robertop3000.github.io/Birthminder/
@@ -359,7 +359,26 @@ Canonical reference: `supabase-schema.sql` in project root.
 
 ---
 
-## v1.6.4 Changes (Current — QA Audit & Production Polish)
+## v1.7.5 Changes (Current — Contact Linking Fix)
+
+**Contact Linking iOS Compatibility (2026-03-14):**
+- Fixed "Contact not found" error by storing contact phone and name at link time (from `presentContactPickerAsync()`)
+- No longer depends on re-fetching via `getContactsAsync()`, which requires permissions and fails on some iOS versions
+- Added `contact_phone` and `contact_name` columns to `people` table
+- `ContactLinkButton` displays stored name directly, graceful fallback to "Linked contact"
+- Messaging uses stored phone; fallback to API for legacy contacts only
+- Backward compatible: existing contacts (contact_id only) still work via fallback
+
+**Contact Photo Auto-Import (2026-03-14):**
+- When linking a contact, auto-import contact's profile photo if birthday has no existing photo
+- Uses existing `uploadImage()` utility
+- Works silently — doesn't block contact linking if import fails
+
+**All tests passing:** 17 suites, 114 tests.
+
+---
+
+## v1.6.4 Changes (QA Audit & Production Polish)
 
 **Account Deletion Overhaul (2026-03-09):**
 - Reworked deletion flow to use Edge Function + CASCADE instead of manual client-side data deletion

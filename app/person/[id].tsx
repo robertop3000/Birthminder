@@ -21,6 +21,7 @@ import { useNotifications } from '../../hooks/useNotifications';
 import { Avatar } from '../../components/ui/Avatar';
 import { ContactLinkButton } from '../../components/birthday/ContactLinkButton';
 import { openWhatsApp, openIMessage } from '../../lib/messaging';
+import { uploadImage } from '../../lib/uploadImage';
 import { SHARE_BASE_URL } from '../../lib/constants';
 
 const REMINDER_OPTIONS = [
@@ -120,6 +121,8 @@ export default function PersonDetailScreen() {
         notes: person.notes ?? '',
         groups: groupIds ?? '',
         contact_id: person.contact_id ?? '',
+        contact_phone: person.contact_phone ?? '',
+        contact_name: person.contact_name ?? '',
         reminder_days: JSON.stringify(person.reminder_days ?? [0]),
       },
     });
@@ -127,7 +130,13 @@ export default function PersonDetailScreen() {
 
   const handleMessaging = async (type: 'whatsapp' | 'imessage') => {
     if (!person?.contact_id) return;
-    const phone = await getContactPhone(person.contact_id);
+
+    // Use stored phone first (no permissions needed), fallback to API for legacy contacts
+    let phone: string | null = person.contact_phone ?? null;
+    if (!phone) {
+      phone = await getContactPhone(person.contact_id);
+    }
+
     if (!phone) {
       Alert.alert('No Phone Number', 'No phone number found for this contact.');
       return;
@@ -329,11 +338,30 @@ export default function PersonDetailScreen() {
         </Text>
         <ContactLinkButton
           contactId={person.contact_id}
-          onContactLinked={async (cid: string) => {
-            await updateBirthday(person.id, { contact_id: cid });
+          contactName={person.contact_name}
+          onContactLinked={async (contact) => {
+            const updates: Parameters<typeof updateBirthday>[1] = {
+              contact_id: contact.id,
+              contact_phone: contact.phone,
+              contact_name: contact.name,
+            };
+            // Auto-import contact photo if person has no existing photo
+            if (!person.photo_url && contact.imageUri) {
+              try {
+                const uploadedUrl = await uploadImage(contact.imageUri, 'people');
+                updates.photo_url = uploadedUrl;
+              } catch {
+                // Photo import failed silently
+              }
+            }
+            await updateBirthday(person.id, updates);
           }}
           onContactUnlinked={async () => {
-            await updateBirthday(person.id, { contact_id: null });
+            await updateBirthday(person.id, {
+              contact_id: null,
+              contact_phone: null,
+              contact_name: null,
+            });
           }}
         />
       </View>

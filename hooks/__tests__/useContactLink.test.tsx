@@ -48,8 +48,33 @@ describe('useContactLink', () => {
       id: 'contact-abc',
       name: 'Jane Doe',
       imageUri: 'file:///photo.jpg',
+      phone: null,
     });
     expect(result.current.linking).toBe(false);
+  });
+
+  it('pickContact extracts phone when contact has phone numbers', async () => {
+    (Contacts.presentContactPickerAsync as jest.Mock).mockResolvedValueOnce({
+      id: 'contact-def',
+      firstName: 'Bob',
+      lastName: 'Smith',
+      image: null,
+      phoneNumbers: [{ number: '+1 555-0100' }, { number: '+1 555-0101' }],
+    });
+
+    const { result } = renderHook(() => useContactLink());
+
+    let contact: unknown = undefined;
+    await act(async () => {
+      contact = await result.current.pickContact();
+    });
+
+    expect(contact).toEqual({
+      id: 'contact-def',
+      name: 'Bob Smith',
+      imageUri: null,
+      phone: '+1 555-0100',
+    });
   });
 
   it('getContactInfo returns null when permission is denied', async () => {
@@ -93,6 +118,7 @@ describe('useContactLink', () => {
       id: 'contact-xyz',
       name: 'John Smith',
       imageUri: 'file:///john.jpg',
+      phone: null,
     });
   });
 

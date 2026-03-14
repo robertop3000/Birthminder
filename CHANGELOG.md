@@ -1,3 +1,40 @@
+## v1.7.5 - 2026-03-14
+*Developed using Claude Opus 4.6. Branch: 1.7.5 (Expo Version: 1.7.2, Build: 12).*
+
+### Contact Linking Fix + Contact Photo Auto-Import
+
+#### Contact Linking — iOS Permission Compatibility Fix
+**Files:** `hooks/useContactLink.ts`, `components/birthday/ContactLinkButton.tsx`, `contexts/BirthdaysContext.tsx`, `app/person/[id].tsx`
+- **Root cause**: App called `getContactsAsync()` (requires permissions) after linking via `presentContactPickerAsync()` (no permissions needed)
+  - On older iOS or with limited permissions, `getContactsAsync()` would fail or return empty
+  - Users saw "Contact not found" error and messaging failed
+- **Solution**: Store contact data at pick time
+  - Added `contact_phone` and `contact_name` columns to `people` table
+  - `LinkedContact` interface now includes `phone` field extracted from picker response
+  - `ContactLinkButton` displays stored name directly; graceful fallback to "Linked contact" instead of error
+  - Messaging uses stored phone first; fallback to API only for legacy contacts
+- **Backward compatibility**: Legacy contacts with only `contact_id` still work via fallback re-fetch
+
+#### Contact Photo Auto-Import
+**Files:** `app/person/[id].tsx`, `components/birthday/BirthdayForm.tsx`
+- When linking a contact, auto-import contact's profile photo to birthday
+- Only imports if birthday has no existing photo
+- Uses existing `uploadImage()` utility for consistent processing
+- Works silently — import failure doesn't block contact linking
+
+#### Database Changes
+**File:** `supabase-schema.sql`
+- Added `contact_phone TEXT` to `people` table
+- Added `contact_name TEXT` to `people` table
+- Run SQL migration in Supabase dashboard to add columns (backward compatible)
+
+### Tests
+- Added test: `pickContact extracts phone when contact has phone numbers`
+- Updated tests for new `phone` field in `LinkedContact`
+- All 114 tests passing (17 suites). TypeScript: 0 errors.
+
+---
+
 ## v1.7.3 - 2026-03-14
 *Developed using Claude Haiku 4.5. Branch: 1.7.3 (Expo Version: 1.7.3, Build: 13).*
 

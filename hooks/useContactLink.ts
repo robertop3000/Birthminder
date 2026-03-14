@@ -5,6 +5,7 @@ export interface LinkedContact {
   id: string;
   name: string;
   imageUri: string | null;
+  phone: string | null;
 }
 
 export function useContactLink() {
@@ -21,10 +22,16 @@ export function useContactLink() {
         return null;
       }
 
+      const phone =
+        contact.phoneNumbers && contact.phoneNumbers.length > 0
+          ? contact.phoneNumbers[0].number ?? null
+          : null;
+
       const result: LinkedContact = {
         id: contact.id,
         name: `${contact.firstName ?? ''} ${contact.lastName ?? ''}`.trim() || contact.name || 'Unknown',
         imageUri: contact.image?.uri ?? null,
+        phone,
       };
 
       setLinking(false);
@@ -58,6 +65,7 @@ export function useContactLink() {
         id: contact.id,
         name: `${contact.firstName ?? ''} ${contact.lastName ?? ''}`.trim() || contact.name || 'Unknown',
         imageUri: contact.image?.uri ?? null,
+        phone: null,
       };
     } catch {
       return null;

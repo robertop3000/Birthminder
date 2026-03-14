@@ -28,6 +28,8 @@ export default function AddEditBirthdayModal() {
     notes?: string;
     groups?: string;
     contact_id?: string;
+    contact_phone?: string;
+    contact_name?: string;
     preselectedGroupId?: string;
     reminder_days?: string;
   }>();
@@ -46,6 +48,8 @@ export default function AddEditBirthdayModal() {
       notes: params.notes ?? '',
       group_ids: params.groups ? params.groups.split(',') : [],
       contact_id: params.contact_id ?? null,
+      contact_phone: params.contact_phone || null,
+      contact_name: params.contact_name || null,
       reminder_days: params.reminder_days ? JSON.parse(params.reminder_days) : [0],
     }
     : undefined;
@@ -77,6 +81,8 @@ export default function AddEditBirthdayModal() {
           notes: data.notes || null,
           group_ids: data.group_ids,
           contact_id: data.contact_id,
+          contact_phone: data.contact_phone,
+          contact_name: data.contact_name,
           reminder_days: data.reminder_days,
         });
       } else {
@@ -89,6 +95,8 @@ export default function AddEditBirthdayModal() {
           notes: data.notes || null,
           group_ids: data.group_ids,
           contact_id: data.contact_id,
+          contact_phone: data.contact_phone,
+          contact_name: data.contact_name,
           reminder_days: data.reminder_days,
         });
       }

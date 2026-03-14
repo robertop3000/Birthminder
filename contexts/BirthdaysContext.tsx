@@ -22,6 +22,8 @@ export interface Person {
     notes: string | null;
     share_code: string | null;
     contact_id: string | null;
+    contact_phone: string | null;
+    contact_name: string | null;
     reminder_days: number[];
     created_at: string;
     person_groups: PersonGroup[];
@@ -36,6 +38,8 @@ export interface BirthdayInput {
     notes?: string | null;
     group_ids?: string[];
     contact_id?: string | null;
+    contact_phone?: string | null;
+    contact_name?: string | null;
     reminder_days?: number[];
 }
 
@@ -108,6 +112,8 @@ export function BirthdaysProvider({ children }: { children: React.ReactNode }) {
                     photo_url: input.photo_url ?? null,
                     notes: input.notes ?? null,
                     contact_id: input.contact_id ?? null,
+                    contact_phone: input.contact_phone ?? null,
+                    contact_name: input.contact_name ?? null,
                     reminder_days: input.reminder_days ?? [0],
                 })
                 .select()
@@ -142,6 +148,8 @@ export function BirthdaysProvider({ children }: { children: React.ReactNode }) {
             if (input.photo_url !== undefined) updateData.photo_url = input.photo_url;
             if (input.notes !== undefined) updateData.notes = input.notes;
             if (input.contact_id !== undefined) updateData.contact_id = input.contact_id;
+            if (input.contact_phone !== undefined) updateData.contact_phone = input.contact_phone;
+            if (input.contact_name !== undefined) updateData.contact_name = input.contact_name;
             if (input.reminder_days !== undefined) updateData.reminder_days = input.reminder_days;
 
             if (Object.keys(updateData).length > 0) {

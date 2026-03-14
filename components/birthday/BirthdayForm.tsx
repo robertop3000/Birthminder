@@ -17,6 +17,7 @@ import { useTheme } from '../../hooks/useTheme';
 import { useGroups } from '../../hooks/useGroups';
 import { Avatar } from '../ui/Avatar';
 import { ContactLinkButton } from './ContactLinkButton';
+import { LinkedContact } from '../../hooks/useContactLink';
 
 export interface BirthdayFormData {
   name: string;
@@ -27,6 +28,8 @@ export interface BirthdayFormData {
   notes: string;
   group_ids: string[];
   contact_id: string | null;
+  contact_phone: string | null;
+  contact_name: string | null;
   reminder_days: number[];
 }
 
@@ -84,6 +87,12 @@ export function BirthdayForm({
   });
   const [contactId, setContactId] = useState<string | null>(
     initialValues?.contact_id ?? null
+  );
+  const [contactPhone, setContactPhone] = useState<string | null>(
+    initialValues?.contact_phone ?? null
+  );
+  const [contactName, setContactName] = useState<string | null>(
+    initialValues?.contact_name ?? null
   );
   const [reminderDays, setReminderDays] = useState<number[]>(
     initialValues?.reminder_days ?? [0]
@@ -189,6 +198,8 @@ export function BirthdayForm({
       notes: notes.trim(),
       group_ids: selectedGroups,
       contact_id: contactId,
+      contact_phone: contactPhone,
+      contact_name: contactName,
       reminder_days: reminderDays,
     });
   };
@@ -612,8 +623,21 @@ export function BirthdayForm({
           </Text>
           <ContactLinkButton
             contactId={contactId}
-            onContactLinked={(id: string) => setContactId(id)}
-            onContactUnlinked={() => setContactId(null)}
+            contactName={contactName}
+            onContactLinked={(contact: LinkedContact) => {
+              setContactId(contact.id);
+              setContactPhone(contact.phone);
+              setContactName(contact.name);
+              // Auto-set photo from contact if no existing photo
+              if (!photoUri && contact.imageUri) {
+                setPhotoUri(contact.imageUri);
+              }
+            }}
+            onContactUnlinked={() => {
+              setContactId(null);
+              setContactPhone(null);
+              setContactName(null);
+            }}
           />
         </View>
 
