@@ -1,3 +1,39 @@
+## v1.7.7 - 2026-03-28
+*Developed using Claude Sonnet 4.6. Branch: 1.7.7 (Expo Version: 1.7.2, Build: 12).*
+
+### Calendar Import & UI Fixes
+
+#### Per-Group Select/Deselect All
+**File:** `components/birthday/CalendarImportModal.tsx`
+- Added "Select All" / "Deselect All" button for each calendar group
+- Users can now select/deselect all events within a group independently
+- Global "Select All" at top remains unchanged
+- Restructured header row to separate expand/collapse from group selection logic
+
+#### Consolidate Duplicate Birthday Names
+**File:** `hooks/useCalendarImport.ts`
+- Strip common birthday suffixes during import: `'s 1st Birthday`, `'s Birthday`, `Birthday`
+- Transforms "Adrian YO's 1st Birthday" → "Adrian YO", "Claudio Costantini's 47th Birthday" → "Claudio Costantini"
+- Deduplication now works on cleaned names — multiple year variants of same person appear as one entry
+- Applies to display name and dedup matching against existing birthdays
+
+#### Add-to-Group List Full Screen
+**File:** `app/group/[id].tsx`
+- Removed `maxHeight: 400` constraint on FlatList in "Add People to Group" modal
+- List now fills available screen space, enabling scrolling through large groups
+
+#### Hide Dark Mode Toggle
+**File:** `app/(tabs)/profile.tsx`
+- Removed "Appearance" section and ThemeToggle component from Profile screen
+- Theme context and underlying dark mode functionality remain intact
+- Can be re-added later without code changes
+
+#### Tests
+- Updated `useCalendarImport` test expectations for cleaned birthday names
+- All 115 tests passing (17 suites)
+
+---
+
 ## v1.7.6 - 2026-03-14
 *Developed using Claude Haiku 4.5. Branch: 1.7.6 (Expo Version: 1.7.2, Build: 12).*
 

@@ -223,11 +223,11 @@ When bumping to version X.Y.Z:
 
 # PART 4: CURRENT PROJECT STATE
 
-**Last Updated:** 2026-03-14
-**Current Version:** v1.7.6 (Branch: main)
-**Build Number:** 12 (dev build, 1.7.2)
+**Last Updated:** 2026-03-28
+**Current Version:** v1.7.7 (Branch: main)
+**Build Number:** 12 (dev build, 1.7.6)
 **Test Status:** 17 suites, 115 tests — all passing
-**Build Status:** Contact photo refetch fallback (v1.7.6). Merged to main. Expo version set to 1.7.2 for EAS update compatibility with dev build.
+**Build Status:** Calendar UI fixes & name consolidation (v1.7.7). Merged to main. Runtime version 1.7.6 for EAS update compatibility.
 **Pre-Flight Audit:** PASSED (v1.6.4)
 **EAS Secrets:** EXPO_PUBLIC_SUPABASE_URL and EXPO_PUBLIC_SUPABASE_ANON_KEY configured
 **GitHub Pages:** Enabled — serves OG landing page at https://robertop3000.github.io/Birthminder/
@@ -359,7 +359,34 @@ Canonical reference: `supabase-schema.sql` in project root.
 
 ---
 
-## v1.7.6 Changes (Current — Contact Photo Refetch)
+## v1.7.7 Changes (Current — Calendar Import UI Fixes)
+
+**Calendar Import — Per-Group Select All (2026-03-28):**
+- Added "Select All" / "Deselect All" button for each calendar group header
+- Users can toggle all events in a group without affecting other groups
+- Restructured header layout to prevent expand/collapse triggering on group select
+
+**Calendar Import — Consolidate Duplicate Names (2026-03-28):**
+- Strip birthday suffixes from event titles: `'s 1st Birthday`, `'s 2nd Birthday`, etc.
+- "Adrian YO's 1st Birthday" and "Adrian YO's Birthday" now appear as single "Adrian YO" entry
+- Applies to display name AND dedup matching against existing birthdays
+- File: `hooks/useCalendarImport.ts`
+
+**Add-to-Group — Full Screen List (2026-03-28):**
+- Removed `maxHeight: 400` cap on FlatList in "Add People to Group" modal
+- List now fills available screen space, allows full scrolling
+- File: `app/group/[id].tsx`
+
+**Dark Mode Toggle — Hidden (2026-03-28):**
+- Removed "Appearance" section and ThemeToggle from Profile tab
+- Theme context and functionality remain intact for future re-enabling
+- File: `app/(tabs)/profile.tsx`
+
+**All tests passing:** 17 suites, 115 tests.
+
+---
+
+## v1.7.6 Changes (Contact Photo Refetch)
 
 **Contact Photo Refetch — iOS Picker Image Fallback (2026-03-14):**
 - iOS `presentContactPickerAsync()` does not return image data; photos were not auto-importing
