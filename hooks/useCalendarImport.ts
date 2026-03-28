@@ -21,6 +21,14 @@ export interface CalendarGroup {
   items: CalendarBirthdayItem[];
 }
 
+function cleanBirthdayName(title: string): string {
+  return title
+    .replace(/'s\s+\d+\w*\s+Birthday$/i, '') // "X's 1st Birthday" → "X"
+    .replace(/'s\s+Birthday$/i, '')            // "X's Birthday" → "X"
+    .replace(/\s+Birthday$/i, '')              // "X Birthday" → "X"
+    .trim();
+}
+
 export function useCalendarImport() {
   const { user } = useAuth();
   const { birthdays, refetch } = useBirthdays();
@@ -85,7 +93,7 @@ export function useCalendarImport() {
 
         for (const event of events) {
           if (!event.title) continue;
-          const name = event.title.trim();
+          const name = cleanBirthdayName(event.title.trim());
           if (!name) continue;
           if (seen.has(name.toLowerCase())) continue;
 

@@ -607,7 +607,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   personList: {
-    maxHeight: 400,
+    flex: 1,
   },
   personRow: {
     flexDirection: 'row',

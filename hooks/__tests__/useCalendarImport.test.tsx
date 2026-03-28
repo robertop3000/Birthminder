@@ -144,7 +144,7 @@ describe('useCalendarImport', () => {
     const personalGroup = result.current.calendarGroups[1];
     expect(personalGroup.calendarName).toBe('Personal');
     expect(personalGroup.items).toHaveLength(1);
-    expect(personalGroup.items[0].name).toBe("Mom's Birthday");
+    expect(personalGroup.items[0].name).toBe("Mom");
   });
 
   it('skips calendars with no events', async () => {

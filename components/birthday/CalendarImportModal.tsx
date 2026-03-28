@@ -124,6 +124,20 @@ export function CalendarImportModal({
     });
   }, []);
 
+  const toggleGroup = useCallback((group: CalendarGroup) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      const groupUids = group.items.map((i) => i.uid);
+      const allInGroupSelected = groupUids.every((uid) => next.has(uid));
+      if (allInGroupSelected) {
+        groupUids.forEach((uid) => next.delete(uid));
+      } else {
+        groupUids.forEach((uid) => next.add(uid));
+      }
+      return next;
+    });
+  }, []);
+
   const handleImport = async () => {
     const selected = allItems.filter((item) => selectedIds.has(item.uid));
     if (selected.length === 0) return;
@@ -159,26 +173,34 @@ export function CalendarImportModal({
     if (row.type === 'header') {
       const { group, expanded } = row;
       const selectedInGroup = group.items.filter((i) => selectedIds.has(i.uid)).length;
+      const allInGroupSelected = group.items.length > 0 && group.items.every((i) => selectedIds.has(i.uid));
       return (
-        <Pressable
-          onPress={() => toggleCalendarExpanded(group.calendarId)}
-          style={[styles.sectionHeader, { backgroundColor: colors.surface }]}
-        >
-          <Ionicons
-            name={expanded ? 'chevron-down' : 'chevron-forward'}
-            size={18}
-            color={colors.textSecondary}
-          />
-          <View style={styles.sectionInfo}>
-            <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>
-              {group.calendarName}
+        <View style={[styles.sectionHeader, { backgroundColor: colors.surface }]}>
+          <Pressable
+            onPress={() => toggleCalendarExpanded(group.calendarId)}
+            style={styles.sectionHeaderMain}
+          >
+            <Ionicons
+              name={expanded ? 'chevron-down' : 'chevron-forward'}
+              size={18}
+              color={colors.textSecondary}
+            />
+            <View style={styles.sectionInfo}>
+              <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>
+                {group.calendarName}
+              </Text>
+              <Text style={[styles.sectionCount, { color: colors.textSecondary }]}>
+                {group.items.length} event{group.items.length !== 1 ? 's' : ''}
+                {selectedInGroup > 0 ? ` · ${selectedInGroup} selected` : ''}
+              </Text>
+            </View>
+          </Pressable>
+          <Pressable onPress={() => toggleGroup(group)} hitSlop={8}>
+            <Text style={[styles.groupSelectAll, { color: colors.primary }]}>
+              {allInGroupSelected ? 'Deselect All' : 'Select All'}
             </Text>
-            <Text style={[styles.sectionCount, { color: colors.textSecondary }]}>
-              {group.items.length} event{group.items.length !== 1 ? 's' : ''}
-              {selectedInGroup > 0 ? ` · ${selectedInGroup} selected` : ''}
-            </Text>
-          </View>
-        </Pressable>
+          </Pressable>
+        </View>
       );
     }
 
@@ -399,10 +421,19 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 20,
     paddingVertical: 14,
+  },
+  sectionHeaderMain: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
     gap: 10,
   },
   sectionInfo: {
     flex: 1,
+  },
+  groupSelectAll: {
+    fontSize: 13,
+    fontFamily: 'DMSans_500Medium',
   },
   sectionTitle: {
     fontSize: 15,

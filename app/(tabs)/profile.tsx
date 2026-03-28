@@ -15,7 +15,6 @@ import { useTheme } from '../../hooks/useTheme';
 import { useAuth } from '../../hooks/useAuth';
 import { supabase } from '../../lib/supabase';
 import { Button } from '../../components/ui/Button';
-import { ThemeToggle } from '../../components/ui/ThemeToggle';
 import { APP_VERSION } from '../../lib/constants';
 
 export default function ProfileScreen() {
@@ -114,13 +113,6 @@ export default function ProfileScreen() {
         </View>
 
         <View style={styles.sections}>
-          <View style={styles.section}>
-            <Text style={[styles.sectionLabel, { color: colors.textSecondary }]}>
-              Appearance
-            </Text>
-            <ThemeToggle />
-          </View>
-
           <View style={styles.section}>
             <Button
               title="Sign Out"
