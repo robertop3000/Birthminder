@@ -1,3 +1,86 @@
+## v1.7.8 - 2026-03-31
+*Developed using Claude Sonnet 4.6 & Haiku 4.5. Branch: 1.7.8 (Expo Version: 1.7.2, Build: 12).*
+
+### Group-Level Notification Settings + UI Consistency Fix
+
+#### Group Reminder Days — Additive Settings
+**Files:** `contexts/GroupsContext.tsx`, `app/group/[id].tsx`, `supabase-schema.sql`
+- Added `reminder_days INTEGER[] DEFAULT '{}'` column to groups table
+- Users can now set reminder days (0–7 days before) at the group level, not just per-birthday
+- Group reminders are **additive**: they supplement individual settings and merge via union
+- **Example scenario**: John has individual [0], belongs to Group A [1] and Group B [2] → effective notifications = [0, 1, 2]
+- Only existing users marked as migrated via new migration key are rescheduled (non-breaking)
+
+#### Group Detail Screen — Remind Me Section
+**File:** `app/group/[id].tsx`
+- Added "REMIND ME" section between group info banner and Members list
+- Matches person detail reminder UI pattern exactly (dropdown + modal with checkboxes)
+- Dropdown shows summary: "None", "Same day", "1 day before", etc., or comma-separated list
+- Modal allows toggling each of 8 reminder options (0–7 days) with checkboxes
+- Helper text below dropdown: "Applies to all members of this group"
+- Full styling integration with theme colors
+- Reschedules notifications immediately when group reminders change (if permission granted)
+
+#### Effective Reminders Utility — Merge + Attribution
+**New File:** `lib/reminderHelpers.ts`
+- Created `getEffectiveReminders(person, groups)` utility for computing merged reminder days
+- Returns: `effectiveDays` (union, sorted), `individualDays` (person's own), `groupSources` (Map of day → group names)
+- Handles all edge cases: null reminder_days, empty arrays, multiple groups, deduplication
+- Used in two places: notification scheduling + person detail display
+- Backward compatible: called without groups parameter still works (groups = [])
+
+#### Person Detail — Group Attribution in Reminder Picker
+**File:** `app/person/[id].tsx`
+- Person detail reminder picker now shows which groups contribute each reminder day
+- Individual-only days: checkbox, toggleable (current behavior)
+- Group-inherited days: checkbox active, subtitled "From: GroupName" or "From: Family, Work"
+- Users can still toggle individual settings even when inherited from groups
+- Enhances clarity: explains why certain reminders are active
+
+#### Notification Scheduling Rework
+**File:** `hooks/useNotifications.ts`
+- Updated `scheduleAllNotifications(birthdays, groups = [])` signature
+- Uses `getEffectiveReminders()` to compute merged days instead of just individual days
+- Backward compatible: calling without groups still works (defaults to [])
+- Reschedules all notifications when group settings change
+
+#### Migration & App Load Reschedule
+**File:** `app/_layout.tsx`
+- Updated `NotificationMigration` component to pass groups to `scheduleAllNotifications()`
+- Bumped migration key from `v1.6_reminders_migrated` → `v1.8_group_reminders_migrated`
+- Existing users get one-time rescheduling on next app load (picks up group reminders)
+- Non-breaking: users without groups continue as before
+
+#### Constant Extraction
+**Files:** `lib/constants.ts`, `components/birthday/BirthdayForm.tsx`
+- Extracted `REMINDER_OPTIONS` (8 reminder choices) to shared `lib/constants.ts`
+- Was previously defined inline in 2+ places; now single source of truth
+- Used by: BirthdayForm, person detail, group detail
+
+#### UI Consistency — "Birthday is" Label
+**File:** `app/person/[id].tsx` (line 230)
+- Added "Birthday is" label above "Today!" on person detail stat card
+- Matches "Turning" label on right side card (same font, size, color)
+- Single-line change improving visual balance
+
+#### Tests
+**New File:** `lib/__tests__/reminderHelpers.test.ts`
+- 8 new tests for `getEffectiveReminders()` utility
+- Tests: no groups, single group, multiple groups, deduplication, attribution, null handling, edge cases
+
+**Updated:** `hooks/__tests__/useNotifications.test.ts`
+- 2 new tests for notification scheduling with groups
+- Test 1: group reminders merge with individual reminders
+- Test 2: backward compatibility (calling without groups parameter still works)
+
+**Test Results:**
+- All 18 test suites passing
+- 126/126 tests passing (up from 115)
+- TypeScript: 0 errors
+- Branch: 1.7.8
+
+---
+
 ## v1.7.7 - 2026-03-28
 *Developed using Claude Sonnet 4.6. Branch: 1.7.7 (Expo Version: 1.7.2, Build: 12).*
 
