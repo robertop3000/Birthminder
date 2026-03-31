@@ -18,6 +18,7 @@ import { useGroups } from '../../hooks/useGroups';
 import { Avatar } from '../ui/Avatar';
 import { ContactLinkButton } from './ContactLinkButton';
 import { LinkedContact } from '../../hooks/useContactLink';
+import { REMINDER_OPTIONS } from '../../lib/constants';
 
 export interface BirthdayFormData {
   name: string;
@@ -44,17 +45,6 @@ interface BirthdayFormProps {
 const MONTHS = [
   'January', 'February', 'March', 'April', 'May', 'June',
   'July', 'August', 'September', 'October', 'November', 'December',
-];
-
-const REMINDER_OPTIONS = [
-  { value: 0, label: 'Same day' },
-  { value: 1, label: '1 day before' },
-  { value: 2, label: '2 days before' },
-  { value: 3, label: '3 days before' },
-  { value: 4, label: '4 days before' },
-  { value: 5, label: '5 days before' },
-  { value: 6, label: '6 days before' },
-  { value: 7, label: '1 week before' },
 ];
 
 export function BirthdayForm({

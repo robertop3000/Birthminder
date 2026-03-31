@@ -2,7 +2,9 @@ import { useState, useEffect, useCallback } from 'react';
 import * as Notifications from 'expo-notifications';
 import { subDays } from 'date-fns';
 import { Person } from './useBirthdays';
+import { Group } from '../contexts/GroupsContext';
 import { getNextBirthday } from '../lib/dateHelpers';
+import { getEffectiveReminders } from '../lib/reminderHelpers';
 
 export function useNotifications() {
   const [permissionStatus, setPermissionStatus] = useState<string | null>(null);
@@ -42,7 +44,7 @@ export function useNotifications() {
   }, []);
 
   const scheduleAllNotifications = useCallback(
-    async (birthdays: Person[]) => {
+    async (birthdays: Person[], groups: Group[] = []) => {
       await Notifications.cancelAllScheduledNotificationsAsync();
 
       if (permissionStatus === null) return;
@@ -56,7 +58,8 @@ export function useNotifications() {
       const schedulingPromises: Promise<string>[] = [];
 
       for (const person of birthdays) {
-        const days = person.reminder_days ?? [0];
+        const { effectiveDays } = getEffectiveReminders(person, groups);
+        const days = effectiveDays.length > 0 ? effectiveDays : [0];
 
         for (const daysBefore of days) {
           if (daysBefore === 0) {

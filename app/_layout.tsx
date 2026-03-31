@@ -18,6 +18,7 @@ import { GroupsProvider } from '../contexts/GroupsContext';
 import { ErrorBoundary } from '../components/ErrorBoundary';
 import { useTheme } from '../hooks/useTheme';
 import { useBirthdays } from '../hooks/useBirthdays';
+import { useGroups } from '../hooks/useGroups';
 import { useNotifications } from '../hooks/useNotifications';
 import { supabase } from '../lib/supabase';
 
@@ -84,10 +85,11 @@ export default function RootLayout() {
   );
 }
 
-const MIGRATION_KEY = 'v1.6_reminders_migrated';
+const MIGRATION_KEY = 'v1.8_group_reminders_migrated';
 
 function NotificationMigration() {
   const { birthdays } = useBirthdays();
+  const { groups } = useGroups();
   const { scheduleAllNotifications, permissionStatus } = useNotifications();
   const migrated = useRef(false);
 
@@ -103,11 +105,11 @@ function NotificationMigration() {
       }
 
       await Notifications.cancelAllScheduledNotificationsAsync();
-      await scheduleAllNotifications(birthdays);
+      await scheduleAllNotifications(birthdays, groups);
       await AsyncStorage.setItem(MIGRATION_KEY, 'true');
       migrated.current = true;
     })();
-  }, [permissionStatus, birthdays, scheduleAllNotifications]);
+  }, [permissionStatus, birthdays, groups, scheduleAllNotifications]);
 
   return null;
 }

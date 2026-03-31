@@ -10,6 +10,7 @@ export interface Group {
     photo_url: string | null;
     share_code: string | null;
     source_share_code: string | null;
+    reminder_days: number[];
     created_at: string;
     member_count?: number;
 }
@@ -18,6 +19,7 @@ export interface GroupInput {
     name: string;
     color?: string | null;
     photo_url?: string | null;
+    reminder_days?: number[];
 }
 
 interface GroupsContextValue {
@@ -60,6 +62,7 @@ export function GroupsProvider({ children }: { children: React.ReactNode }) {
 
             const mapped = (data ?? []).map((g: Record<string, unknown>) => ({
                 ...g,
+                reminder_days: (g.reminder_days as number[] | null) ?? [],
                 member_count: Array.isArray(g.person_groups) && g.person_groups.length > 0
                     ? (g.person_groups[0] as { count: number }).count
                     : 0,
@@ -90,6 +93,7 @@ export function GroupsProvider({ children }: { children: React.ReactNode }) {
                     name: input.name,
                     color: input.color ?? null,
                     photo_url: input.photo_url ?? null,
+                    reminder_days: input.reminder_days ?? [],
                 })
                 .select()
                 .single();

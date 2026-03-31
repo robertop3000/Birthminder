@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -21,7 +21,8 @@ import { useBirthdays } from '../../hooks/useBirthdays';
 import { Avatar } from '../../components/ui/Avatar';
 import { GroupForm } from '../../components/group/GroupForm';
 import { uploadImage } from '../../lib/uploadImage';
-import { SHARE_BASE_URL } from '../../lib/constants';
+import { SHARE_BASE_URL, REMINDER_OPTIONS } from '../../lib/constants';
+import { useNotifications } from '../../hooks/useNotifications';
 import {
   getDaysUntilBirthday,
   formatBirthdayDate,
@@ -34,12 +35,19 @@ export default function GroupDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { groups, deleteGroup, generateShareCode, addPersonToGroup, removePersonFromGroup, updateGroup } = useGroups();
   const { birthdays, refetch: refetchBirthdays } = useBirthdays();
+  const { scheduleAllNotifications, permissionStatus } = useNotifications();
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [editLoading, setEditLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [reminderDays, setReminderDays] = useState<number[]>([]);
+  const [showReminderPicker, setShowReminderPicker] = useState(false);
 
   const group = groups.find((g) => g.id === id);
+
+  useEffect(() => {
+    if (group) setReminderDays(group.reminder_days ?? []);
+  }, [group?.reminder_days]);
 
   const members = useMemo(() => {
     if (!id) return [];
@@ -65,6 +73,15 @@ export default function GroupDetailScreen() {
     );
   }, [availablePeople, searchQuery]);
 
+  const reminderSummary = useMemo(() => {
+    if (reminderDays.length === 0) return 'None';
+    return reminderDays
+      .slice()
+      .sort((a, b) => a - b)
+      .map((d) => REMINDER_OPTIONS.find((o) => o.value === d)?.label ?? `${d}d`)
+      .join(', ');
+  }, [reminderDays]);
+
   if (!group) {
     return (
       <View
@@ -78,6 +95,21 @@ export default function GroupDetailScreen() {
       </View>
     );
   }
+
+  const handleToggleReminder = async (day: number) => {
+    if (!group) return;
+    const updated = reminderDays.includes(day)
+      ? reminderDays.filter((d) => d !== day)
+      : [...reminderDays, day].sort((a, b) => a - b);
+    setReminderDays(updated);
+    await updateGroup(group.id, { reminder_days: updated });
+    if (permissionStatus === 'granted') {
+      const updatedGroups = groups.map((g) =>
+        g.id === group.id ? { ...g, reminder_days: updated } : g
+      );
+      scheduleAllNotifications(birthdays, updatedGroups);
+    }
+  };
 
   const handleEditSubmit = async (name: string, color: string, photoUri: string | null) => {
     setEditLoading(true);
@@ -129,6 +161,9 @@ export default function GroupDetailScreen() {
     try {
       await addPersonToGroup(personId, group.id);
       await refetchBirthdays(); // Refresh birthdays so person_groups updates
+      if (permissionStatus === 'granted' && (group.reminder_days?.length ?? 0) > 0) {
+        scheduleAllNotifications(birthdays, groups);
+      }
     } catch {
       Alert.alert('Error', 'Failed to add person to group');
     }
@@ -157,6 +192,9 @@ export default function GroupDetailScreen() {
             try {
               await removePersonFromGroup(personId, group.id);
               await refetchBirthdays();
+              if (permissionStatus === 'granted' && (group.reminder_days?.length ?? 0) > 0) {
+                scheduleAllNotifications(birthdays, groups);
+              }
             } catch {
               Alert.alert('Error', 'Failed to remove person');
             }
@@ -212,6 +250,34 @@ export default function GroupDetailScreen() {
           </Text>
           <Text style={[styles.memberCount, { color: colors.textSecondary }]}>
             {members.length} member{members.length !== 1 ? 's' : ''}
+          </Text>
+        </View>
+
+        <View style={styles.reminderSection}>
+          <Text style={[styles.sectionTitle, { color: colors.textSecondary }]}>
+            Remind me
+          </Text>
+          <Pressable
+            onPress={() => setShowReminderPicker(true)}
+            style={[
+              styles.reminderDropdown,
+              {
+                backgroundColor: colors.surface,
+                borderColor: colors.bottomBarBorder,
+              },
+            ]}
+          >
+            <Ionicons name="notifications-outline" size={18} color={colors.primary} />
+            <Text
+              style={[styles.reminderDropdownText, { color: colors.textPrimary }]}
+              numberOfLines={1}
+            >
+              {reminderSummary}
+            </Text>
+            <Text style={{ color: colors.textSecondary }}>▼</Text>
+          </Pressable>
+          <Text style={[styles.reminderHelperText, { color: colors.textSecondary }]}>
+            Applies to all members of this group
           </Text>
         </View>
 
@@ -298,6 +364,64 @@ export default function GroupDetailScreen() {
           )}
         </View>
       </ScrollView>
+
+      {/* Reminder Picker Modal */}
+      <Modal
+        visible={showReminderPicker}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowReminderPicker(false)}
+      >
+        <Pressable
+          style={styles.reminderModalOverlay}
+          onPress={() => setShowReminderPicker(false)}
+        >
+          <View
+            style={[
+              styles.reminderModalContent,
+              { backgroundColor: colors.surface },
+            ]}
+          >
+            <Text style={[styles.reminderModalTitle, { color: colors.textPrimary }]}>
+              Remind me
+            </Text>
+            {REMINDER_OPTIONS.map((option) => {
+              const isSelected = reminderDays.includes(option.value);
+              return (
+                <Pressable
+                  key={option.value}
+                  onPress={() => handleToggleReminder(option.value)}
+                  style={[
+                    styles.reminderOption,
+                    {
+                      backgroundColor: isSelected
+                        ? colors.primary + '10'
+                        : 'transparent',
+                    },
+                  ]}
+                >
+                  <Ionicons
+                    name={isSelected ? 'checkbox' : 'square-outline'}
+                    size={22}
+                    color={isSelected ? colors.primary : colors.textSecondary}
+                  />
+                  <Text
+                    style={[
+                      styles.reminderOptionText,
+                      {
+                        color: isSelected ? colors.primary : colors.textPrimary,
+                        fontWeight: isSelected ? '600' : '400',
+                      },
+                    ]}
+                  >
+                    {option.label}
+                  </Text>
+                </Pressable>
+              );
+            })}
+          </View>
+        </Pressable>
+      </Modal>
 
       {/* Edit Group Modal */}
       <Modal visible={showEditModal} animationType="slide" transparent>
@@ -583,6 +707,62 @@ const styles = StyleSheet.create({
   },
   removeButton: {
     padding: 4,
+  },
+  reminderSection: {
+    paddingHorizontal: 20,
+    marginTop: 8,
+    marginBottom: 8,
+  },
+  reminderDropdown: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderRadius: 12,
+    borderWidth: 1,
+  },
+  reminderDropdownText: {
+    flex: 1,
+    fontSize: 15,
+    fontFamily: 'DMSans_400Regular',
+  },
+  reminderHelperText: {
+    fontSize: 12,
+    fontFamily: 'DMSans_400Regular',
+    marginTop: 6,
+  },
+  reminderModalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  reminderModalContent: {
+    width: '80%',
+    maxHeight: '70%',
+    borderRadius: 16,
+    padding: 16,
+  },
+  reminderModalTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    fontFamily: 'DMSans_700Bold',
+    marginBottom: 12,
+    textAlign: 'center',
+  },
+  reminderOption: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    marginBottom: 4,
+  },
+  reminderOptionText: {
+    fontSize: 16,
+    fontFamily: 'DMSans_500Medium',
   },
   modalOverlay: {
     flex: 1,

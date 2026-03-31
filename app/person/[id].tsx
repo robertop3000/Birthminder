@@ -22,18 +22,8 @@ import { Avatar } from '../../components/ui/Avatar';
 import { ContactLinkButton } from '../../components/birthday/ContactLinkButton';
 import { openWhatsApp, openIMessage } from '../../lib/messaging';
 import { uploadImage } from '../../lib/uploadImage';
-import { SHARE_BASE_URL } from '../../lib/constants';
-
-const REMINDER_OPTIONS = [
-  { value: 0, label: 'Same day' },
-  { value: 1, label: '1 day before' },
-  { value: 2, label: '2 days before' },
-  { value: 3, label: '3 days before' },
-  { value: 4, label: '4 days before' },
-  { value: 5, label: '5 days before' },
-  { value: 6, label: '6 days before' },
-  { value: 7, label: '1 week before' },
-];
+import { SHARE_BASE_URL, REMINDER_OPTIONS } from '../../lib/constants';
+import { getEffectiveReminders } from '../../lib/reminderHelpers';
 import {
   getDaysUntilBirthday,
   getAge,
@@ -54,14 +44,20 @@ export default function PersonDetailScreen() {
   const [reminderDays, setReminderDays] = useState<number[]>(person?.reminder_days ?? [0]);
   const [showReminderPicker, setShowReminderPicker] = useState(false);
 
+  const effective = useMemo(
+    () => (person ? getEffectiveReminders(person, groups) : null),
+    [person, groups]
+  );
+
   const reminderSummary = useMemo(() => {
-    if (reminderDays.length === 0) return 'None';
-    return reminderDays
+    const days = effective?.effectiveDays ?? reminderDays;
+    if (days.length === 0) return 'None';
+    return days
       .slice()
       .sort((a, b) => a - b)
       .map((d) => REMINDER_OPTIONS.find((o) => o.value === d)?.label ?? `${d}d`)
       .join(', ');
-  }, [reminderDays]);
+  }, [effective, reminderDays]);
 
   if (!person) {
     return (
@@ -155,7 +151,7 @@ export default function PersonDetailScreen() {
     setReminderDays(updated);
     await updateBirthday(person.id, { reminder_days: updated });
     if (permissionStatus === 'granted') {
-      scheduleAllNotifications(birthdays);
+      scheduleAllNotifications(birthdays, groups);
     }
   };
 
@@ -227,7 +223,7 @@ export default function PersonDetailScreen() {
           style={[styles.statCard, { backgroundColor: colors.surface }]}
         >
           <Text style={[styles.statLabel, { color: colors.textSecondary }]}>
-            {daysUntil === 0 ? '' : 'Days left'}
+            {daysUntil === 0 ? 'Birthday is' : 'Days left'}
           </Text>
           <Text style={[styles.statValue, { color: colors.primary }]}>
             {daysUntil === 0 ? 'Today!' : `${daysUntil}`}
@@ -295,7 +291,10 @@ export default function PersonDetailScreen() {
               Remind me
             </Text>
             {REMINDER_OPTIONS.map((option) => {
-              const isSelected = reminderDays.includes(option.value);
+              const isIndividual = reminderDays.includes(option.value);
+              const groupSources = effective?.groupSources.get(option.value) ?? [];
+              const isFromGroup = groupSources.length > 0;
+              const isSelected = isIndividual || isFromGroup;
               return (
                 <Pressable
                   key={option.value}
@@ -314,17 +313,24 @@ export default function PersonDetailScreen() {
                     size={22}
                     color={isSelected ? colors.primary : colors.textSecondary}
                   />
-                  <Text
-                    style={[
-                      styles.reminderOptionText,
-                      {
-                        color: isSelected ? colors.primary : colors.textPrimary,
-                        fontWeight: isSelected ? '600' : '400',
-                      },
-                    ]}
-                  >
-                    {option.label}
-                  </Text>
+                  <View style={{ flex: 1 }}>
+                    <Text
+                      style={[
+                        styles.reminderOptionText,
+                        {
+                          color: isSelected ? colors.primary : colors.textPrimary,
+                          fontWeight: isSelected ? '600' : '400',
+                        },
+                      ]}
+                    >
+                      {option.label}
+                    </Text>
+                    {isFromGroup && (
+                      <Text style={[styles.reminderGroupSource, { color: colors.textSecondary }]}>
+                        From: {groupSources.join(', ')}
+                      </Text>
+                    )}
+                  </View>
                 </Pressable>
               );
             })}
@@ -594,5 +600,10 @@ const styles = StyleSheet.create({
   reminderOptionText: {
     fontSize: 16,
     fontFamily: 'DMSans_500Medium',
+  },
+  reminderGroupSource: {
+    fontSize: 12,
+    fontFamily: 'DMSans_400Regular',
+    marginTop: 1,
   },
 });

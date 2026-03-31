@@ -156,4 +156,74 @@ describe('useNotifications', () => {
         expect(identifiers).toContain('bday-multi-3');
         expect(identifiers).toContain('bday-multi-7');
     });
+
+    it('merges group reminder_days with individual when groups are passed', async () => {
+        const { result } = renderHook(() => useNotifications());
+
+        await act(async () => { });
+
+        const birthdays = [
+            {
+                id: 'bday-group',
+                name: 'GroupTest',
+                birthday_day: 10,
+                birthday_month: 4,
+                user_id: 'user-123',
+                reminder_days: [0], // Individual: same day only
+                person_groups: [{ group_id: 'grp-1', groups: { id: 'grp-1', name: 'Family', color: '#4CAF50' } }],
+            },
+        ];
+
+        const groups = [
+            {
+                id: 'grp-1',
+                user_id: 'user-123',
+                name: 'Family',
+                color: '#4CAF50',
+                photo_url: null,
+                share_code: null,
+                source_share_code: null,
+                member_count: 1,
+                reminder_days: [3], // Group adds 3-day advance reminder
+            },
+        ];
+
+        await act(async () => {
+            await result.current.scheduleAllNotifications(birthdays as any, groups as any);
+        });
+
+        // Should schedule 2 notifications: day-of (0) + 3 days before (3)
+        expect(Notifications.scheduleNotificationAsync).toHaveBeenCalledTimes(2);
+
+        const calls = (Notifications.scheduleNotificationAsync as jest.Mock).mock.calls;
+        const identifiers = calls.map(([arg]: any[]) => arg.identifier);
+        expect(identifiers).toContain('bday-group-0');
+        expect(identifiers).toContain('bday-group-3');
+    });
+
+    it('backward compatible: calling without groups still works', async () => {
+        const { result } = renderHook(() => useNotifications());
+
+        await act(async () => { });
+
+        const birthdays = [
+            {
+                id: 'bday-compat',
+                name: 'CompatTest',
+                birthday_day: 5,
+                birthday_month: 8,
+                user_id: 'user-123',
+                reminder_days: [0],
+            },
+        ];
+
+        await act(async () => {
+            await result.current.scheduleAllNotifications(birthdays as any);
+        });
+
+        expect(Notifications.scheduleNotificationAsync).toHaveBeenCalledTimes(1);
+        expect(Notifications.scheduleNotificationAsync).toHaveBeenCalledWith(
+            expect.objectContaining({ identifier: 'bday-compat-0' })
+        );
+    });
 });
