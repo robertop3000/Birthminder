@@ -223,11 +223,11 @@ When bumping to version X.Y.Z:
 
 # PART 4: CURRENT PROJECT STATE
 
-**Last Updated:** 2026-03-28
-**Current Version:** v1.7.7 (Branch: main)
-**Build Number:** 12 (dev build, 1.7.6)
-**Test Status:** 17 suites, 115 tests — all passing
-**Build Status:** Calendar UI fixes & name consolidation (v1.7.7). Merged to main. Runtime version 1.7.6 for EAS update compatibility.
+**Last Updated:** 2026-03-31
+**Current Version:** v1.7.8 (Branch: 1.7.8)
+**Build Number:** 12 (dev build, 1.7.2)
+**Test Status:** 18 suites, 126 tests — all passing
+**Build Status:** Group-level reminder settings + "Birthday is" label (v1.7.8). On branch 1.7.8, ready for testing.
 **Pre-Flight Audit:** PASSED (v1.6.4)
 **EAS Secrets:** EXPO_PUBLIC_SUPABASE_URL and EXPO_PUBLIC_SUPABASE_ANON_KEY configured
 **GitHub Pages:** Enabled — serves OG landing page at https://robertop3000.github.io/Birthminder/
@@ -359,7 +359,45 @@ Canonical reference: `supabase-schema.sql` in project root.
 
 ---
 
-## v1.7.7 Changes (Current — Calendar Import UI Fixes)
+## v1.7.8 Changes (Current — Group-Level Notification Settings)
+
+**Group-Level Reminder Control (2026-03-31):**
+- Added `reminder_days` column to groups table (INTEGER[] DEFAULT '{}')
+- Users can now set reminder days (0–7) at the group level, not just per-birthday
+- Group reminders are **additive**: they supplement individual settings (union merge)
+- Example: John has individual [0], Group A has [1], Group B has [2] → effective notifications = [0, 1, 2]
+- Full UI on group detail screen matching person detail pattern (dropdown + modal with checkboxes)
+- Helper text: "Applies to all members of this group"
+- Files: `app/group/[id].tsx`, `contexts/GroupsContext.tsx`, `hooks/useNotifications.ts`
+
+**Effective Reminder Attribution (2026-03-31):**
+- New `lib/reminderHelpers.ts` utility: `getEffectiveReminders()` computes merged days + group attribution
+- Person detail reminder picker shows group sources: "From: FamilyGroup, WorkGroup" for inherited reminders
+- Enables users to understand why they're being reminded (individual setting vs group setting)
+- Backward compatible: existing calls still work (groups parameter defaults to [])
+- Files: `app/person/[id].tsx`, `lib/reminderHelpers.ts`
+
+**"Birthday is" Label Consistency (2026-03-31):**
+- Added "Birthday is" label above "Today!" on person detail screen
+- Now matches the "Turning" label style for symmetry
+- Single-line fix improving UI consistency
+
+**Notification Rescheduling & Migration (2026-03-31):**
+- Updated `NotificationMigration` in `app/_layout.tsx` to pass groups
+- Bumped migration key to `v1.8_group_reminders_migrated` so existing users get rescheduled with group reminders
+- Extracted `REMINDER_OPTIONS` to shared `lib/constants.ts` (used in 4 places)
+
+**Testing & Verification:**
+- Added 11 new tests: 8 for `getEffectiveReminders()` utility, 3 for notification scheduling with groups
+- All 18 test suites passing, 126/126 tests (up from 115)
+- TypeScript: 0 errors
+- Tests cover: person with no groups, merging individual + group days, multiple groups, deduplication, group attribution, backward compatibility
+
+**All tests passing:** 18 suites, 126 tests.
+
+---
+
+## v1.7.7 Changes (Calendar Import UI Fixes)
 
 **Calendar Import — Per-Group Select All (2026-03-28):**
 - Added "Select All" / "Deselect All" button for each calendar group header

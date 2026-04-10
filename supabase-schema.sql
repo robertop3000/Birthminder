@@ -48,6 +48,7 @@ CREATE TABLE groups (
   photo_url TEXT,
   share_code TEXT UNIQUE,
   source_share_code TEXT,
+  reminder_days INTEGER[] DEFAULT '{}',
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
