@@ -16,6 +16,8 @@ import { supabase } from '../../../lib/supabase';
 import { useBirthdays } from '../../../hooks/useBirthdays';
 import { Avatar } from '../../../components/ui/Avatar';
 import { Button } from '../../../components/ui/Button';
+import { OpenInAppBanner } from '../../../components/ui/OpenInAppBanner';
+import { getPersonDeepLink } from '../../../lib/constants';
 import {
   getDaysUntilBirthday,
   formatBirthdayDate,
@@ -63,7 +65,7 @@ export default function SharedPersonScreen() {
 
   const handleImport = async () => {
     if (!user) {
-      router.push('/(auth)/signup');
+      router.push({ pathname: '/(auth)/signup', params: { next: `/shared/person/${code}` } });
       return;
     }
 
@@ -163,6 +165,8 @@ export default function SharedPersonScreen() {
         paddingBottom: insets.bottom + 40,
       }}
     >
+      <OpenInAppBanner deepLink={getPersonDeepLink(code ?? '')} />
+
       <View style={[styles.banner, { backgroundColor: colors.surface }]}>
         <Avatar uri={person.photo_url} size={72} />
         <Text style={[styles.bannerText, { color: colors.textPrimary }]}>

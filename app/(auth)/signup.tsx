@@ -9,18 +9,21 @@ import {
   Platform,
   Pressable,
 } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../../hooks/useTheme';
 import { useAuth } from '../../hooks/useAuth';
 import { Button } from '../../components/ui/Button';
 import { APP_NAME } from '../../lib/constants';
+import { getSafeNextPath } from '../../lib/navigation';
 
 export default function SignUpScreen() {
   const { colors } = useTheme();
   const { signUp } = useAuth();
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const { next } = useLocalSearchParams<{ next?: string }>();
+  const nextPath = getSafeNextPath(next);
 
   const [displayName, setDisplayName] = useState('');
   const [email, setEmail] = useState('');
@@ -39,7 +42,7 @@ export default function SignUpScreen() {
 
     try {
       await signUp(email.trim(), password, displayName.trim());
-      router.replace('/(tabs)');
+      router.replace(nextPath);
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Sign up failed';
       setError(message);
@@ -143,7 +146,7 @@ export default function SignUpScreen() {
           style={styles.button}
         />
 
-        <Pressable onPress={() => router.push('/(auth)/login')}>
+        <Pressable onPress={() => router.push({ pathname: '/(auth)/login', params: next ? { next } : {} })}>
           <Text style={[styles.linkText, { color: colors.textSecondary }]}>
             Already have an account?{' '}
             <Text style={{ color: colors.primary }}>Log in</Text>

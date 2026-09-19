@@ -71,40 +71,52 @@
 <body>
     <img src="./og-image.png" alt="Birthminder" class="logo">
     <h1>Birthminder</h1>
-    <p class="subtitle">Someone shared birthdays with you!<br>Open the link in the app to view and save them.</p>
-    <a href="#" id="open-app" class="btn">Open in Birthminder</a>
+    <p class="subtitle">Someone shared birthdays with you!<br>View them on the web or open them in the app.</p>
+    <a href="#" id="open-web" class="btn">View on the web</a>
+    <a href="#" id="open-app" class="secondary">Open in the Birthminder app</a>
     <a href="https://apps.apple.com/app/birthminder/id6742752905" class="secondary">
         Don't have the app? Download from the App Store
     </a>
 
     <script>
         (function() {
+            var WEB_APP = 'https://birthminder-deve-robert.vercel.app';
             var params = new URLSearchParams(window.location.search);
             var code = params.get('code');
             var person = params.get('person');
             var deepLink = null;
+            var webLink = WEB_APP;
 
             if (code) {
-                deepLink = 'birthminder://shared/' + code;
+                deepLink = 'birthminder://shared/' + encodeURIComponent(code);
+                webLink = WEB_APP + '/shared/' + encodeURIComponent(code);
             } else if (person) {
-                deepLink = 'birthminder://shared/person/' + person;
+                deepLink = 'birthminder://shared/person/' + encodeURIComponent(person);
+                webLink = WEB_APP + '/shared/person/' + encodeURIComponent(person);
             }
 
+            document.getElementById('open-web').href = webLink;
+
+            var appBtn = document.getElementById('open-app');
             if (deepLink) {
-                var btn = document.getElementById('open-app');
-                btn.href = deepLink;
+                appBtn.href = deepLink;
 
-                // Auto-try to open the app after a short delay
-                setTimeout(function() {
-                    window.location.href = deepLink;
-                }, 300);
-
-                // If deep link didn't open the app, redirect to App Store after 1.5s
-                setTimeout(function() {
-                    if (!document.hidden) {
-                        window.location.href = 'https://apps.apple.com/app/birthminder/id6742752905';
-                    }
-                }, 1500);
+                var isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+                if (isIOS) {
+                    // Try the app first; if it is not installed, continue to the web app.
+                    setTimeout(function() {
+                        window.location.href = deepLink;
+                    }, 300);
+                    setTimeout(function() {
+                        if (!document.hidden) {
+                            window.location.href = webLink;
+                        }
+                    }, 1500);
+                } else {
+                    window.location.replace(webLink);
+                }
+            } else {
+                appBtn.style.display = 'none';
             }
         })();
     </script>

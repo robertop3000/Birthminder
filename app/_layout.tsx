@@ -141,21 +141,26 @@ function RecoveryDeepLinkHandler() {
       const refreshToken = params.get('refresh_token');
       const type = params.get('type');
 
-      if (type === 'recovery' && accessToken && refreshToken) {
+      const isRecovery = type === 'recovery';
+      const isConfirmation =
+        type === 'signup' || type === 'magiclink' || type === 'email_change' || type === 'invite';
+
+      if ((isRecovery || isConfirmation) && accessToken && refreshToken) {
         try {
           const { error } = await supabase.auth.setSession({
             access_token: accessToken,
             refresh_token: refreshToken,
           });
           if (error) throw error;
+          const destination = isRecovery ? '/reset-password?source=recovery' : '/';
           if (IS_WEB) {
             // Drop the tokens from the address bar / browser history.
             const hist = (globalThis as { history?: { replaceState: (a: unknown, b: string, c: string) => void } }).history;
-            hist?.replaceState(null, '', '/reset-password?source=recovery');
+            hist?.replaceState(null, '', destination);
           }
-          router.replace('/(auth)/reset-password?source=recovery');
+          router.replace(isRecovery ? '/(auth)/reset-password?source=recovery' : '/(tabs)');
         } catch (err) {
-          if (__DEV__) console.warn('Recovery deep link error:', err);
+          if (__DEV__) console.warn('Auth deep link error:', err);
         }
       }
     }

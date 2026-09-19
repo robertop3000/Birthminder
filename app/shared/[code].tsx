@@ -17,6 +17,8 @@ import { useBirthdays } from '../../hooks/useBirthdays';
 import { useGroups } from '../../hooks/useGroups';
 import { Avatar } from '../../components/ui/Avatar';
 import { Button } from '../../components/ui/Button';
+import { OpenInAppBanner } from '../../components/ui/OpenInAppBanner';
+import { getGroupDeepLink } from '../../lib/constants';
 import {
   getDaysUntilBirthday,
   formatBirthdayDate,
@@ -228,7 +230,7 @@ export default function SharedGroupScreen() {
 
   const handleImport = async () => {
     if (!user) {
-      router.push('/(auth)/signup');
+      router.push({ pathname: '/(auth)/signup', params: { next: `/shared/${code}` } });
       return;
     }
 
@@ -336,6 +338,8 @@ export default function SharedGroupScreen() {
         paddingBottom: insets.bottom + 40,
       }}
     >
+      <OpenInAppBanner deepLink={getGroupDeepLink(code ?? '')} />
+
       <View style={[styles.banner, { backgroundColor: colors.surface }]}>
         {group.photo_url ? (
           <Avatar uri={group.photo_url} size={48} />

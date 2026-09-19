@@ -21,7 +21,7 @@ import { useBirthdays } from '../../hooks/useBirthdays';
 import { Avatar } from '../../components/ui/Avatar';
 import { GroupForm } from '../../components/group/GroupForm';
 import { uploadImage } from '../../lib/uploadImage';
-import { SHARE_BASE_URL, REMINDER_OPTIONS } from '../../lib/constants';
+import { getGroupShareUrl, REMINDER_OPTIONS } from '../../lib/constants';
 import { useNotifications } from '../../hooks/useNotifications';
 import {
   getDaysUntilBirthday,
@@ -130,7 +130,7 @@ export default function GroupDetailScreen() {
   const handleShare = async () => {
     try {
       const code = group.share_code || (await generateShareCode(group.id));
-      const shareUrl = `${SHARE_BASE_URL}?code=${code}`;
+      const shareUrl = getGroupShareUrl(code);
       const outcome = await shareText(`Check out my "${group.name}" birthdays on Birthminder! ${shareUrl}`);
       if (outcome === 'copied') {
         showAlert('Link Copied', 'The share link was copied to your clipboard.');

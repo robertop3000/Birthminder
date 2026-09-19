@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Session, User } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase';
-import { RECOVERY_REDIRECT_URL } from '../lib/config';
+import { RECOVERY_REDIRECT_URL, getWebOrigin } from '../lib/config';
 
 /**
  * Ensures a profile row exists for the given user.
@@ -86,6 +86,8 @@ export function useAuth() {
         email,
         password,
         options: {
+          // On web, the confirmation link should come back to this deployment.
+          emailRedirectTo: getWebOrigin() ?? undefined,
           data: {
             display_name: displayName,
             avatar_url: avatarUrl ?? null,

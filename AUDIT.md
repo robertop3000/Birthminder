@@ -137,3 +137,41 @@ Auth: email/password sign-up with `display_name`/`avatar_url` metadata,
 
 - Project `birthminder` created and linked under team `deve-robert`
   (`.vercel/` and `.env.local` are git-ignored). Not deployed yet.
+
+---
+
+## Checkpoint 4 — Web authentication and sharing links (2026-09-19)
+
+### Changes
+
+- **Share links now open the web app**: `lib/constants.ts` gained
+  `WEB_BASE_URL` (override with `EXPO_PUBLIC_WEB_BASE_URL`),
+  `getGroupShareUrl()` / `getPersonShareUrl()` (`/shared/<code>`,
+  `/shared/person/<code>`) and the matching `birthminder://` deep-link
+  helpers. The three share buttons use them. Old links to the GitHub Pages
+  redirector keep working: `docs/index.html` now forwards to the web app
+  (after trying the iOS app on iPhones) instead of dead-ending on the App
+  Store.
+- **Shared pages on web**: `components/ui/OpenInAppBanner.tsx` shows
+  "Open in app" / "Get it on the App Store" on iPhone browsers only.
+  Visitors who are not signed in are sent to sign-up with a `next`
+  parameter and return to the shared page afterwards. `lib/navigation.ts`
+  `getSafeNextPath()` only accepts relative in-app paths.
+- **Login / sign-up**: honour `?next=` and pass it to each other.
+- **E-mail flows on web**: sign-up passes `emailRedirectTo` = the web
+  origin; the root layout now completes `signup`/`magiclink`/`invite`/
+  `email_change` links (sets the session, strips the tokens from the URL,
+  goes to the app) in addition to `recovery` links, which still go to the
+  reset-password screen. Password-reset e-mails requested on web redirect
+  to `<web origin>/reset-password`.
+- **Verification**: `npx tsc --noEmit` 0 errors; Jest 23 suites, 151 tests
+  passing (8 new).
+
+### Requires Supabase dashboard (project is paused)
+
+Authentication → URL Configuration must include the web origin before
+e-mail links work on web:
+
+- Site URL: `https://birthminder-deve-robert.vercel.app`
+- Redirect URLs: `https://birthminder-deve-robert.vercel.app/**`, plus the
+  existing native schemes (`birthminder://`, `com.birthminder.app://`).

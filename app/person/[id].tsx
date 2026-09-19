@@ -22,7 +22,7 @@ import { Avatar } from '../../components/ui/Avatar';
 import { ContactLinkButton } from '../../components/birthday/ContactLinkButton';
 import { openWhatsApp, openIMessage } from '../../lib/messaging';
 import { uploadImage } from '../../lib/uploadImage';
-import { SHARE_BASE_URL, REMINDER_OPTIONS } from '../../lib/constants';
+import { getPersonShareUrl, REMINDER_OPTIONS } from '../../lib/constants';
 import { getEffectiveReminders } from '../../lib/reminderHelpers';
 import {
   getDaysUntilBirthday,
@@ -91,7 +91,7 @@ export default function PersonDetailScreen() {
   const handleShare = async () => {
     try {
       const code = person.share_code || (await generatePersonShareCode(person.id));
-      const shareUrl = `${SHARE_BASE_URL}?person=${code}`;
+      const shareUrl = getPersonShareUrl(code);
       const outcome = await shareText(`${person.name}'s birthday is on ${dateStr}! Save it on Birthminder: ${shareUrl}`);
       if (outcome === 'copied') {
         showAlert('Link Copied', 'The share link was copied to your clipboard.');

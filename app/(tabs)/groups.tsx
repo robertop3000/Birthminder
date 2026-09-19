@@ -17,7 +17,7 @@ import { TopBar } from '../../components/ui/TopBar';
 import { GroupCard } from '../../components/group/GroupCard';
 import { GroupForm } from '../../components/group/GroupForm';
 import { uploadImage } from '../../lib/uploadImage';
-import { SHARE_BASE_URL } from '../../lib/constants';
+import { getGroupShareUrl } from '../../lib/constants';
 
 export default function GroupsScreen() {
   const { colors } = useTheme();
@@ -45,7 +45,7 @@ export default function GroupsScreen() {
   const handleShare = async (groupId: string) => {
     try {
       const code = await generateShareCode(groupId);
-      const shareUrl = `${SHARE_BASE_URL}?code=${code}`;
+      const shareUrl = getGroupShareUrl(code);
       const outcome = await shareText(`Check out my group birthdays on Birthminder! ${shareUrl}`);
       if (outcome === 'copied') {
         showAlert('Link Copied', 'The share link was copied to your clipboard.');
