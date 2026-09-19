@@ -58,3 +58,6 @@ GoogleService-Info.plist
 full_diff.txt
 latest_diff.txt
 test_output.txt
+
+# Supabase CLI local state
+supabase/.temp/
