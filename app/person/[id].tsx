@@ -4,12 +4,12 @@ import {
   Text,
   StyleSheet,
   ScrollView,
-  Alert,
-  Share,
   ActivityIndicator,
   Pressable,
   Modal,
 } from 'react-native';
+import { showAlert } from '../../lib/alert';
+import { shareText } from '../../lib/share';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -92,11 +92,12 @@ export default function PersonDetailScreen() {
     try {
       const code = person.share_code || (await generatePersonShareCode(person.id));
       const shareUrl = `${SHARE_BASE_URL}?person=${code}`;
-      await Share.share({
-        message: `${person.name}'s birthday is on ${dateStr}! Save it on Birthminder: ${shareUrl}`,
-      });
+      const outcome = await shareText(`${person.name}'s birthday is on ${dateStr}! Save it on Birthminder: ${shareUrl}`);
+      if (outcome === 'copied') {
+        showAlert('Link Copied', 'The share link was copied to your clipboard.');
+      }
     } catch {
-      Alert.alert('Error', 'Failed to share birthday');
+      showAlert('Error', 'Failed to share birthday');
     }
   };
 
@@ -134,7 +135,7 @@ export default function PersonDetailScreen() {
     }
 
     if (!phone) {
-      Alert.alert('No Phone Number', 'No phone number found for this contact.');
+      showAlert('No Phone Number', 'No phone number found for this contact.');
       return;
     }
     if (type === 'whatsapp') {
@@ -156,7 +157,7 @@ export default function PersonDetailScreen() {
   };
 
   const handleDelete = () => {
-    Alert.alert(
+    showAlert(
       'Delete Birthday',
       `Are you sure you want to delete ${person.name}?`,
       [

@@ -7,8 +7,8 @@ import {
   Pressable,
   StyleSheet,
   ActivityIndicator,
-  Alert,
 } from 'react-native';
+import { showAlert } from '../../lib/alert';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../hooks/useTheme';
 import {
@@ -144,13 +144,13 @@ export function CalendarImportModal({
 
     try {
       const count = await importSelected(selected);
-      Alert.alert(
+      showAlert(
         'Import Complete',
         `${count} birthday${count > 1 ? 's' : ''} imported successfully.`,
         [{ text: 'OK', onPress: () => onImportComplete(count) }]
       );
     } catch {
-      Alert.alert('Import Failed', 'Something went wrong. Please try again.');
+      showAlert('Import Failed', 'Something went wrong. Please try again.');
     }
   };
 

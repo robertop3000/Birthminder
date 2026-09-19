@@ -3,11 +3,11 @@ import {
   View,
   Text,
   StyleSheet,
-  Alert,
   Pressable,
   Image,
   useWindowDimensions,
 } from 'react-native';
+import { showAlert } from '../../lib/alert';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -50,7 +50,7 @@ export default function ProfileScreen() {
       await signOut();
       router.replace('/(auth)/login');
     } catch (err: unknown) {
-      Alert.alert('Error', 'Failed to sign out');
+      showAlert('Error', 'Failed to sign out');
     }
   };
 

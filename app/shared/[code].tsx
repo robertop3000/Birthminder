@@ -5,8 +5,8 @@ import {
   StyleSheet,
   ScrollView,
   ActivityIndicator,
-  Alert,
 } from 'react-native';
+import { showAlert } from '../../lib/alert';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -152,7 +152,7 @@ export default function SharedGroupScreen() {
     // Force context refetch to update UI across all tabs immediately
     await Promise.all([refetchBirthdays(), refetchGroups()]);
 
-    Alert.alert('Imported!', `Group "${group.name}" has been added to your calendar.`);
+    showAlert('Imported!', `Group "${group.name}" has been added to your calendar.`);
     router.replace('/(tabs)/groups');
   };
 
@@ -217,10 +217,10 @@ export default function SharedGroupScreen() {
       // Force context refetch to update UI across all tabs immediately
       await Promise.all([refetchBirthdays(), refetchGroups()]);
 
-      Alert.alert('Updated!', `Group "${group.name}" has been refreshed.`);
+      showAlert('Updated!', `Group "${group.name}" has been refreshed.`);
       router.replace('/(tabs)/groups');
     } catch {
-      Alert.alert('Error', 'Failed to update group.');
+      showAlert('Error', 'Failed to update group.');
     } finally {
       setImporting(false);
     }
@@ -255,7 +255,7 @@ export default function SharedGroupScreen() {
 
       if (existingGroup) {
         setImporting(false);
-        Alert.alert(
+        showAlert(
           'Already Imported',
           'You already have this group. Would you like to update it with the latest data or create a duplicate?',
           [
@@ -274,7 +274,7 @@ export default function SharedGroupScreen() {
                 try {
                   await performFreshImport(false);
                 } catch {
-                  Alert.alert('Error', 'Failed to duplicate group.');
+                  showAlert('Error', 'Failed to duplicate group.');
                 } finally {
                   setImporting(false);
                 }
@@ -287,7 +287,7 @@ export default function SharedGroupScreen() {
 
       await performFreshImport();
     } catch {
-      Alert.alert('Error', 'Failed to import group.');
+      showAlert('Error', 'Failed to import group.');
     } finally {
       setImporting(false);
     }

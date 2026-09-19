@@ -5,11 +5,11 @@ import {
   FlatList,
   StyleSheet,
   ActivityIndicator,
-  Alert,
   Modal,
   Pressable,
-  Share,
 } from 'react-native';
+import { showAlert } from '../../lib/alert';
+import { shareText } from '../../lib/share';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../hooks/useTheme';
 import { useGroups } from '../../hooks/useGroups';
@@ -36,7 +36,7 @@ export default function GroupsScreen() {
       setShowModal(false);
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Failed to create group';
-      Alert.alert('Error', msg);
+      showAlert('Error', msg);
     } finally {
       setCreating(false);
     }
@@ -46,11 +46,12 @@ export default function GroupsScreen() {
     try {
       const code = await generateShareCode(groupId);
       const shareUrl = `${SHARE_BASE_URL}?code=${code}`;
-      await Share.share({
-        message: `Check out my group birthdays on Birthminder! ${shareUrl}`,
-      });
+      const outcome = await shareText(`Check out my group birthdays on Birthminder! ${shareUrl}`);
+      if (outcome === 'copied') {
+        showAlert('Link Copied', 'The share link was copied to your clipboard.');
+      }
     } catch {
-      Alert.alert('Error', 'Failed to share group');
+      showAlert('Error', 'Failed to share group');
     }
   };
 

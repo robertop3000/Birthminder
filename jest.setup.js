@@ -223,6 +223,7 @@ jest.mock('react-native-safe-area-context', () => ({
 
 // Mock expo-file-system/legacy (TypeScript entry point that Jest can't transform)
 jest.mock('expo-file-system/legacy', () => ({
+  getInfoAsync: jest.fn().mockResolvedValue({ exists: true, size: 1024 }),
   readAsStringAsync: jest.fn().mockResolvedValue('base64-string-content'),
   EncodingType: { Base64: 'base64' },
 }));

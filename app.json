@@ -9,7 +9,8 @@
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "platforms": [
-      "ios"
+      "ios",
+      "web"
     ],
     "splash": {
       "image": "./assets/splash-icon.png",
@@ -83,6 +84,16 @@
     "runtimeVersion": "1.7.6",
     "updates": {
       "url": "https://u.expo.dev/f094907d-a438-4375-aec5-3fe9329d380c"
+    },
+    "web": {
+      "bundler": "metro",
+      "output": "single",
+      "favicon": "./assets/favicon.png",
+      "name": "Birthminder",
+      "lang": "en",
+      "themeColor": "#7145B5",
+      "backgroundColor": "#FFF8FE",
+      "description": "Never forget a birthday. Save, organize and share the birthdays that matter."
     }
   }
 }

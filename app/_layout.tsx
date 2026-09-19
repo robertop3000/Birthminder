@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import { View, ActivityIndicator, StyleSheet, Appearance } from 'react-native';
+import { View, ActivityIndicator, StyleSheet, Appearance, Platform } from 'react-native';
 import { Stack, useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import {
@@ -16,23 +16,31 @@ import { ThemeProvider } from '../contexts/ThemeContext';
 import { BirthdaysProvider } from '../contexts/BirthdaysContext';
 import { GroupsProvider } from '../contexts/GroupsContext';
 import { ErrorBoundary } from '../components/ErrorBoundary';
+import { AlertHost } from '../components/ui/AlertHost';
 import { useTheme } from '../hooks/useTheme';
 import { useBirthdays } from '../hooks/useBirthdays';
 import { useGroups } from '../hooks/useGroups';
 import { useNotifications } from '../hooks/useNotifications';
 import { supabase } from '../lib/supabase';
 
+const IS_WEB = Platform.OS === 'web';
+
+/** Width of the app column on large web viewports (phones and PWAs stay full-width). */
+const WEB_MAX_WIDTH = 600;
+
 SplashScreen.preventAutoHideAsync().catch(() => { });
 
-Notifications.setNotificationHandler({
-  handleNotification: async () => ({
-    shouldShowAlert: true,
-    shouldShowBanner: true,
-    shouldShowList: true,
-    shouldPlaySound: true,
-    shouldSetBadge: false,
-  }),
-});
+if (!IS_WEB) {
+  Notifications.setNotificationHandler({
+    handleNotification: async () => ({
+      shouldShowAlert: true,
+      shouldShowBanner: true,
+      shouldShowList: true,
+      shouldPlaySound: true,
+      shouldSetBadge: false,
+    }),
+  });
+}
 
 export default function RootLayout() {
   const [fontsLoaded, fontsError] = useFonts({
@@ -48,6 +56,8 @@ export default function RootLayout() {
   }, [fontsLoaded, fontsError]);
 
   useEffect(() => {
+    if (IS_WEB) return; // Web asks for push permission explicitly from Settings.
+
     async function setupNotifications() {
       const { status } = await Notifications.getPermissionsAsync();
       if (status === 'undetermined') {
@@ -78,6 +88,7 @@ export default function RootLayout() {
           <GroupsProvider>
             <NotificationMigration />
             <RootNavigator />
+            <AlertHost />
           </GroupsProvider>
         </BirthdaysProvider>
       </ThemeProvider>
@@ -94,6 +105,7 @@ function NotificationMigration() {
   const migrated = useRef(false);
 
   useEffect(() => {
+    if (IS_WEB) return; // No local scheduling on web.
     if (migrated.current) return;
     if (permissionStatus === null || birthdays.length === 0) return;
 
@@ -136,6 +148,11 @@ function RecoveryDeepLinkHandler() {
             refresh_token: refreshToken,
           });
           if (error) throw error;
+          if (IS_WEB) {
+            // Drop the tokens from the address bar / browser history.
+            const hist = (globalThis as { history?: { replaceState: (a: unknown, b: string, c: string) => void } }).history;
+            hist?.replaceState(null, '', '/reset-password?source=recovery');
+          }
           router.replace('/(auth)/reset-password?source=recovery');
         } catch (err) {
           if (__DEV__) console.warn('Recovery deep link error:', err);
@@ -160,23 +177,35 @@ function RecoveryDeepLinkHandler() {
 }
 
 function RootNavigator() {
-  const { mode } = useTheme();
+  const { mode, colors } = useTheme();
+
+  const stack = (
+    <Stack screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="(auth)" />
+      <Stack.Screen name="(tabs)" />
+      <Stack.Screen name="modal" options={{ presentation: 'modal' }} />
+      <Stack.Screen name="person/[id]" />
+      <Stack.Screen name="group/[id]" />
+      <Stack.Screen name="shared/[code]" />
+      <Stack.Screen name="shared/person/[code]" />
+      <Stack.Screen name="legal" />
+      <Stack.Screen name="settings" />
+    </Stack>
+  );
 
   return (
     <>
       <StatusBar style={mode === 'dark' ? 'light' : 'dark'} />
       <RecoveryDeepLinkHandler />
-      <Stack screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="(auth)" />
-        <Stack.Screen name="(tabs)" />
-        <Stack.Screen name="modal" options={{ presentation: 'modal' }} />
-        <Stack.Screen name="person/[id]" />
-        <Stack.Screen name="group/[id]" />
-        <Stack.Screen name="shared/[code]" />
-        <Stack.Screen name="shared/person/[code]" />
-        <Stack.Screen name="legal" />
-        <Stack.Screen name="settings" />
-      </Stack>
+      {IS_WEB ? (
+        <View style={[styles.webFrame, { backgroundColor: colors.surface }]}>
+          <View style={[styles.webColumn, { backgroundColor: colors.background }]}>
+            {stack}
+          </View>
+        </View>
+      ) : (
+        stack
+      )}
     </>
   );
 }
@@ -186,5 +215,14 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  webFrame: {
+    flex: 1,
+    alignItems: 'center',
+  },
+  webColumn: {
+    flex: 1,
+    width: '100%',
+    maxWidth: WEB_MAX_WIDTH,
   },
 });

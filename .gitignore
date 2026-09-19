@@ -61,3 +61,9 @@ test_output.txt
 
 # Supabase CLI local state
 supabase/.temp/
+
+# Vercel
+.vercel/
+
+.vercel
+.env*

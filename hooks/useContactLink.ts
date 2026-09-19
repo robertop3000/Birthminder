@@ -1,5 +1,8 @@
 import { useState, useCallback } from 'react';
+import { Platform } from 'react-native';
 import * as Contacts from 'expo-contacts';
+
+const IS_WEB = Platform.OS === 'web';
 
 export interface LinkedContact {
   id: string;

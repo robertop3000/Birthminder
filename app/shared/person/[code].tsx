@@ -5,8 +5,8 @@ import {
   StyleSheet,
   ScrollView,
   ActivityIndicator,
-  Alert,
 } from 'react-native';
+import { showAlert } from '../../../lib/alert';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -82,7 +82,7 @@ export default function SharedPersonScreen() {
         .maybeSingle();
 
       if (existing) {
-        Alert.alert(
+        showAlert(
           'Already Saved',
           `${person.name} is already in your Birthminder!`,
           [{ text: 'OK', onPress: () => router.replace('/(tabs)') }]
@@ -104,10 +104,10 @@ export default function SharedPersonScreen() {
 
       await refetchBirthdays();
 
-      Alert.alert('Saved!', `${person.name}'s birthday has been added to your Birthminder.`);
+      showAlert('Saved!', `${person.name}'s birthday has been added to your Birthminder.`);
       router.replace('/(tabs)');
     } catch {
-      Alert.alert('Error', 'Failed to save birthday.');
+      showAlert('Error', 'Failed to save birthday.');
     } finally {
       setImporting(false);
     }

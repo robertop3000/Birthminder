@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react';
 import * as Calendar from 'expo-calendar';
-import { Alert, Linking } from 'react-native';
+import { Linking, Platform } from 'react-native';
+import { showAlert } from '../lib/alert';
 import { supabase } from '../lib/supabase';
 import { useAuth } from './useAuth';
 import { useBirthdays, Person } from './useBirthdays';
@@ -41,10 +42,16 @@ export function useCalendarImport() {
     setLoading(true);
     setError(null);
 
+    if (Platform.OS === 'web') {
+      setError('Calendar import is only available in the iOS app.');
+      setLoading(false);
+      return false;
+    }
+
     try {
       const { status } = await Calendar.requestCalendarPermissionsAsync();
       if (status !== 'granted') {
-        Alert.alert(
+        showAlert(
           'Calendar Access Required',
           'Please enable calendar access in Settings to import birthdays.',
           [

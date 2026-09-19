@@ -5,13 +5,13 @@ import {
   TextInput,
   StyleSheet,
   ScrollView,
-  Alert,
-  Share,
   ActivityIndicator,
   Pressable,
   Modal,
   FlatList,
 } from 'react-native';
+import { showAlert } from '../../lib/alert';
+import { shareText } from '../../lib/share';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -121,7 +121,7 @@ export default function GroupDetailScreen() {
       await updateGroup(group.id, { name, color, photo_url: photoUrl });
       setShowEditModal(false);
     } catch {
-      Alert.alert('Error', 'Failed to update group');
+      showAlert('Error', 'Failed to update group');
     } finally {
       setEditLoading(false);
     }
@@ -131,16 +131,17 @@ export default function GroupDetailScreen() {
     try {
       const code = group.share_code || (await generateShareCode(group.id));
       const shareUrl = `${SHARE_BASE_URL}?code=${code}`;
-      await Share.share({
-        message: `Check out my "${group.name}" birthdays on Birthminder! ${shareUrl}`,
-      });
+      const outcome = await shareText(`Check out my "${group.name}" birthdays on Birthminder! ${shareUrl}`);
+      if (outcome === 'copied') {
+        showAlert('Link Copied', 'The share link was copied to your clipboard.');
+      }
     } catch {
-      Alert.alert('Error', 'Failed to share group');
+      showAlert('Error', 'Failed to share group');
     }
   };
 
   const handleDelete = () => {
-    Alert.alert(
+    showAlert(
       'Delete Group',
       `Are you sure you want to delete "${group.name}"? Members will not be deleted.`,
       [
@@ -165,7 +166,7 @@ export default function GroupDetailScreen() {
         scheduleAllNotifications(birthdays, groups);
       }
     } catch {
-      Alert.alert('Error', 'Failed to add person to group');
+      showAlert('Error', 'Failed to add person to group');
     }
   };
 
@@ -180,7 +181,7 @@ export default function GroupDetailScreen() {
   };
 
   const handleRemovePerson = (personId: string, personName: string) => {
-    Alert.alert(
+    showAlert(
       'Remove from Group',
       `Remove ${personName} from "${group.name}"?`,
       [
@@ -196,7 +197,7 @@ export default function GroupDetailScreen() {
                 scheduleAllNotifications(birthdays, groups);
               }
             } catch {
-              Alert.alert('Error', 'Failed to remove person');
+              showAlert('Error', 'Failed to remove person');
             }
           },
         },

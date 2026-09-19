@@ -6,6 +6,7 @@ import {
   SectionList,
   Pressable,
   StyleSheet,
+  Platform,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -102,19 +103,23 @@ export default function SearchScreen() {
         <Text style={[styles.infoText, { color: colors.textSecondary }]}>
           {isEnabled
             ? 'Notifications are enabled.'
-            : 'To receive birthday reminders, enable notifications for Birthminder in your iOS Settings.'}
+            : Platform.OS === 'web'
+              ? 'Turn on browser notifications in Settings to get birthday reminders.'
+              : 'To receive birthday reminders, enable notifications for Birthminder in your iOS Settings.'}
         </Text>
       </View>
 
-      <Pressable
-        onPress={() => setShowImportModal(true)}
-        style={[styles.importButton, { backgroundColor: colors.surface }]}
-      >
-        <Ionicons name="calendar-outline" size={20} color={colors.primary} />
-        <Text style={[styles.importButtonText, { color: colors.primary }]}>
-          Import from Calendar
-        </Text>
-      </Pressable>
+      {Platform.OS !== 'web' && (
+        <Pressable
+          onPress={() => setShowImportModal(true)}
+          style={[styles.importButton, { backgroundColor: colors.surface }]}
+        >
+          <Ionicons name="calendar-outline" size={20} color={colors.primary} />
+          <Text style={[styles.importButtonText, { color: colors.primary }]}>
+            Import from Calendar
+          </Text>
+        </Pressable>
+      )}
     </View>
   );
 

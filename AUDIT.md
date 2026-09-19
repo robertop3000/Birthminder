@@ -94,3 +94,46 @@ Auth: email/password sign-up with `display_name`/`avatar_url` metadata,
   (`hooks/useContactLink.ts`) are unavailable on web.
 - `RECOVERY_REDIRECT_URL` is a custom URL scheme; web needs an `https`
   redirect and a Site URL configured in Supabase Auth.
+
+---
+
+## Checkpoint 3 — Web compatibility and PWA (2026-09-19)
+
+### Changes
+
+- **Web platform enabled**: `app.json` now lists `web` with the Metro
+  bundler and `output: "single"` (client-rendered SPA). `react-native-web`
+  and `@expo/metro-runtime` added as dependencies.
+- **PWA shell**: `public/index.html` (Expo uses it as the HTML template),
+  `public/manifest.json`, `public/sw.js` (app-shell cache, Web Push
+  `push`/`notificationclick` handlers) and generated icons in
+  `public/icons/` (192, 512, 180 apple-touch, 32 favicon).
+- **Alerts**: new `lib/alert.ts` `showAlert()` replaces every `Alert.alert`
+  call (12 files). Native behaviour is unchanged; on web the request is
+  rendered by `components/ui/AlertHost.tsx`, a themed modal mounted in the
+  root layout, with a `window.confirm`/`alert` fallback.
+- **Sharing**: new `lib/share.ts` `shareText()` uses the system sheet on
+  iOS, the Web Share API where available, and otherwise copies the message
+  to the clipboard and tells the user.
+- **Photos**: `lib/uploadImage.ts` gained a web path (fetch → size check →
+  canvas resize via expo-image-manipulator → upload) since
+  `expo-file-system` is native-only.
+- **Notifications**: `hooks/useNotifications.ts` tracks the browser
+  permission on web and makes local scheduling a no-op there (Web Push is
+  delivered by the server, checkpoint 5). Root layout and Settings skip the
+  native notification APIs on web.
+- **Native-only features on web**: calendar import button hidden, contact
+  linking replaced by a hint, WhatsApp links use `wa.me`.
+- **Layout**: on web the app renders in a centred 600px column with the
+  surface colour outside it; the tab bar is 64px tall on web.
+- **Config**: `lib/config.ts` derives the password-recovery redirect from
+  the web origin on web. `vercel.json` added (SPA rewrite, service-worker
+  and immutable-asset cache headers, security headers).
+- **Verification**: `npx expo export --platform web` succeeds (2.37 MB
+  bundle); `npx tsc --noEmit` 0 errors; Jest 22 suites, 143 tests passing
+  (17 new tests for alert, share, messaging links and web permission).
+
+### Vercel
+
+- Project `birthminder` created and linked under team `deve-robert`
+  (`.vercel/` and `.env.local` are git-ignored). Not deployed yet.

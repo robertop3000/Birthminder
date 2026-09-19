@@ -5,10 +5,11 @@ import {
     StyleSheet,
     ScrollView,
     Pressable,
-    Alert,
     Modal,
     ActivityIndicator,
+    Platform,
 } from 'react-native';
+import { showAlert } from '../lib/alert';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -27,6 +28,10 @@ export default function SettingsScreen() {
     const [deleting, setDeleting] = useState(false);
 
     const handleSendTestNotification = async () => {
+        if (Platform.OS === 'web') {
+            showAlert('Not Available', 'Test notifications are only available in the iOS app.');
+            return;
+        }
         try {
             await Notifications.scheduleNotificationAsync({
                 content: {
@@ -40,9 +45,9 @@ export default function SettingsScreen() {
                     seconds: 5,
                 },
             });
-            Alert.alert('Test Scheduled', 'A test notification will appear in 5 seconds.');
+            showAlert('Test Scheduled', 'A test notification will appear in 5 seconds.');
         } catch (err) {
-            Alert.alert('Error', 'Failed to schedule test notification');
+            showAlert('Error', 'Failed to schedule test notification');
         }
     };
 
@@ -51,7 +56,9 @@ export default function SettingsScreen() {
         setDeleting(true);
         try {
             // 1. Cancel all scheduled notifications
-            await Notifications.cancelAllScheduledNotificationsAsync();
+            if (Platform.OS !== 'web') {
+                await Notifications.cancelAllScheduledNotificationsAsync();
+            }
 
             // 2. Clean up storage photos (best-effort, don't block deletion)
             try {
@@ -132,7 +139,7 @@ export default function SettingsScreen() {
             router.replace('/(auth)/login');
 
             setTimeout(() => {
-                Alert.alert(
+                showAlert(
                     'Account Deleted',
                     'Your account and all data have been permanently deleted.'
                 );
@@ -140,7 +147,7 @@ export default function SettingsScreen() {
         } catch (err) {
             const message =
                 err instanceof Error ? err.message : 'Failed to delete account. Please try again.';
-            Alert.alert('Error', message);
+            showAlert('Error', message);
         } finally {
             setDeleting(false);
         }

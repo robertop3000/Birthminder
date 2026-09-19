@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, Pressable, StyleSheet, ActivityIndicator } from 'react-native';
+import { View, Text, Pressable, StyleSheet, ActivityIndicator, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../hooks/useTheme';
 import { useContactLink, LinkedContact } from '../../hooks/useContactLink';
@@ -81,6 +81,17 @@ export function ContactLinkButton({
             </Text>
           </Pressable>
         </View>
+      </View>
+    );
+  }
+
+  // Contacts are a native-only API; on web show a hint instead of a dead button
+  if (Platform.OS === 'web') {
+    return (
+      <View style={[styles.container, { backgroundColor: colors.surface }]}>
+        <Text style={[styles.unlinkText, { color: colors.textSecondary }]}>
+          Contact linking is available in the iOS app.
+        </Text>
       </View>
     );
   }

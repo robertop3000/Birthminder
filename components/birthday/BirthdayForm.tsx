@@ -9,8 +9,8 @@ import {
   Platform,
   KeyboardAvoidingView,
   Modal,
-  Alert,
 } from 'react-native';
+import { showAlert } from '../../lib/alert';
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import { useTheme } from '../../hooks/useTheme';
@@ -118,7 +118,7 @@ export function BirthdayForm({
 
   const handleCreateGroup = async () => {
     if (!newGroupName.trim()) {
-      Alert.alert('Error', 'Please enter a group name');
+      showAlert('Error', 'Please enter a group name');
       return;
     }
     setCreatingGroup(true);
@@ -134,7 +134,7 @@ export function BirthdayForm({
       setNewGroupColor('#7145B5');
       setShowNewGroup(false);
     } catch {
-      Alert.alert('Error', 'Failed to create group');
+      showAlert('Error', 'Failed to create group');
     } finally {
       setCreatingGroup(false);
     }
